@@ -101,7 +101,7 @@ class Teachblog {
 	
 	public function class_loader($class) {
 		if (!isset($this->classmap[$class])) return;
-		$classpath = $this->dir.'/system/'.$this->classmap[$class].'.php';
+		$classpath = $this->dir.'system/'.$this->classmap[$class].'.php';
 		
 		if (file_exists($classpath)) {
 			require $classpath;

@@ -24,23 +24,26 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	const TEACHBLOG_POST = 'teachblog_post';
 	const TEACHBLOG_TAXONOMY = 'teachblog_tax';
 	
+	protected $actions = array(
+		'admin_menu' => 'menu_structure'
+	);
 	
-	protected function setup() {		
+	
+	protected function setup() {
+		#if (!$this->local_setting('student_content_enabled')) return;
+		
 		$this->register_type();
 		$this->register_taxonomy();
 		$this->type_taxonomy_link();
-	}
+	}	
 	
 	
 	/**
 	 * Registers the Teachblog custom post type (only when student content has been enabled for the 
 	 * current blog). 
 	 */
-	protected function register_type() {
-		if (!$this->local_setting('student_content_enabled')) return;
-		
-		// Supported functionality
-		$supports = array('title', 'description', 'excerpt', 'custom-fields', 'comments');
+	protected function register_type() {		
+		$supports = array('title', 'editor', 'description', 'excerpt', 'custom-fields', 'comments');
 		
 		// Optional supported functionality
 		if ($this->local_setting('post_revisions')) $supports[] = 'revisions';
@@ -74,7 +77,15 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		register_taxonomy(self::TEACHBLOG_TAXONOMY, self::TEACHBLOG_POST, array(
 			'label' => __('Student Blogs', self::DOMAIN),
 			'labels' => array(
-				'singular_name' => __('Student Blog', self::DOMAIN) ),
+				'singular_name' => _x('Student Blog', self::TEACHBLOG_TAXONOMY, self::DOMAIN),
+				'all_items' => _x('All Student Blogs', self::TEACHBLOG_TAXONOMY, self::DOMAIN),
+				'edit_item' => _x('Edit Blog', self::TEACHBLOG_TAXONOMY, self::DOMAIN),
+				'view_item' => _x('View Blog', self::TEACHBLOG_TAXONOMY, self::DOMAIN),
+				'update_item' => _x('Update Blog', self::TEACHBLOG_TAXONOMY, self::DOMAIN),
+				'add_new_item' => _x('Add New Student Blog', self::TEACHBLOG_TAXONOMY, self::DOMAIN),
+				'new_item_name' => _x('New Student Blogs', self::TEACHBLOG_TAXONOMY, self::DOMAIN),
+				'parent_item' => _x('Parent Blog/Group', self::TEACHBLOG_TAXONOMY, self::DOMAIN),
+				'search_items' => _x('Search Blogs', self::TEACHBLOG_TAXONOMY, self::DOMAIN) ),
 			'hierarchical' => true,
 			'show_admin_column' => true,
 			'rewrite' => array(
@@ -96,5 +107,30 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	 */
 	public function editor_metaboxes() {
 		do_action('teachblog_editor_metaboxes');
+	}
+	
+	
+	/**
+	 * Alters the menu structure created during post registration and allows additional items to be added.
+	 * 
+	 * @todo refactor: move to menu class
+	 */
+	public function menu_structure() {
+		add_menu_page(
+			_x('Student Content Management', 'menu-entry', self::DOMAIN),
+			_x('Student Content', 'menu-entry', self::DOMAIN),
+			'edit_posts',
+			'teachblog_student_content',
+			array($this, 'menu_page'),
+			'',
+			$this->safe_menu_position());			
+	}
+	
+	
+	/**
+	 * @todo add already-occupied checks
+	 */
+	protected function safe_menu_position() {
+		return '54.67';
 	}
 }
