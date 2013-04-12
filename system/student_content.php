@@ -25,17 +25,26 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	const TEACHBLOG_TAXONOMY = 'teachblog_tax';
 	
 	
-	protected function setup() {
+	protected function setup() {		
 		$this->register_type();
+		$this->register_taxonomy();
+		$this->type_taxonomy_link()
 	}
 	
 	
 	/**
-	 * Registers the Teachblog custom post type and taxonomy (only when student content has
-	 * been enabled for the current blog). 
+	 * Registers the Teachblog custom post type (only when student content has been enabled for the 
+	 * current blog). 
 	 */
 	protected function register_type() {
 		if (!$this->local_setting('student_content_enabled')) return;
+		
+		// Supported functionality
+		$supports = array('title', 'description', 'excerpt', 'custom-fields', 'comments');
+		
+		// Optional supported functionality
+		if ($this->local_setting('post_revisions')) $supports[] = 'revisions';
+		if (current_theme_supports('post_thumbnails')) $supports[] = 'thumbnails';
 		
 		register_post_type(self::TEACHBLOG_POST, array(
 			'label' => __('Student Posts', self::DOMAIN),
@@ -45,7 +54,47 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 				'add_new' => _x('Add New', self::TEACHBLOG_POST, self::DOMAIN) ),
 			'description' => __('Container for student submitted content', self::DOMAIN),
 			'public' => true,
-				
+			'supports' => $supports,
+			'register_meta_box_cb' => array($this, 'editor_metaboxes'),
+			'taxonomy' => self::TEACHBLOG_TAXONOMY,
+			'has_archive' => true,
+			'rewrite' => array(
+				'slug' => _x('studentpost', 'student_post_slug', self::DOMAIN) )					
 		));		
+	}
+	
+	
+	
+	/**
+	 * Registers the Teachblog custom taxonomy (only when student content has been enabled for the
+	 * current blog) which is intended as a tool to effectively organize posts into individual
+	 * "sub-blogs".
+	 */
+	protected function register_taxonomy() {
+		register_taxonomy(self::TEACHBLOG_TAXONOMY, self::TEACHBLOG_POST, array(
+			'label' => __('Student Blogs', self::DOMAIN),
+			'labels' => array(
+				'singular_name' => __('Student Blog', self::DOMAIN) ),
+			'hierarchical' => true,
+			'show_admin_column' => true,
+			'rewrite' => array(
+				'slug' => _x('studentblog', 'student_blog_slug', self::DOMAIN) )	
+		));
+	}
+	
+	
+	/**
+	 * Helps to avoid edge cases where the link between taxonomy and post type is not observed. 
+	 */
+	protected function type_taxonomy_link() {
+		register_taxonomy_for_object_type(self::TEACHBLOG_TAXONOMY, self::TEACHBLOG_POST);
+	}
+	
+	
+	/**
+	 * Triggers the addition of metaboxes to the student post editor.
+	 */
+	public function editor_metaboxes() {
+		do_action('teachblog_editor_metaboxes');
 	}
 }
