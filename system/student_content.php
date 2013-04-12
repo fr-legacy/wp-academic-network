@@ -28,7 +28,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	protected function setup() {		
 		$this->register_type();
 		$this->register_taxonomy();
-		$this->type_taxonomy_link()
+		$this->type_taxonomy_link();
 	}
 	
 	
