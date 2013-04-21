@@ -53,7 +53,12 @@ class Teachblog {
 	 * @var mixed
 	 */
 	public $current_site = false;
-	
+
+    /**
+     * @var Teachblog_Admin_Menu
+     */
+    public $admin_menu;
+
 	/** 
 	 * @var Teachblog_Student_Content
 	 */
@@ -63,6 +68,7 @@ class Teachblog {
 	 * @var array
 	 */
 	protected $classmap = array(
+		'Teachblog_Admin_Menu' => 'admin_menu',
 		'Teachblog_Base_Object' => 'base',
 		'Teachblog_Student_Content' => 'student_content'
 	);
@@ -114,6 +120,7 @@ class Teachblog {
 	
 	public function launch() {
 		$this->current_site = get_current_site();
+        $this->admin_menu = new Teachblog_Admin_Menu;
 		$this->student_content = new Teachblog_Student_Content;
 	}
 }

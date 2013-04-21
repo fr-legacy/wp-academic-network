@@ -30,10 +30,16 @@ class Teachblog_Base_Object {
 	 * @var Teachblog
 	 */
 	protected $system;
+
+    /**
+     * @var Teachblog_Admin_Menu
+     */
+    protected $admin_menu;
 	
 	
 	public function __construct() {
 		$this->system = Teachblog::core();
+        $this->admin_menu = $this->system->admin_menu;
 		$this->setup_hooks('add_action', 'actions');
 		$this->setup_hooks('add_filter', 'filters');
 		if (method_exists($this, 'setup')) $this->setup();
