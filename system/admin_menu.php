@@ -45,10 +45,10 @@ class Teachblog_Admin_Menu extends Teachblog_Base_Object {
     /**
      * Registers a top level administrative menu.
      */
-    public function register_menu($title, $slug, $controller, $capability = '') {
+    public function register_menu($title, $slug, $controller, $capability = '', $icon = '') {
         // For l10n purposes the title translation needs to be assessed upstream of this method
         $title = _x($title, 'menu-entry', self::DOMAIN);
-        $icon = '';
+        $icon = empty($icon) ? $this->system->url.'assets/menu-icon-set.png' : $icon;
 
         add_menu_page(
             $title, $title, $capability, $slug, $controller, $icon, $this->safe_menu_position());
@@ -80,6 +80,8 @@ class Teachblog_Admin_Menu extends Teachblog_Base_Object {
         // Map to the new parent item
         $this->parent_file_map[$taxonomy] = $parent;
         add_filter('parent_file', array($this, 'parent_file_remap'));
+
+		return $slug;
     }
 
 

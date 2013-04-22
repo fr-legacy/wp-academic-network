@@ -61,6 +61,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 			'description' => __('Container for student submitted content', self::DOMAIN),
 			'public' => true,
             'show_in_menu' => self::TEACHBLOG_MENU_SLUG,
+			'menu_icon' => $this->system->url.'assets/tango-web-icon-32.png',
 			'supports' => $supports,
 			'register_meta_box_cb' => array($this, 'editor_metaboxes'),
 			'taxonomy' => self::TEACHBLOG_BLOG_TAXONOMY,
@@ -124,21 +125,13 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
             array($this, 'dashboard_page'),
             'edit_posts' );
 
-        /*$this->admin_menu->register_submenu(
-            'Student Blogs',
-            self::TEACHBLOG_MENU_SLUG,
-            self::TEACHBLOG_BLOGS_SLUG,
-            'manage_categories',
-            array($this, 'blogs_page')
-        );*/
-
-        $this->admin_menu->register_taxonomy_subpage(
+        $slug = $this->admin_menu->register_taxonomy_subpage(
             'Student Blogs',
             self::TEACHBLOG_MENU_SLUG,
             self::TEACHBLOG_BLOG_TAXONOMY,
             'manage_categories'
         );
 
-        // $this->admin_menu->send_to_top(self::TEACHBLOG_MENU_SLUG, self::TEACHBLOG_BLOGS_SLUG);
+		$this->admin_menu->send_to_top(self::TEACHBLOG_MENU_SLUG, $slug);
     }
 }
