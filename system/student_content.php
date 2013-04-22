@@ -123,7 +123,8 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
             'Student Content',
             self::TEACHBLOG_MENU_SLUG,
             array($this, 'dashboard_page'),
-            'edit_posts' );
+            'edit_posts'
+		);
 
         $slug = $this->admin_menu->register_taxonomy_subpage(
             'Student Blogs',

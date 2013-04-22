@@ -35,4 +35,29 @@ class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 	public function admin_styles() {
 		wp_enqueue_style(self::DOMAIN.'_admin_theme', $this->system->url.'assets/admin.css');
 	}
+
+
+	public function page($view, array $vars = null) {
+		$vars = array_merge(array(
+			'title' => 'Teachblog',
+			'menu' => '',
+			'content' => ''
+		), (array) $vars);
+
+		$vars['content'] = $view = $this->view($view, $vars, false);
+		$this->view('admin_frame', $vars);
+	}
+
+
+	public function view($view, array $vars = null, $render = true) {
+		$path = $this->system->dir."system/views/$view.php";
+		if (!file_exists($path)) return;
+
+		if (!$render) ob_start();
+
+		extract($vars);
+		include $path;
+
+		if (!$render) return ob_get_clean();
+	}
 }

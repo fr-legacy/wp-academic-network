@@ -64,6 +64,11 @@ class Teachblog {
      */
     public $admin_menu;
 
+	/**
+	 * @var Teachblog_General_Settings
+	 */
+	public $general_settings;
+
 	/** 
 	 * @var Teachblog_Student_Content
 	 */
@@ -76,6 +81,7 @@ class Teachblog {
 		'Teachblog_Admin_Environment' => 'admin_environment',
 		'Teachblog_Admin_Menu' => 'admin_menu',
 		'Teachblog_Base_Object' => 'base',
+		'Teachblog_General_Settings' => 'general_settings',
 		'Teachblog_Student_Content' => 'student_content'
 	);
 	
@@ -127,6 +133,7 @@ class Teachblog {
 	public function launch() {
 		$this->current_site = get_current_site();
         $this->admin_environment = new Teachblog_Admin_Environment;
+        $this->general_settings = new Teachblog_General_Settings;
         $this->admin_menu = new Teachblog_Admin_Menu;
 		$this->student_content = new Teachblog_Student_Content;
 	}
