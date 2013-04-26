@@ -76,6 +76,12 @@ class Teachblog {
 	 * @var Teachblog_Student_Content
 	 */
 	public $student_content;
+
+	/**
+	 * @var Teachblog_Modules
+	 */
+	public $modules;
+
 	
 	/**
 	 * @var array
@@ -83,9 +89,11 @@ class Teachblog {
 	protected $classmap = array(
 		'Teachblog_Admin_Environment' => 'admin_environment',
 		'Teachblog_Admin_Menu' => 'admin_menu',
-		'Teachblog_Admin_Table' => 'tables/admin',
+		'Teachblog_Admin_Table' => 'helpers/admin_table',
 		'Teachblog_Base_Object' => 'base',
+		'Teachblog_Form' => 'helpers/form',
 		'Teachblog_General_Settings' => 'general_settings',
+		'Teachblog_Modules' => 'modules',
 		'Teachblog_Student_Content' => 'student_content'
 	);
 	
@@ -137,6 +145,7 @@ class Teachblog {
 	
 	public function launch() {
 		$this->current_site = get_current_site();
+		$this->modules = new Teachblog_Modules;
         $this->admin_environment = new Teachblog_Admin_Environment;
         $this->general_settings = new Teachblog_General_Settings;
         $this->admin_menu = new Teachblog_Admin_Menu;

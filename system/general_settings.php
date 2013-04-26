@@ -25,6 +25,7 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 	const SETTINGS_SLUG = 'teachblog_general_settings';
 
 	protected $actions = array(
+		'admin_init' => 'save_changes',
 		'admin_menu' => 'add_settings_page'
 	);
 
@@ -36,8 +37,47 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 
 
 	public function options_page() {
-		$this->admin->page('general_settings', array(
-			'title' => __('Educational Tools &ndash; Configuration', self::DOMAIN)
+		// Prepare the table used to layout the available modules
+		$module_table = new Teachblog_Admin_Table;
+		$module_table->set_actions(array(
+			'Activate' => 'do-activation',
+			'Deactivate' => 'do-deactivation'
 		));
+
+		$this->admin->page('general_settings', array(
+			'title' => __('Educational Tools &ndash; Configuration', self::DOMAIN),
+			'modules' => $this->system->modules,
+			'module_table' => $module_table
+		));
+	}
+
+
+	public function save_changes() {
+		if (!Teachblog_Form::check_admin_url()) return;
+
+		// Look for individual module activation/deactivations
+		foreach ($this->system->modules->get_module_slugs() as $slug) {
+			if (isset($_POST[$slug])) $this->system->modules->enable($slug);
+			else $this->system->modules->disable($slug);
+		}
+
+
+		if (Teachblog_Form::is_posted('actions-top', 'do-activation'))
+			$this->activate_selected_modules();
+
+		if (Teachblog_Form::is_posted('actions-top', 'do-deactivation'))
+			$this->deactivate_selected_modules();
+	}
+
+
+	public function activate_selected_modules() {
+		foreach ($_POST['check_row'] as $module)
+			$this->system->modules->enable($module);
+	}
+
+
+	public function deactivate_selected_modules() {
+		foreach ($_POST['check_row'] as $module)
+			$this->system->modules->disable($module);
 	}
 }

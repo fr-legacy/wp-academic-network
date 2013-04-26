@@ -4,7 +4,11 @@
 
 	<?php echo $menu ?>
 
-	<div class="content">
-		<?php echo $content ?>
-	</div>
+	<br/>
+
+	<form method="post" enctype="multipart/form-data" action="<?php echo Teachblog_Form::admin_url() ?>">
+		<div class="content">
+			<?php echo $content ?>
+		</div>
+	</form>
 </div>

@@ -14,6 +14,10 @@
     display: inline-block;
 }
 
+.teachblog .onoffswitch > span:hover {
+	box-shadow: 0px 1px 2px #40449f;
+}
+
 .teachblog .onoffswitch > span > span {
     display: table-cell;
     padding: 3px 7px;
@@ -30,16 +34,24 @@
     font-weight: bold;
 }
 
+.teachblog .onoffswitch > span > span:hover {
+	background: #d0d0d0;
+}
+
+.teachblog .onoffswitch > span > span.active:hover {
+	background: #0076c4;
+}
+
 .teachblog .onoffswitch > span > span.off {
     text-align: right;
 }
 
-.teachblog .onoffswitch > span > span.on.active {
+.teachblog .onoffswitch > span > span.on {
     border-top-left-radius: 9px;
     border-bottom-left-radius: 9px;
 }
 
-.teachblog .onoffswitch > span > span.off.active {
+.teachblog .onoffswitch > span > span.off {
     border-top-right-radius: 9px;
     border-bottom-right-radius: 9px;
 }
