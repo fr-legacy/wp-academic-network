@@ -92,9 +92,11 @@ class Teachblog {
 		'Teachblog_Admin_Table' => 'helpers/admin_table',
 		'Teachblog_Base_Object' => 'base',
 		'Teachblog_Form' => 'helpers/form',
+		'Teachblog_Front_Editor' => 'modules/student_content/front_editor',
 		'Teachblog_General_Settings' => 'general_settings',
 		'Teachblog_Modules' => 'modules',
-		'Teachblog_Student_Content' => 'student_content'
+		'Teachblog_Student_Content' => 'modules/student_content/student_content',
+		'Teachblog_Template' => 'helpers/template'
 	);
 	
 	

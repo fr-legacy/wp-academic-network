@@ -30,6 +30,11 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
         'admin_menu' => 'menu_structure'
     );
 
+	/**
+	 * @var Teachblog_Front_Editor
+	 */
+	public $front_editor;
+
 
 	protected function preflight() {
 		if (!$this->system->modules->is_enabled('student_content')) return false;
@@ -37,12 +42,23 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	}
 	
 	protected function setup() {
+		$this->setup_content_support();
+		$this->setup_supporting_tools();
+	}	
+
+
+	protected function setup_content_support() {
 		$this->register_type();
 		$this->register_taxonomy();
 		$this->type_taxonomy_link();
-	}	
-	
-	
+	}
+
+
+	protected function setup_supporting_tools() {
+		$this->front_editor = new Teachblog_Front_Editor;
+	}
+
+
 	/**
 	 * Registers the Teachblog custom post type (only when student content has been enabled for the 
 	 * current blog). 
