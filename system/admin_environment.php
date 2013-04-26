@@ -29,6 +29,8 @@ class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 
 	protected function setup() {
 		if (!is_admin()) return;
+		if (!class_exists('WP_List_Table'))
+			require_once(ABSPATH.'wp-admin/includes/class-wp-list-table.php');
 	}
 
 

@@ -83,6 +83,7 @@ class Teachblog {
 	protected $classmap = array(
 		'Teachblog_Admin_Environment' => 'admin_environment',
 		'Teachblog_Admin_Menu' => 'admin_menu',
+		'Teachblog_Admin_Table' => 'tables/admin',
 		'Teachblog_Base_Object' => 'base',
 		'Teachblog_General_Settings' => 'general_settings',
 		'Teachblog_Student_Content' => 'student_content'
