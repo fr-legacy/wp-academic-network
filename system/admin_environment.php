@@ -23,7 +23,7 @@
  */
 class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 	protected $actions = array(
-		'admin_init' => 'admin_styles'
+		'admin_init' => 'admin_resources'
 	);
 
 
@@ -32,8 +32,13 @@ class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 	}
 
 
-	public function admin_styles() {
+	public function admin_resources() {
 		wp_enqueue_style(self::DOMAIN.'_admin_theme', $this->system->url.'assets/admin.css');
+		wp_enqueue_script(self::DOMAIN.'_admin_script', $this->system->url.'assets/admin.js', array('jquery'));
+		wp_localize_script(self::DOMAIN.'_admin_script', self::DOMAIN, array(
+			'on' => __('On', self::DOMAIN),
+			'off' => __('Off', self::DOMAIN)
+		));
 	}
 
 

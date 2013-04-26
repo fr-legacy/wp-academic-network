@@ -37,7 +37,7 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 
 	public function options_page() {
 		$this->admin->page('general_settings', array(
-			'title' => __('Educational Tool Settings', self::DOMAIN)
+			'title' => __('Educational Tools &ndash; Configuration', self::DOMAIN)
 		));
 	}
 }
