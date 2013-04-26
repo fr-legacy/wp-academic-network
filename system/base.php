@@ -47,6 +47,9 @@ class Teachblog_Base_Object {
         $this->admin = $this->system->admin_environment;
         $this->admin_menu = $this->system->admin_menu;
 
+		// Allow components the opportunity to determine if they should run or not
+		if (method_exists($this, 'preflight') and !$this->preflight()) return;
+
 		$this->setup_hooks('add_action', 'actions');
 		$this->setup_hooks('add_filter', 'filters');
 		if (method_exists($this, 'setup')) $this->setup();
@@ -69,7 +72,7 @@ class Teachblog_Base_Object {
 	 */
 	protected function local_setting($key, $value = null) {
 		$key = self::DOMAIN."_$key";
-		
+		$t = get_option($key);
 		if (is_null($value)) return get_option($key);		
 		else return update_option($key, $value);
 	}

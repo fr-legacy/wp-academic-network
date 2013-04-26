@@ -54,17 +54,17 @@ class Teachblog_Modules extends Teachblog_Base_Object {
 	 * @return bool
 	 */
 	public function is_enabled($slug) {
-		return $this->local_setting(self::DOMAIN.'_'.$slug.'_enabled'); // teachblog_{module_name}_enabled
+		return $this->local_setting($slug.'_enabled');
 	}
 
 
 	public function enable($slug) {
-		$this->local_setting(self::DOMAIN.'_'.$slug.'_enabled', true);
+		$this->local_setting($slug.'_enabled', true);
 	}
 
 
 	public function disable($slug) {
-		$this->local_setting(self::DOMAIN.'_'.$slug.'_enabled', false);
+		$this->local_setting($slug.'_enabled', false);
 	}
 
 

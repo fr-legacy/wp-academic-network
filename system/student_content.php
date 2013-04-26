@@ -31,10 +31,12 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
     );
 
 
+	protected function preflight() {
+		if (!$this->system->modules->is_enabled('student_content')) return false;
+		return true;
+	}
 	
 	protected function setup() {
-		#if (!$this->local_setting('student_content_enabled')) return;
-		
 		$this->register_type();
 		$this->register_taxonomy();
 		$this->type_taxonomy_link();

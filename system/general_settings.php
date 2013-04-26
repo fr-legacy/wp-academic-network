@@ -61,12 +61,15 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 			else $this->system->modules->disable($slug);
 		}
 
-
+		// Look for bulk actions
 		if (Teachblog_Form::is_posted('actions-top', 'do-activation'))
 			$this->activate_selected_modules();
 
 		if (Teachblog_Form::is_posted('actions-top', 'do-deactivation'))
 			$this->deactivate_selected_modules();
+
+		// Reload
+		wp_redirect(Teachblog_Form::admin_url());
 	}
 
 
