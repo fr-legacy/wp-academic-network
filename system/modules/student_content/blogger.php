@@ -42,6 +42,17 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 
 
 	/**
+	 * Returns the blogger object for the current user (if the visitor has authenticated). Effectively an
+	 * alias for Teachblog_Blogger::load() where no $id parameter is passed in.
+	 *
+	 * @return Teachblog_Blogger
+	 */
+	public static function current_user() {
+		return self::load();
+	}
+
+
+	/**
 	 * Returns the blogger object for the specified user (or current user if no ID is specified). Otherwise,
 	 * returns boolean false.
 	 *
