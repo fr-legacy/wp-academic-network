@@ -25,13 +25,34 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 	protected $id;
 	protected $owner;
 
+
+
 	protected function setup() {
 		add_shortcode('teachblog_editor', array($this, 'public_editor'));
 	}
 
 
 	public function public_editor() {
-		$editor = new Teachblog_Template('editor');
-		return $editor;
+		if (Teachblog_Blogger::load()->has_blog()) return $this->show_editor();
+		else return $this->blog_not_setup();
+	}
+
+
+	protected function show_editor() {
+		$vars = array(
+			'title' => 'My first post',
+			'content' => 'Hello!'
+		);
+
+		return new Teachblog_Template('editor', $vars);
+	}
+
+
+	protected function blog_not_setup() {
+		$message = new Teachblog_Template('inform_no_blog', array(
+			'signed_in' => (get_current_user_id() > 0)
+		));
+
+		return apply_filters(self::DOMAIN.'_editor_no_blog_available', $message);
 	}
 }

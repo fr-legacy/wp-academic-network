@@ -91,6 +91,7 @@ class Teachblog {
 		'Teachblog_Admin_Menu' => 'admin_menu',
 		'Teachblog_Admin_Table' => 'helpers/admin_table',
 		'Teachblog_Base_Object' => 'base',
+		'Teachblog_Blogger' => 'modules/student_content/blogger',
 		'Teachblog_Form' => 'helpers/form',
 		'Teachblog_Front_Editor' => 'modules/student_content/front_editor',
 		'Teachblog_General_Settings' => 'general_settings',

@@ -40,6 +40,37 @@ class Teachblog_Form {
 
 
 	/**
+	 * Useful for forms embedded in pages/posts using a shortcode etc, this returns the current post
+	 * permalink if available (or else an empty string).
+	 *
+	 * All URL queries for the current request will be appended to the returned string - unless an array
+	 * of URL query params is passed in (in which case, only those will be appended). To ensure no
+	 * URL query params are appended an empty array can be passed.
+	 *
+	 * @param array $get_params
+	 * @return string
+	 */
+	public static function post_url(array $get_params = null) {
+		// Basic URL
+		global $post;
+		$url = (is_object($post) and isset($post->ID)) ? get_permalink($post->ID) : '';
+		$query = '';
+
+		// Use all existing query vars?
+		if ($get_params === null and !empty($_GET)) $query = http_build_query($_GET);
+
+		// Specified params only?
+		if (is_array($get_params)) {
+			$get_params = array_flip($get_params);
+			$query = http_build_query(array_intersect_key($_GET, $get_params));
+		}
+
+		if (!empty($query)) $url .= "?$query";
+		return $url;
+	}
+
+
+	/**
 	 * Returns a nonced action URL for use in admin screens (the nonce name for checks is "teachblog_admin".
 	 *
 	 * @return string
