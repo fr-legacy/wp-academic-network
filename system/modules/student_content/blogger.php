@@ -38,7 +38,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 *
 	 * @var bool
 	 */
-	protected $loaded = false;
+	public $loaded = false;
 
 
 	/**
@@ -110,6 +110,48 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 		$blog_id = (int) $this->user->teachblog_student_blog;
 		if ($this-is_valid_blog($blog_id)) return $blog_id;
 		return false;
+	}
+
+
+	/**
+	 * Returns the user object(s) assigned to a blog or else bool false if no user(s) have been assigned.
+	 *
+	 * This could be accomplished with a WP user query (and a user meta element) however for backwards compatibility
+	 * with WP 3.4 a direct query is being used.
+	 *
+	 * @param $blog_term_id
+	 * @return bool|WP_User
+	 */
+	public function get_assigned_user($blog_term_id) {
+		global $wpdb;
+
+	}
+
+
+	/**
+	 * Assigns the current user (if loaded) to the specified blog (if it exists).
+	 *
+	 * This assumes that the user can be assigned to multiple blogs, however if optional parameter $make_exclusive is
+	 * passed as true then all other assignments will be cleared.
+	 *
+	 * @param $blog_id
+	 * @param bool $make_exclusive
+	 * @return bool
+	 */
+	public function assign_to_blog($blog_id, $make_exclusive = false) {
+		if (!$this->loaded or !$this->is_valid_blog($blog_id)) return false;
+
+		if ($make_exclusive) $this->unassign_from_all();
+		return add_user_meta($this->user->ID, self::DOMAIN.'_assigned_blogs', $blog_id);
+	}
+
+
+	/**
+	 * Unassigns the blogger from all and any blogs to which they are currently assigned.
+	 */
+	public function unassign_from_all() {
+		if (!$this->loaded) return false;
+		return delete_user_meta($this->user->ID, self::DOMAIN.'_assigned_blogs');
 	}
 
 

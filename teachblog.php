@@ -78,6 +78,11 @@ class Teachblog {
 	public $student_content;
 
 	/**
+	 * @var Teachblog_Student_User
+	 */
+	public $student_user;
+
+	/**
 	 * @var Teachblog_Modules
 	 */
 	public $modules;
@@ -97,6 +102,7 @@ class Teachblog {
 		'Teachblog_General_Settings' => 'general_settings',
 		'Teachblog_Modules' => 'modules',
 		'Teachblog_Student_Content' => 'modules/student_content/student_content',
+		'Teachblog_Student_User' => 'modules/students/student_user',
 		'Teachblog_Template' => 'helpers/template'
 	);
 	
@@ -152,6 +158,7 @@ class Teachblog {
         $this->admin_environment = new Teachblog_Admin_Environment;
         $this->general_settings = new Teachblog_General_Settings;
         $this->admin_menu = new Teachblog_Admin_Menu;
+		$this->student_user = new Teachblog_Student_User;
 		$this->student_content = new Teachblog_Student_Content;
 	}
 }

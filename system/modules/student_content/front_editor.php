@@ -33,7 +33,7 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 
 
 	public function public_editor() {
-		if (Teachblog_Blogger::load()->has_blog()) return $this->show_editor();
+		if (Teachblog_Blogger::current_user()->has_blog()) return $this->show_editor();
 		else return $this->blog_not_setup();
 	}
 

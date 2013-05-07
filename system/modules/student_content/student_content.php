@@ -42,6 +42,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	}
 	
 	protected function setup() {
+		$this->blog_setup();
 		$this->setup_content_support();
 		$this->setup_supporting_tools();
 	}	
@@ -153,4 +154,91 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 		$this->admin_menu->send_to_top(self::TEACHBLOG_MENU_SLUG, $slug);
     }
+
+
+	/**
+	 * Sets up integration with the add new/edit existing taxonomy screens for the student blog object.
+	 */
+	public function blog_setup() {
+		add_action('edited_'.self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
+		add_action(self::TEACHBLOG_BLOG_TAXONOMY.'_add_form_fields', array($this, 'new_ownership_selector'));
+		add_action(self::TEACHBLOG_BLOG_TAXONOMY.'_edit_form_fields', array($this, 'existing_ownership_selector'));
+	}
+
+
+	/**
+	 * Updates the association between the student blog and the student user(s). The method draws on the $_POST super
+	 * global and inspects the student_blog_owner entry, however optional param $user_ids can be set and be used
+	 * instead.
+	 *
+	 * This method supports the concept of multiple users being assigned to a single blog even if not implemented by the
+	 * basic additions to the UI.
+	 *
+	 * It is not a requirement that assigned users be student_users however, they can belong to any role.
+	 *
+	 * @param $term_id
+	 * @param array $user_ids
+	 */
+	public function save_assigned_student($term_id, array $user_ids = null) {
+		// A supplied $user_ids list takes precedence over an entry in $_POST
+		if (!is_array($user_ids) and isset($_POST['student_blog_owner'])) {
+			$this->edit_tag_checks();
+			$user_ids = (array) $_POST['student_blog_owner'];
+		}
+
+		// If we have neither/it's an empty list then bug out
+		if (!is_array($user_ids) or empty($user_ids)) return;
+
+		// Clear (unset) assigned user(s)?
+		if (count($user_ids) === 1 and ($user_ids[0] === 'unset' or (int) $user_ids[0] === 0))
+			Teachblog_Blogger::unassign_all($term_id);
+
+		// Or else assign
+		else foreach ($user_ids as $user) {
+			$user = Teachblog_Blogger::load((int) $user);
+			if (!$user->loaded) continue; // Non-existent/invalid user?
+			else $user->assign_to_blog($term_id);
+		}
+
+	}
+
+
+	/**
+	 * Emulates the security and sanity checks normally performed in edit-tags.php. Failure means execution will be
+	 * halted.
+	 */
+	protected function edit_tag_checks() {
+		$tag_id = (int) $_POST['tag_ID'];
+		check_admin_referer('update-tag_'.$tag_id);
+
+		if (!current_user_can($tax = get_taxonomy(self::TEACHBLOG_BLOG_TAXONOMY)->cap->edit_terms))
+			wp_die(__('You do not have permission to carry out this action.', self::DOMAIN));
+
+		$tag = get_term($tag_id, self::TEACHBLOG_BLOG_TAXONOMY);
+		if (!$tag) wp_die(__('The blog you are trying to edit is no longer available.', self::DOMAIN));
+	}
+
+
+	/**
+	 * Adds UI elements to allow blogs to be assigned to student users (when a new blog is created).
+	 */
+	public function new_ownership_selector() {
+		$this->admin->view('student_selector', array(
+			'label' => __('Blog Owner', self::DOMAIN),
+			'description' => __('Any posts the assigned student makes will automatically be linked to this blog.', self::DOMAIN),
+			'students' => $this->system->student_user->list_users(),
+		));
+	}
+
+
+	/**
+	 * Adds UI elements to allow blogs to be assigned to student users (when an existing blog is being edited).
+	 */
+	public function existing_ownership_selector() {
+		$this->admin->view('student_selector_table', array(
+			'label' => __('Blog Owner', self::DOMAIN),
+			'description' => __('Any posts the assigned student makes will automatically be linked to this blog.', self::DOMAIN),
+			'students' => $this->system->student_user->list_users(),
+		));
+	}
 }
