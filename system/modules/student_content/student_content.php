@@ -311,6 +311,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 			$columns['taxonomy-'.self::TEACHBLOG_BLOG_TAXONOMY] = __('Blog', self::DOMAIN);
 
 		$columns[self::DOMAIN . '_last_edit'] = __('Last Edit By', self::DOMAIN);
+		$columns[self::DOMAIN . '_status'] = __('Status', self::DOMAIN);
 		return $columns;
 	}
 
@@ -324,7 +325,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	 * @param $tag_id
 	 */
 	public function populate_post_columns($html, $column_name) {
-		if ($column_name !== self::DOMAIN . '_last_edit') return $html;
+		if ($column_name !== self::DOMAIN . '_last_edit' or $column_name !== self::DOMAIN . '_status') return $html;
 
 		$html = 'TODO!';
 		return $html;
