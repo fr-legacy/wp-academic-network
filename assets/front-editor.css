@@ -1,0 +1,39 @@
+.teachblog.editor .section {
+	margin-bottom: 2em;
+}
+
+.teachblog.editor .section label {
+	display: block;
+	font-weight: bold;
+}
+
+.teachblog.editor .section.status {
+	margin: 0em 0em 0em 2em;
+	position: relative;
+	top: 1.42em;
+}
+
+.teachblog.editor .section.title input {
+	width: 70%;
+}
+
+.teachblog.editor .section.status > div {
+	background: #566864;
+	border-radius: 0.4em;
+	color: #fff;
+	float: right;
+	font-weight: bold;
+	padding: 0.28em 1.3em;
+	text-align: center;
+	width: auto;
+}
+
+.teachblog.editor .section.status > div.new { background: #60b0c0; }
+.teachblog.editor .section.status > div.draft { background: #505050; }
+.teachblog.editor .section.status > div.pending { background: #ce8944; }
+.teachblog.editor .section.status > div.live { background: #50a050; }
+.teachblog.editor .section.status > div.offline { background: #c04040; }
+
+.teachblog.editor .section.controls input {
+	margin-left: 1em;
+}

@@ -25,9 +25,18 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 	protected $id;
 	protected $owner;
 
+	protected $actions = array(
+		'wp_enqueue_scripts' => 'enqueue_styles'
+	);
+
 
 	protected function setup() {
 		add_shortcode('teachblog_editor', array($this, 'public_editor'));
+	}
+
+
+	public function enqueue_styles() {
+		wp_enqueue_style(self::DOMAIN.'_front_editor', $this->system->url.'assets/front-editor.css');
 	}
 
 
@@ -39,8 +48,11 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 
 	protected function show_editor() {
 		$vars = array(
+			'assignable_blogs' => Teachblog_Blogger::current_user()->get_assigned_blog_list(),
+			'current_blog' => null,
 			'title' => 'My first post',
-			'content' => 'Hello!'
+			'content' => 'Hello!',
+			'status' => array('new', _x('New!', 'post-status', self::DOMAIN))
 		);
 
 		return new Teachblog_Template('editor', $vars);

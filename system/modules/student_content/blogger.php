@@ -94,22 +94,45 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public function has_blog() {
 		if (!$this->loaded) return false;
-		return (is_int($this->get_blog_id())) ? true : false;
+
+		$blog_ids = $this->get_blog_ids();
+		return (is_array($blog_ids) and !empty($blog_ids)) ? true : false;
 	}
 
 
 	/**
-	 * Returns the taxonomy ID for the student blog, if the user is assigned to one, or else boolean false.
+	 * Returns an array structured in key:value form where the key is the student blog ID and value is the the student
+	 * blog title. The returned array may be empty!
 	 *
-	 * @return bool|int
+	 * @return array
 	 */
-	public function get_blog_id() {
+	public function get_assigned_blog_list() {
 		if (!$this->loaded) return false;
-		if (!isset($this->user->teachblog_student_blog)) return false;
 
-		$blog_id = (int)$this->user->teachblog_student_blog;
-		if ($this - is_valid_blog($blog_id)) return $blog_id;
-		return false;
+		$blogs = array();
+		$blog_ids = $this->get_blog_ids();
+		if (!is_array($blog_ids) or empty($blog_ids)) return array();
+
+		foreach ($blog_ids as $term_id) {
+			$student_blog = get_term($term_id, Teachblog_Student_Content::TEACHBLOG_BLOG_TAXONOMY);
+			if (!is_object($student_blog) or !isset($student_blog->term_id)) continue;
+			$blogs[(int) $student_blog->term_id] = $student_blog->name;
+		}
+
+		return $blogs;
+	}
+
+
+	/**
+	 * Returns the taxonomy IDs for the student blog, if the user is assigned to one/more than one, as an array of IDs.
+	 * The array may be empty if the user is not assigned to any blogs. Should the user object not have loaded (ie, it
+	 * is a non existent user) then bool false will be returned instead.
+	 *
+	 * @return bool|array
+	 */
+	public function get_blog_ids() {
+		if (!$this->loaded) return false;
+		return (array) get_user_meta($this->user->ID, self::DOMAIN . '_assigned_blogs_' . get_current_blog_id());
 	}
 
 
