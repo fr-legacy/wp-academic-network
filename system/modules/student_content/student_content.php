@@ -161,6 +161,9 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	 */
 	public function blog_setup() {
 		add_action('edited_'.self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
+		add_action('created_'.self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
+		add_filter('manage_edit-'.self::TEACHBLOG_BLOG_TAXONOMY.'_columns', array($this, 'add_blog_assignee_column'));
+		add_filter('manage_'.self::TEACHBLOG_BLOG_TAXONOMY.'_custom_column', array($this, 'populate_assignee_columns'), 10, 3);
 		add_action(self::TEACHBLOG_BLOG_TAXONOMY.'_add_form_fields', array($this, 'new_ownership_selector'));
 		add_action(self::TEACHBLOG_BLOG_TAXONOMY.'_edit_form_fields', array($this, 'existing_ownership_selector'));
 	}
@@ -189,33 +192,41 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		// If we have neither/it's an empty list then bug out
 		if (!is_array($user_ids) or empty($user_ids)) return;
 
-		// Clear (unset) assigned user(s)?
-		if (count($user_ids) === 1 and ($user_ids[0] === 'unset' or (int) $user_ids[0] === 0))
-			Teachblog_Blogger::unassign_all($term_id);
+		// Start by *unassigning* all
+		Teachblog_Blogger::unassign_all($term_id);
 
-		// Or else assign
-		else foreach ($user_ids as $user) {
+		// Now assign all users as requested
+		foreach ($user_ids as $user) {
 			$user = Teachblog_Blogger::load((int) $user);
 			if (!$user->loaded) continue; // Non-existent/invalid user?
 			else $user->assign_to_blog($term_id);
 		}
-
 	}
 
 
 	/**
-	 * Emulates the security and sanity checks normally performed in edit-tags.php. Failure means execution will be
-	 * halted.
+	 * Emulates the security and sanity checks normally performed in edit-tags.php/ajax-actions.php. Failure means
+	 * execution will be halted.
 	 */
 	protected function edit_tag_checks() {
-		$tag_id = (int) $_POST['tag_ID'];
-		check_admin_referer('update-tag_'.$tag_id);
+		// New blog (taxonomy) being created?
+		if (isset($_REQUEST['action']) and $_REQUEST['action'] === 'add-tag') {
+			if (defined('DOING_AJAX') and DOING_AJAX) check_ajax_referer('add-tag', '_wpnonce_add-tag'); // via ajax
+			else check_admin_referer('add-tag', '_wpnonce_add-tag'); // without ajax
+			if (!current_user_can(get_taxonomy(self::TEACHBLOG_BLOG_TAXONOMY)->cap->edit_terms)) wp_die(-1);
+		}
 
-		if (!current_user_can($tax = get_taxonomy(self::TEACHBLOG_BLOG_TAXONOMY)->cap->edit_terms))
-			wp_die(__('You do not have permission to carry out this action.', self::DOMAIN));
+		// Or else existing blog (taxonomy) being edited?
+		else {
+			$tag_id = (int) $_POST['tag_ID'];
+			check_admin_referer('update-tag_'.$tag_id);
 
-		$tag = get_term($tag_id, self::TEACHBLOG_BLOG_TAXONOMY);
-		if (!$tag) wp_die(__('The blog you are trying to edit is no longer available.', self::DOMAIN));
+			if (!current_user_can(get_taxonomy(self::TEACHBLOG_BLOG_TAXONOMY)->cap->edit_terms))
+				wp_die(__('You do not have permission to carry out this action.', self::DOMAIN));
+
+			$tag = get_term($tag_id, self::TEACHBLOG_BLOG_TAXONOMY);
+			if (!$tag) wp_die(__('The blog you are trying to edit is no longer available.', self::DOMAIN));
+		}
 	}
 
 
@@ -226,7 +237,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		$this->admin->view('student_selector', array(
 			'label' => __('Blog Owner', self::DOMAIN),
 			'description' => __('Any posts the assigned student makes will automatically be linked to this blog.', self::DOMAIN),
-			'students' => $this->system->student_user->list_users(),
+			'students' => $this->system->student_user->list_users()
 		));
 	}
 
@@ -235,10 +246,48 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	 * Adds UI elements to allow blogs to be assigned to student users (when an existing blog is being edited).
 	 */
 	public function existing_ownership_selector() {
+		$tag_id = isset($_REQUEST['tag_ID']) ? (int) $_REQUEST['tag_ID'] : 0;
+
 		$this->admin->view('student_selector_table', array(
 			'label' => __('Blog Owner', self::DOMAIN),
 			'description' => __('Any posts the assigned student makes will automatically be linked to this blog.', self::DOMAIN),
 			'students' => $this->system->student_user->list_users(),
+			'selected' => Teachblog_Blogger::get_assigned_users($tag_id)
 		));
+	}
+
+
+	/**
+	 * Adds the header component of the assignees column, which will appear on the student blog list to give a quick
+	 * overview of who owns(/is assigned to) which blog.
+	 *
+	 * @param $columns
+	 * @return mixed
+	 */
+	public function add_blog_assignee_column($columns) {
+		$columns[self::DOMAIN.'_assignees'] = __('Assignee(s)', self::DOMAIN);
+		return $columns;
+	}
+
+
+	/**
+	 * Populates each entry of the assignee column with the assignee names etc (if a user is assigned).
+	 *
+	 * @param $html
+	 * @param $column_name
+	 * @param $tag_id
+	 */
+	public function populate_assignee_columns($html, $column_name, $tag_id) {
+		if ($column_name !== self::DOMAIN.'_assignees') return $html;
+
+		$users = (array) Teachblog_Blogger::get_assigned_users($tag_id);
+
+		if (empty($users)) $html = __('No one is assigned to this blog', self::DOMAIN);
+		else foreach ($users as $user) {
+			$user = get_user_by('id', $user);
+			$html .= '<a href="'. get_edit_user_link($user->ID).'">'.esc_attr($user->user_nicename).'</a> <br />';
+		}
+
+		return $html;
 	}
 }
