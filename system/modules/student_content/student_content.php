@@ -23,12 +23,12 @@
 class Teachblog_Student_Content extends Teachblog_Base_Object {
 	const TEACHBLOG_POST = 'teachblog_post';
 	const TEACHBLOG_BLOG_TAXONOMY = 'teachblog_blogs';
-    const TEACHBLOG_MENU_SLUG = 'teachblog_student_content';
-    const TEACHBLOG_BLOGS_SLUG = 'teachblog_student_blogs';
+	const TEACHBLOG_MENU_SLUG = 'teachblog_student_content';
+	const TEACHBLOG_BLOGS_SLUG = 'teachblog_student_blogs';
 
-    protected $actions = array(
-        'admin_menu' => 'menu_structure'
-    );
+	protected $actions = array(
+		'admin_menu' => 'menu_structure'
+	);
 
 	/**
 	 * @var Teachblog_Front_Editor
@@ -40,12 +40,12 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		if (!$this->system->modules->is_enabled('student_content')) return false;
 		return true;
 	}
-	
+
 	protected function setup() {
 		$this->blog_setup();
 		$this->setup_content_support();
 		$this->setup_supporting_tools();
-	}	
+	}
 
 
 	protected function setup_content_support() {
@@ -61,37 +61,36 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 
 	/**
-	 * Registers the Teachblog custom post type (only when student content has been enabled for the 
-	 * current blog). 
+	 * Registers the Teachblog custom post type (only when student content has been enabled for the
+	 * current blog).
 	 */
-	protected function register_type() {		
+	protected function register_type() {
 		$supports = array('title', 'editor', 'description', 'excerpt', 'custom-fields', 'comments');
-		
+
 		// Optional supported functionality
 		if ($this->local_setting('post_revisions')) $supports[] = 'revisions';
 		if (current_theme_supports('post_thumbnails')) $supports[] = 'thumbnails';
-		
+
 		register_post_type(self::TEACHBLOG_POST, array(
 			'label' => __('Student Posts', self::DOMAIN),
 			'labels' => array(
 				'singular_name' => __('Student Post', self::DOMAIN),
 				'all_items' => __('All Student Posts', self::DOMAIN),
-				'add_new' => _x('Add New', self::TEACHBLOG_POST, self::DOMAIN) ),
+				'add_new' => _x('Add New', self::TEACHBLOG_POST, self::DOMAIN)),
 			'description' => __('Container for student submitted content', self::DOMAIN),
 			'public' => true,
-            'show_in_menu' => self::TEACHBLOG_MENU_SLUG,
-			'menu_icon' => $this->system->url.'assets/tango-web-icon-32.png',
+			'show_in_menu' => self::TEACHBLOG_MENU_SLUG,
+			'menu_icon' => $this->system->url . 'assets/tango-web-icon-32.png',
 			'supports' => $supports,
 			'register_meta_box_cb' => array($this, 'editor_metaboxes'),
 			'taxonomy' => self::TEACHBLOG_BLOG_TAXONOMY,
 			'has_archive' => true,
 			'rewrite' => array(
-				'slug' => _x('studentpost', 'student_post_slug', self::DOMAIN) )
-		));		
+				'slug' => _x('studentpost', 'student_post_slug', self::DOMAIN))
+		));
 	}
-	
-	
-	
+
+
 	/**
 	 * Registers the Teachblog custom taxonomy (only when student content has been enabled for the
 	 * current blog) which is intended as a tool to effectively organize posts into individual
@@ -109,23 +108,23 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 				'add_new_item' => _x('Add New Student Blog', self::TEACHBLOG_BLOG_TAXONOMY, self::DOMAIN),
 				'new_item_name' => _x('New Student Blogs', self::TEACHBLOG_BLOG_TAXONOMY, self::DOMAIN),
 				'parent_item' => _x('Parent Blog/Group', self::TEACHBLOG_BLOG_TAXONOMY, self::DOMAIN),
-				'search_items' => _x('Search Blogs', self::TEACHBLOG_BLOG_TAXONOMY, self::DOMAIN) ),
+				'search_items' => _x('Search Blogs', self::TEACHBLOG_BLOG_TAXONOMY, self::DOMAIN)),
 			'hierarchical' => true,
-            'public' => true,
+			'public' => true,
 			'rewrite' => array(
-				'slug' => _x('studentblog', 'student_blog_slug', self::DOMAIN) )	
+				'slug' => _x('studentblog', 'student_blog_slug', self::DOMAIN))
 		));
 	}
-	
-	
+
+
 	/**
-	 * Helps to avoid edge cases where the link between taxonomy and post type is not observed. 
+	 * Helps to avoid edge cases where the link between taxonomy and post type is not observed.
 	 */
 	protected function type_taxonomy_link() {
 		register_taxonomy_for_object_type(self::TEACHBLOG_BLOG_TAXONOMY, self::TEACHBLOG_POST);
 	}
-	
-	
+
+
 	/**
 	 * Triggers the addition of metaboxes to the student post editor.
 	 */
@@ -134,38 +133,38 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	}
 
 
-    /**
-     * Generates the basic menu structure
-     */
-    public function menu_structure() {
-        $this->admin_menu->register_menu(
-            'Student Content',
-            self::TEACHBLOG_MENU_SLUG,
-            array($this, 'dashboard_page'),
-            'edit_posts'
+	/**
+	 * Generates the basic menu structure
+	 */
+	public function menu_structure() {
+		$this->admin_menu->register_menu(
+			'Student Content',
+			self::TEACHBLOG_MENU_SLUG,
+			array($this, 'dashboard_page'),
+			'edit_posts'
 		);
 
-        $slug = $this->admin_menu->register_taxonomy_subpage(
-            'Student Blogs',
-            self::TEACHBLOG_MENU_SLUG,
-            self::TEACHBLOG_BLOG_TAXONOMY,
-            'manage_categories'
-        );
+		$slug = $this->admin_menu->register_taxonomy_subpage(
+			'Student Blogs',
+			self::TEACHBLOG_MENU_SLUG,
+			self::TEACHBLOG_BLOG_TAXONOMY,
+			'manage_categories'
+		);
 
 		$this->admin_menu->send_to_top(self::TEACHBLOG_MENU_SLUG, $slug);
-    }
+	}
 
 
 	/**
 	 * Sets up integration with the add new/edit existing taxonomy screens for the student blog object.
 	 */
 	public function blog_setup() {
-		add_action('edited_'.self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
-		add_action('created_'.self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
-		add_filter('manage_edit-'.self::TEACHBLOG_BLOG_TAXONOMY.'_columns', array($this, 'add_blog_assignee_column'));
-		add_filter('manage_'.self::TEACHBLOG_BLOG_TAXONOMY.'_custom_column', array($this, 'populate_assignee_columns'), 10, 3);
-		add_action(self::TEACHBLOG_BLOG_TAXONOMY.'_add_form_fields', array($this, 'new_ownership_selector'));
-		add_action(self::TEACHBLOG_BLOG_TAXONOMY.'_edit_form_fields', array($this, 'existing_ownership_selector'));
+		add_action('edited_' . self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
+		add_action('created_' . self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
+		add_filter('manage_edit-' . self::TEACHBLOG_BLOG_TAXONOMY . '_columns', array($this, 'add_blog_assignee_column'));
+		add_filter('manage_' . self::TEACHBLOG_BLOG_TAXONOMY . '_custom_column', array($this, 'populate_assignee_columns'), 10, 3);
+		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_add_form_fields', array($this, 'new_ownership_selector'));
+		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_edit_form_fields', array($this, 'existing_ownership_selector'));
 	}
 
 
@@ -186,7 +185,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		// A supplied $user_ids list takes precedence over an entry in $_POST
 		if (!is_array($user_ids) and isset($_POST['student_blog_owner'])) {
 			$this->edit_tag_checks();
-			$user_ids = (array) $_POST['student_blog_owner'];
+			$user_ids = (array)$_POST['student_blog_owner'];
 		}
 
 		// If we have neither/it's an empty list then bug out
@@ -197,7 +196,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 		// Now assign all users as requested
 		foreach ($user_ids as $user) {
-			$user = Teachblog_Blogger::load((int) $user);
+			$user = Teachblog_Blogger::load((int)$user);
 			if (!$user->loaded) continue; // Non-existent/invalid user?
 			else $user->assign_to_blog($term_id);
 		}
@@ -214,12 +213,10 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 			if (defined('DOING_AJAX') and DOING_AJAX) check_ajax_referer('add-tag', '_wpnonce_add-tag'); // via ajax
 			else check_admin_referer('add-tag', '_wpnonce_add-tag'); // without ajax
 			if (!current_user_can(get_taxonomy(self::TEACHBLOG_BLOG_TAXONOMY)->cap->edit_terms)) wp_die(-1);
-		}
-
-		// Or else existing blog (taxonomy) being edited?
+		} // Or else existing blog (taxonomy) being edited?
 		else {
-			$tag_id = (int) $_POST['tag_ID'];
-			check_admin_referer('update-tag_'.$tag_id);
+			$tag_id = (int)$_POST['tag_ID'];
+			check_admin_referer('update-tag_' . $tag_id);
 
 			if (!current_user_can(get_taxonomy(self::TEACHBLOG_BLOG_TAXONOMY)->cap->edit_terms))
 				wp_die(__('You do not have permission to carry out this action.', self::DOMAIN));
@@ -246,7 +243,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	 * Adds UI elements to allow blogs to be assigned to student users (when an existing blog is being edited).
 	 */
 	public function existing_ownership_selector() {
-		$tag_id = isset($_REQUEST['tag_ID']) ? (int) $_REQUEST['tag_ID'] : 0;
+		$tag_id = isset($_REQUEST['tag_ID']) ? (int)$_REQUEST['tag_ID'] : 0;
 
 		$this->admin->view('student_selector_table', array(
 			'label' => __('Blog Owner', self::DOMAIN),
@@ -265,7 +262,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	 * @return mixed
 	 */
 	public function add_blog_assignee_column($columns) {
-		$columns[self::DOMAIN.'_assignees'] = __('Assignee(s)', self::DOMAIN);
+		$columns[self::DOMAIN . '_assignees'] = __('Assignee(s)', self::DOMAIN);
 		return $columns;
 	}
 
@@ -278,14 +275,14 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	 * @param $tag_id
 	 */
 	public function populate_assignee_columns($html, $column_name, $tag_id) {
-		if ($column_name !== self::DOMAIN.'_assignees') return $html;
+		if ($column_name !== self::DOMAIN . '_assignees') return $html;
 
-		$users = (array) Teachblog_Blogger::get_assigned_users($tag_id);
+		$users = (array)Teachblog_Blogger::get_assigned_users($tag_id);
 
 		if (empty($users)) $html = __('No one is assigned to this blog', self::DOMAIN);
 		else foreach ($users as $user) {
 			$user = get_user_by('id', $user);
-			$html .= '<a href="'. get_edit_user_link($user->ID).'">'.esc_attr($user->user_nicename).'</a> <br />';
+			$html .= '<a href="' . get_edit_user_link($user->ID) . '">' . esc_attr($user->user_nicename) . '</a> <br />';
 		}
 
 		return $html;

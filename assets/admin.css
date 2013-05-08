@@ -1,17 +1,17 @@
 .teachblog .icon32,
 #icon-teachblog_student_content {
-    background-image: url("tango-web-icon-32.png");
+	background-image: url("tango-web-icon-32.png");
 }
 
 /* On/off switches */
 
 .teachblog .onoffswitch > span {
-    background: #dedede;
-    border: 1px solid #0074a0;
-    border-radius: 10px;
-    box-shadow: 0px 1px 2px #a0a4df;
-    color: #777;
-    display: inline-block;
+	background: #dedede;
+	border: 1px solid #0074a0;
+	border-radius: 10px;
+	box-shadow: 0px 1px 2px #a0a4df;
+	color: #777;
+	display: inline-block;
 }
 
 .teachblog .onoffswitch > span:hover {
@@ -19,19 +19,19 @@
 }
 
 .teachblog .onoffswitch > span > span {
-    display: table-cell;
-    padding: 3px 7px;
-    font-size: 0.95em;
-    text-transform: uppercase;
-    width: 50%;
-    vertical-align: middle;
+	display: table-cell;
+	padding: 3px 7px;
+	font-size: 0.95em;
+	text-transform: uppercase;
+	width: 50%;
+	vertical-align: middle;
 }
 
 .teachblog .onoffswitch > span > span.active {
-    background: #0088d0;
-    color: #fff;
-    font-size: 1em;
-    font-weight: bold;
+	background: #0088d0;
+	color: #fff;
+	font-size: 1em;
+	font-weight: bold;
 }
 
 .teachblog .onoffswitch > span > span:hover {
@@ -43,15 +43,15 @@
 }
 
 .teachblog .onoffswitch > span > span.off {
-    text-align: right;
+	text-align: right;
 }
 
 .teachblog .onoffswitch > span > span.on {
-    border-top-left-radius: 9px;
-    border-bottom-left-radius: 9px;
+	border-top-left-radius: 9px;
+	border-bottom-left-radius: 9px;
 }
 
 .teachblog .onoffswitch > span > span.off {
-    border-top-right-radius: 9px;
-    border-bottom-right-radius: 9px;
+	border-top-right-radius: 9px;
+	border-bottom-right-radius: 9px;
 }

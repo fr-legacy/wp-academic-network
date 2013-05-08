@@ -25,27 +25,27 @@ class Teachblog_Base_Object {
 	 * Common domain for l10n/i18n and option namespacing
 	 */
 	const DOMAIN = 'teachblog';
-	
+
 	/**
 	 * @var Teachblog
 	 */
 	protected $system;
 
-    /**
-     * @var Teachblog_Admin_Menu
-     */
-    protected $admin_menu;
+	/**
+	 * @var Teachblog_Admin_Menu
+	 */
+	protected $admin_menu;
 
 	/**
 	 * @var Teachblog_Admin_Environment
 	 */
 	protected $admin;
-	
-	
+
+
 	public function __construct() {
 		$this->system = Teachblog::core();
-        $this->admin = $this->system->admin_environment;
-        $this->admin_menu = $this->system->admin_menu;
+		$this->admin = $this->system->admin_environment;
+		$this->admin_menu = $this->system->admin_menu;
 
 		// Allow components the opportunity to determine if they should run or not
 		if (method_exists($this, 'preflight') and !$this->preflight()) return;
@@ -54,30 +54,30 @@ class Teachblog_Base_Object {
 		$this->setup_hooks('add_filter', 'filters');
 		if (method_exists($this, 'setup')) $this->setup();
 	}
-	
-	
-	protected function setup_hooks($register, $map) {		
+
+
+	protected function setup_hooks($register, $map) {
 		if (property_exists($this, $map) and is_array($this->$map))
 			foreach ($this->$map as $hook => $callback)
 				$register($hook, array($this, $callback));
 	}
-	
-	
+
+
 	/**
 	 * Gets or sets a blog specific setting.
-	 * 
+	 *
 	 * @param string $key
 	 * @param string $value
 	 * @return bool
 	 */
 	protected function local_setting($key, $value = null) {
-		$key = self::DOMAIN."_$key";
+		$key = self::DOMAIN . "_$key";
 		$t = get_option($key);
-		if (is_null($value)) return get_option($key);		
+		if (is_null($value)) return get_option($key);
 		else return update_option($key, $value);
 	}
-	
-	
+
+
 	/**
 	 * Gets or sets a site/network wide setting.
 	 *
@@ -86,8 +86,8 @@ class Teachblog_Base_Object {
 	 * @return bool
 	 */
 	protected function global_setting($key, $value = null) {
-		$key = self::DOMAIN."_$key";
-		
+		$key = self::DOMAIN . "_$key";
+
 		if (is_null($value)) return get_site_option($key);
 		else return update_site_option($key, $value);
 	}

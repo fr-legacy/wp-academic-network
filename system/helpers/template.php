@@ -28,7 +28,7 @@ class Teachblog_Template extends Teachblog_Base_Object {
 	public function __construct($path, array $vars = null) {
 		parent::__construct();
 
-		$path = $this->system->dir."system/public_views/$path.php";
+		$path = $this->system->dir . "system/public_views/$path.php";
 		if (file_exists($path)) $this->path = $path;
 		if (is_array($vars)) $this->vars = $vars;
 	}

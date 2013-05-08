@@ -35,7 +35,7 @@ class Teachblog_Form {
 		$value = esc_attr($value);
 		$checked = $checked ? 'checked="checked"' : '';
 
-		return '<div class="onoffswitch"> <input type="checkbox" name="'.$name.'" value="'.$value.'" '.$checked.' /> </div>';
+		return '<div class="onoffswitch"> <input type="checkbox" name="' . $name . '" value="' . $value . '" ' . $checked . ' /> </div>';
 	}
 
 
@@ -84,7 +84,7 @@ class Teachblog_Form {
 		if (isset($_GET['page_num'])) $query['page_num'] = $_GET['page_num'];
 		if (isset($_GET['show'])) $query['show'] = $_GET['show'];
 
-		$action = $pagenow.'?'._http_build_query($query);
+		$action = $pagenow . '?' . _http_build_query($query);
 		return wp_nonce_url(get_admin_url(null, $action), 'teachblog_admin');
 	}
 

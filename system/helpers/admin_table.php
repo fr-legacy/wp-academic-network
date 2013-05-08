@@ -68,7 +68,7 @@ class Teachblog_Admin_Table extends Teachblog_Base_Object {
 	 * @param array $columns
 	 */
 	public function set_columns(array $columns) {
-		$this->columns = (array) apply_filters(self::DOMAIN.'_admin_table_columns', $columns);
+		$this->columns = (array)apply_filters(self::DOMAIN . '_admin_table_columns', $columns);
 		return $this;
 	}
 
@@ -79,7 +79,7 @@ class Teachblog_Admin_Table extends Teachblog_Base_Object {
 	 * @param $bool
 	 */
 	public function use_checkbox($bool) {
-		$this->checkbox = (bool) apply_filters(self::DOMAIN.'_admin_table_checkbox', $bool);
+		$this->checkbox = (bool)apply_filters(self::DOMAIN . '_admin_table_checkbox', $bool);
 		return $this;
 	}
 
@@ -91,7 +91,7 @@ class Teachblog_Admin_Table extends Teachblog_Base_Object {
 	 * @param array $actions
 	 */
 	public function set_actions(array $actions) {
-		$this->actions = (array) apply_filters(self::DOMAIN.'_admin_table_actions', $actions);
+		$this->actions = (array)apply_filters(self::DOMAIN . '_admin_table_actions', $actions);
 		return $this;
 	}
 
@@ -104,13 +104,13 @@ class Teachblog_Admin_Table extends Teachblog_Base_Object {
 	 * @param array $data
 	 */
 	public function set_data(array $data) {
-		$this->data = (array) apply_filters(self::DOMAIN.'_admin_table_data', $data);
+		$this->data = (array)apply_filters(self::DOMAIN . '_admin_table_data', $data);
 		return $this;
 	}
 
 
 	public function add_data_row($id, array $row) {
-		$this->data[$id] = (array) apply_filters(self::DOMAIN.'_admin_table_data_row', $row);
+		$this->data[$id] = (array)apply_filters(self::DOMAIN . '_admin_table_data_row', $row);
 		return $this;
 	}
 
@@ -143,13 +143,13 @@ class Teachblog_Admin_Table extends Teachblog_Base_Object {
 	 * @param $classes (string|array)
 	 */
 	public function add_css_class($classes) {
-		$classes = (array) $classes;
+		$classes = (array)$classes;
 		$this->css_table_classes = array_merge($this->css_table_classes, $classes);
 		return $this;
 	}
 
 	protected function table_classes() {
-		$classes = (array) apply_filters(self::DOMAIN.'_admin_table_css_classes', $this->css_table_classes);
+		$classes = (array)apply_filters(self::DOMAIN . '_admin_table_css_classes', $this->css_table_classes);
 		return join(' ', $classes);
 	}
 }

@@ -24,7 +24,6 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 	const ROLE = 'teachblog_student_user';
 
 
-
 	public function setup() {
 		if ($this->role_undefined()) $this->define_role();
 	}
@@ -44,7 +43,7 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 	 * Defines the student user role and its default capabilities.
 	 */
 	protected function define_role() {
-		$capabilities = apply_filters(self::DOMAIN.'_student_user_capabilities', array(
+		$capabilities = apply_filters(self::DOMAIN . '_student_user_capabilities', array(
 			'delete_posts',
 			'edit_posts',
 			'read'
@@ -60,6 +59,6 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 	 * @return array
 	 */
 	public static function list_users() {
-		return (array) get_users(array('role' => self::ROLE, 'orderby' => 'login', 'order' => 'ASC'));
+		return (array)get_users(array('role' => self::ROLE, 'orderby' => 'login', 'order' => 'ASC'));
 	}
 }

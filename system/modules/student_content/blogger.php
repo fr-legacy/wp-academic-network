@@ -65,7 +65,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public static function load($id = null) {
 		if ($id === null) $id = get_current_user_id();
-		$id = (int) $id;
+		$id = (int)$id;
 
 		if (isset(self::$blogger_instances[$id])) {
 			return self::$blogger_instances[$id];
@@ -107,8 +107,8 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 		if (!$this->loaded) return false;
 		if (!isset($this->user->teachblog_student_blog)) return false;
 
-		$blog_id = (int) $this->user->teachblog_student_blog;
-		if ($this-is_valid_blog($blog_id)) return $blog_id;
+		$blog_id = (int)$this->user->teachblog_student_blog;
+		if ($this - is_valid_blog($blog_id)) return $blog_id;
 		return false;
 	}
 
@@ -124,7 +124,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public static function get_assigned_users($blog_term_id) {
 		global $wpdb;
-		$local_assignments = self::DOMAIN.'_assigned_blogs_'.get_current_blog_id();
+		$local_assignments = self::DOMAIN . '_assigned_blogs_' . get_current_blog_id();
 
 		return $wpdb->get_col($wpdb->prepare(
 			"SELECT user_id FROM $wpdb->usermeta WHERE meta_key = %s AND meta_value = %d",
@@ -138,14 +138,13 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 * @param $blog_term_id
 	 */
 	public static function unassign_all($blog_term_id) {
-		$users = (array) self::get_assigned_users($blog_term_id);
+		$users = (array)self::get_assigned_users($blog_term_id);
 
 		foreach ($users as $user) {
 			$user = Teachblog_Blogger::load($user);
 			$user->unassign_from($blog_term_id);
 		}
 	}
-
 
 
 	/**
@@ -162,7 +161,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 		if (!$this->loaded or !$this->is_valid_blog($blog_id)) return false;
 
 		if ($make_exclusive) $this->unassign_from_all();
-		return add_user_meta($this->user->ID, self::DOMAIN.'_assigned_blogs_'.get_current_blog_id(), $blog_id);
+		return add_user_meta($this->user->ID, self::DOMAIN . '_assigned_blogs_' . get_current_blog_id(), $blog_id);
 	}
 
 
@@ -175,7 +174,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	public function unassign_from($blog_id) {
 		if (!$this->loaded or !$this->is_valid_blog($blog_id)) return false;
 
-		return delete_user_meta($this->user->ID, self::DOMAIN.'_assigned_blogs_'.get_current_blog_id(), $blog_id);
+		return delete_user_meta($this->user->ID, self::DOMAIN . '_assigned_blogs_' . get_current_blog_id(), $blog_id);
 	}
 
 
@@ -184,7 +183,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public function unassign_from_all() {
 		if (!$this->loaded) return false;
-		return delete_user_meta($this->user->ID, self::DOMAIN.'_assigned_blogs_'.get_current_blog_id());
+		return delete_user_meta($this->user->ID, self::DOMAIN . '_assigned_blogs_' . get_current_blog_id());
 	}
 
 

@@ -26,7 +26,6 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 	protected $owner;
 
 
-
 	protected function setup() {
 		add_shortcode('teachblog_editor', array($this, 'public_editor'));
 	}
@@ -53,6 +52,6 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 			'signed_in' => (get_current_user_id() > 0)
 		));
 
-		return apply_filters(self::DOMAIN.'_editor_no_blog_available', $message);
+		return apply_filters(self::DOMAIN . '_editor_no_blog_available', $message);
 	}
 }

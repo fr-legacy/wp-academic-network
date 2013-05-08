@@ -32,27 +32,27 @@ class Teachblog {
 	const CODENAME = 'Busy Biretta';
 
 	protected static $instance = false;
-	
+
 	/**
 	 * Plugin directory URL
-	 * 
+	 *
 	 * @var string
 	 */
 	public $url = '';
 
 	/**
 	 * Plugin directory
-	 * 
+	 *
 	 * @var string
 	 */
 	public $dir = '';
-	
+
 	/**
 	 * After init contains an object with details of the current site; the following
 	 * properties can be expected:
-	 * 
-	 * 	id, domain, path, site_name
-	 * 
+	 *
+	 *    id, domain, path, site_name
+	 *
 	 * @var mixed
 	 */
 	public $current_site = false;
@@ -62,17 +62,17 @@ class Teachblog {
 	 */
 	public $admin_environment;
 
-    /**
-     * @var Teachblog_Admin_Menu
-     */
-    public $admin_menu;
+	/**
+	 * @var Teachblog_Admin_Menu
+	 */
+	public $admin_menu;
 
 	/**
 	 * @var Teachblog_General_Settings
 	 */
 	public $general_settings;
 
-	/** 
+	/**
 	 * @var Teachblog_Student_Content
 	 */
 	public $student_content;
@@ -87,7 +87,7 @@ class Teachblog {
 	 */
 	public $modules;
 
-	
+
 	/**
 	 * @var array
 	 */
@@ -105,59 +105,59 @@ class Teachblog {
 		'Teachblog_Student_User' => 'modules/students/student_user',
 		'Teachblog_Template' => 'helpers/template'
 	);
-	
-	
+
+
 	/**
 	 * Returns the Teachblog core instance/launches it if it does not already exist.
-	 * 
+	 *
 	 * @return Teachblog
 	 */
 	public static function core() {
 		if (self::$instance === false)
 			self::$instance = new self;
-		
+
 		return self::$instance;
 	}
-	
-	
+
+
 	protected function __construct() {
 		$this->locate_self();
 		$this->setup();
 		add_action('init', array($this, 'launch'));
 	}
-	
-	
+
+
 	protected function locate_self() {
 		$this->dir = trailingslashit(plugin_dir_path(__FILE__));
 		$this->url = trailingslashit(plugin_dir_url(__FILE__));
 	}
 
-	
+
 	protected function setup() {
 		spl_autoload_register(array($this, 'class_loader'));
 		if (!defined('TEACHBLOG_L10N')) define('TEACHBLOG_I18N', Teachblog_Base_Object::DOMAIN); // For use in views, templates etc
 	}
-	
-	
+
+
 	public function class_loader($class) {
 		if (!isset($this->classmap[$class])) return;
-		$classpath = $this->dir.'system/'.$this->classmap[$class].'.php';
-		
+		$classpath = $this->dir . 'system/' . $this->classmap[$class] . '.php';
+
 		if (file_exists($classpath)) {
 			require $classpath;
 			return true;
 		}
-		
+
 		return false;
 	}
-	
-	
+
+
 	public function launch() {
 		$this->current_site = get_current_site();
 		$this->modules = new Teachblog_Modules;
-        $this->admin_environment = new Teachblog_Admin_Environment;
-        $this->general_settings = new Teachblog_General_Settings;
-        $this->admin_menu = new Teachblog_Admin_Menu;
+		$this->admin_environment = new Teachblog_Admin_Environment;
+		$this->general_settings = new Teachblog_General_Settings;
+		$this->admin_menu = new Teachblog_Admin_Menu;
 		$this->student_user = new Teachblog_Student_User;
 		$this->student_content = new Teachblog_Student_Content;
 	}

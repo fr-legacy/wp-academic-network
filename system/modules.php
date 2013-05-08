@@ -38,7 +38,7 @@ class Teachblog_Modules extends Teachblog_Base_Object {
 			'student_content'
 		);
 
-		do_action(self::DOMAIN.'_register_modules', $this);
+		do_action(self::DOMAIN . '_register_modules', $this);
 	}
 
 
@@ -54,17 +54,17 @@ class Teachblog_Modules extends Teachblog_Base_Object {
 	 * @return bool
 	 */
 	public function is_enabled($slug) {
-		return $this->local_setting($slug.'_enabled');
+		return $this->local_setting($slug . '_enabled');
 	}
 
 
 	public function enable($slug) {
-		$this->local_setting($slug.'_enabled', true);
+		$this->local_setting($slug . '_enabled', true);
 	}
 
 
 	public function disable($slug) {
-		$this->local_setting($slug.'_enabled', false);
+		$this->local_setting($slug . '_enabled', false);
 	}
 
 

@@ -21,141 +21,140 @@
  * Helpers for working with the WordPress admin menu.
  */
 class Teachblog_Admin_Menu extends Teachblog_Base_Object {
-    const SUBMENU_SLUG_INDEX = 2;
+	const SUBMENU_SLUG_INDEX = 2;
 
-    /**
-     * The menu start position uses a decimal value to avoid collisions,
-     * this is a workaround recommended in the WP codex.
-     *
-     * When used with menu API calls it must be cast to string however.
-     */
-    protected $menu_position = 50.256;
+	/**
+	 * The menu start position uses a decimal value to avoid collisions,
+	 * this is a workaround recommended in the WP codex.
+	 *
+	 * When used with menu API calls it must be cast to string however.
+	 */
+	protected $menu_position = 50.256;
 
-    /**
-     * Used for re-ordering submenu admin items.
-     */
-    protected $parent_file_map = array();
-
-
-    protected function setup() {
-        $this->menu_position = apply_filters('teachblog_menu_start_pos', $this->menu_position);
-    }
+	/**
+	 * Used for re-ordering submenu admin items.
+	 */
+	protected $parent_file_map = array();
 
 
-    /**
-     * Registers a top level administrative menu.
-     */
-    public function register_menu($title, $slug, $controller, $capability = '', $icon = '') {
-        // For l10n purposes the title translation needs to be assessed upstream of this method
-        $title = _x($title, 'menu-entry', self::DOMAIN);
-        $icon = empty($icon) ? $this->system->url.'assets/menu-icon-set.png' : $icon;
-
-        add_menu_page(
-            $title, $title, $capability, $slug, $controller, $icon, $this->safe_menu_position());
-    }
+	protected function setup() {
+		$this->menu_position = apply_filters('teachblog_menu_start_pos', $this->menu_position);
+	}
 
 
-    /**
-     * Registers a submenu page.
-     */
-    public function register_submenu($title, $parent, $slug, $controller, $capability) {
-        // For l10n purposes the title translation needs to be assessed upstream of this method
-        $title = _x($title, 'menu-entry', self::DOMAIN);
+	/**
+	 * Registers a top level administrative menu.
+	 */
+	public function register_menu($title, $slug, $controller, $capability = '', $icon = '') {
+		// For l10n purposes the title translation needs to be assessed upstream of this method
+		$title = _x($title, 'menu-entry', self::DOMAIN);
+		$icon = empty($icon) ? $this->system->url . 'assets/menu-icon-set.png' : $icon;
 
-        add_submenu_page($parent, $title, $title, $capability, $slug, $controller);
-    }
+		add_menu_page(
+			$title, $title, $capability, $slug, $controller, $icon, $this->safe_menu_position());
+	}
 
 
-    /**
-     * Registers the taxonomy admin page as a submenu item.
-     */
-    public function register_taxonomy_subpage($title, $parent, $taxonomy, $capability) {
-        global $submenu;
-        if (!isset($submenu[$parent])) return;
+	/**
+	 * Registers a submenu page.
+	 */
+	public function register_submenu($title, $parent, $slug, $controller, $capability) {
+		// For l10n purposes the title translation needs to be assessed upstream of this method
+		$title = _x($title, 'menu-entry', self::DOMAIN);
 
-        $title = _x($title, 'menu-entry', self::DOMAIN); // For i18n the string can be obtained upstream
-        $slug = "edit-tags.php?taxonomy=$taxonomy";
-        $submenu[$parent][] = array($title, $capability, $slug, $title);
+		add_submenu_page($parent, $title, $title, $capability, $slug, $controller);
+	}
 
-        // Map to the new parent item
-        $this->parent_file_map[$taxonomy] = $parent;
-        add_filter('parent_file', array($this, 'parent_file_remap'));
+
+	/**
+	 * Registers the taxonomy admin page as a submenu item.
+	 */
+	public function register_taxonomy_subpage($title, $parent, $taxonomy, $capability) {
+		global $submenu;
+		if (!isset($submenu[$parent])) return;
+
+		$title = _x($title, 'menu-entry', self::DOMAIN); // For i18n the string can be obtained upstream
+		$slug = "edit-tags.php?taxonomy=$taxonomy";
+		$submenu[$parent][] = array($title, $capability, $slug, $title);
+
+		// Map to the new parent item
+		$this->parent_file_map[$taxonomy] = $parent;
+		add_filter('parent_file', array($this, 'parent_file_remap'));
 
 		return $slug;
-    }
+	}
 
 
-    /**
-     * Used to return a new parent file where items have been re-ordered within the menu.
-     *
-     * @param $parent_file
-     */
-    public function parent_file_remap($parent_file) {
-        global $current_screen;
+	/**
+	 * Used to return a new parent file where items have been re-ordered within the menu.
+	 *
+	 * @param $parent_file
+	 */
+	public function parent_file_remap($parent_file) {
+		global $current_screen;
 
-        if (!isset($current_screen->taxonomy)) return $parent_file;
-        if (!isset($this->parent_file_map[$current_screen->taxonomy])) return $parent_file;
+		if (!isset($current_screen->taxonomy)) return $parent_file;
+		if (!isset($this->parent_file_map[$current_screen->taxonomy])) return $parent_file;
 
-        return $this->parent_file_map[$current_screen->taxonomy];
-    }
-
-
-    /**
-     * Prioritizes the submenu item so it is the first item in the menu.
-     */
-    public function send_to_top($menu_slug, $subitem_slug) {
-        global $submenu;
-        $entry = array();
-
-        if (!isset($submenu[$menu_slug])) return; // No such menu
-
-        // Find the subitem to be prioritized
-        foreach ($submenu[$menu_slug] as $key => $subitem)
-            if ($subitem[self::SUBMENU_SLUG_INDEX] === $subitem_slug) {
-                $entry = $subitem; // Copy subitem
-                unset($submenu[$menu_slug][$key]); // Remove from original position
-                array_unshift($submenu[$menu_slug], $entry); // Reinstate at top of the array
-            }
-
-        if (!isset($key)) return; // Subitem wasn't found
-
-        // Rebuild the entry
-        $entry[] = $subitem;
+		return $this->parent_file_map[$current_screen->taxonomy];
+	}
 
 
+	/**
+	 * Prioritizes the submenu item so it is the first item in the menu.
+	 */
+	public function send_to_top($menu_slug, $subitem_slug) {
+		global $submenu;
+		$entry = array();
 
-    }
+		if (!isset($submenu[$menu_slug])) return; // No such menu
+
+		// Find the subitem to be prioritized
+		foreach ($submenu[$menu_slug] as $key => $subitem)
+			if ($subitem[self::SUBMENU_SLUG_INDEX] === $subitem_slug) {
+				$entry = $subitem; // Copy subitem
+				unset($submenu[$menu_slug][$key]); // Remove from original position
+				array_unshift($submenu[$menu_slug], $entry); // Reinstate at top of the array
+			}
+
+		if (!isset($key)) return; // Subitem wasn't found
+
+		// Rebuild the entry
+		$entry[] = $subitem;
 
 
-    /**
-     * Returns a menu position as-yet free for use.
-     *
-     * It's possible another plugin/theme will override it even so, however the secondary
-     * measure of adding a decimal value and casting to string should help mitigate this
-     * in most circumstances.
-     *
-     * @see http://codex.wordpress.org/Function_Reference/add_menu_page
-     */
-    public function safe_menu_position() {
-        // Find a vacant slot to add the menu item
-        while ($this->menu_position_is_occupied()) $this->menu_position++;
-
-        // Cast to string to support our secondary anti-collision workaround
-        return (string) $this->menu_position++;
-    }
+	}
 
 
-    /**
-     * Returns true if the current menu_position value is taken.
-     *
-     * Comparisons are made using menu_position as a string and as an integer,
-     * further reducing opportunities for Teachblog menus to become a broken group
-     * (if more than one are registered in the same request).
-     *
-     * @return bool
-     */
-    protected function menu_position_is_occupied() {
-        global $menu;
-        return (isset($menu[(string) $this->menu_position]) or isset($menu[(int) $this->menu_position]));
-    }
+	/**
+	 * Returns a menu position as-yet free for use.
+	 *
+	 * It's possible another plugin/theme will override it even so, however the secondary
+	 * measure of adding a decimal value and casting to string should help mitigate this
+	 * in most circumstances.
+	 *
+	 * @see http://codex.wordpress.org/Function_Reference/add_menu_page
+	 */
+	public function safe_menu_position() {
+		// Find a vacant slot to add the menu item
+		while ($this->menu_position_is_occupied()) $this->menu_position++;
+
+		// Cast to string to support our secondary anti-collision workaround
+		return (string)$this->menu_position++;
+	}
+
+
+	/**
+	 * Returns true if the current menu_position value is taken.
+	 *
+	 * Comparisons are made using menu_position as a string and as an integer,
+	 * further reducing opportunities for Teachblog menus to become a broken group
+	 * (if more than one are registered in the same request).
+	 *
+	 * @return bool
+	 */
+	protected function menu_position_is_occupied() {
+		global $menu;
+		return (isset($menu[(string)$this->menu_position]) or isset($menu[(int)$this->menu_position]));
+	}
 }

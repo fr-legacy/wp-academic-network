@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(function ($) {
 	var wrap = $(".wrap.teachblog");
 	var main_action = $(wrap).find("input.main-action");
 	var last_change = 0;
@@ -38,8 +38,8 @@ jQuery(document).ready(function($) {
 		if (input.attr("checked") === "checked") on_active = " active";
 		else off_active = " active";
 
-		$(this).prepend('<span> <span class="on'+on_active+'">'+teachblog.on+'</span> '
-			+'<span class="off'+off_active+'">'+teachblog.off+'</span> </span>');
+		$(this).prepend('<span> <span class="on' + on_active + '">' + teachblog.on + '</span> '
+			+ '<span class="off' + off_active + '">' + teachblog.off + '</span> </span>');
 
 		$(this).click(on_off_update);
 	}
@@ -54,9 +54,11 @@ jQuery(document).ready(function($) {
 		// We only wiggle if it has been more than 7.4 secs have elapsed since the last change
 		if (get_timestamp() - last_change >= 7400) {
 			$(main_action).animate(
-				{ 'margin-left': '+=12' }, 234, function() { $(this).animate(
-					{ 'margin-left': '-=12' }, 340
-				)}
+				{ 'margin-left': '+=12' }, 234, function () {
+					$(this).animate(
+						{ 'margin-left': '-=12' }, 340
+					)
+				}
 			);
 		}
 		last_change = get_timestamp();

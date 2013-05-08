@@ -30,14 +30,14 @@ class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 	protected function setup() {
 		if (!is_admin()) return;
 		if (!class_exists('WP_List_Table'))
-			require_once(ABSPATH.'wp-admin/includes/class-wp-list-table.php');
+			require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 	}
 
 
 	public function admin_resources() {
-		wp_enqueue_style(self::DOMAIN.'_admin_theme', $this->system->url.'assets/admin.css');
-		wp_enqueue_script(self::DOMAIN.'_admin_script', $this->system->url.'assets/admin.js', array('jquery'));
-		wp_localize_script(self::DOMAIN.'_admin_script', self::DOMAIN, array(
+		wp_enqueue_style(self::DOMAIN . '_admin_theme', $this->system->url . 'assets/admin.css');
+		wp_enqueue_script(self::DOMAIN . '_admin_script', $this->system->url . 'assets/admin.js', array('jquery'));
+		wp_localize_script(self::DOMAIN . '_admin_script', self::DOMAIN, array(
 			'on' => __('On', self::DOMAIN),
 			'off' => __('Off', self::DOMAIN)
 		));
@@ -49,7 +49,7 @@ class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 			'title' => 'Teachblog',
 			'menu' => '',
 			'content' => ''
-		), (array) $vars);
+		), (array)$vars);
 
 		$vars['content'] = $view = $this->view($view, $vars, false);
 		$this->view('admin_frame', $vars);
@@ -57,7 +57,7 @@ class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 
 
 	public function view($view, array $vars = null, $render = true) {
-		$path = $this->system->dir."system/views/$view.php";
+		$path = $this->system->dir . "system/views/$view.php";
 		if (!file_exists($path)) return;
 
 		if (!$render) ob_start();
