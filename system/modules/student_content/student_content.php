@@ -112,7 +112,8 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 			'hierarchical' => true,
 			'public' => true,
 			'rewrite' => array(
-				'slug' => _x('studentblog', 'student_blog_slug', self::DOMAIN))
+				'slug' => _x('studentblog', 'student_blog_slug', self::DOMAIN),),
+			'show_admin_column' => true // Effective in WP 3.5+
 		));
 	}
 
@@ -156,13 +157,15 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 
 	/**
-	 * Sets up integration with the add new/edit existing taxonomy screens for the student blog object.
+	 * Integrates blogs and blog posts, hooks up event handlers, sets up UI tweaks etc.
 	 */
 	public function blog_setup() {
 		add_action('edited_' . self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
 		add_action('created_' . self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
-		add_filter('manage_edit-' . self::TEACHBLOG_BLOG_TAXONOMY . '_columns', array($this, 'add_blog_assignee_column'));
+		add_filter('manage_edit-' . self::TEACHBLOG_BLOG_TAXONOMY . '_columns', array($this, 'blog_list_columns'));
 		add_filter('manage_' . self::TEACHBLOG_BLOG_TAXONOMY . '_custom_column', array($this, 'populate_assignee_columns'), 10, 3);
+		add_filter('manage_edit-' . self::TEACHBLOG_POST . '_columns', array($this, 'post_list_columns'));
+		add_filter('manage_' . self::TEACHBLOG_POST . '_custom_column', array($this, 'populate_post_columns'), 10, 3);
 		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_add_form_fields', array($this, 'new_ownership_selector'));
 		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_edit_form_fields', array($this, 'existing_ownership_selector'));
 	}
@@ -255,13 +258,19 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 
 	/**
-	 * Adds the header component of the assignees column, which will appear on the student blog list to give a quick
-	 * overview of who owns(/is assigned to) which blog.
+	 * Adds and removes columns from the list of blogs. By default the assignee is added while the slug and description
+	 * columns are removed for a cleaner view.
 	 *
 	 * @param $columns
 	 * @return mixed
 	 */
-	public function add_blog_assignee_column($columns) {
+	public function blog_list_columns($columns) {
+		if (apply_filters(self::DOMAIN.'_bloglist_remove_slug', true) and isset($columns['slug']))
+			unset($columns['slug']);
+
+		if (apply_filters(self::DOMAIN.'_bloglist_remove_description', true) and isset($columns['description']))
+			unset($columns['description']);
+
 		$columns[self::DOMAIN . '_assignees'] = __('Assignee(s)', self::DOMAIN);
 		return $columns;
 	}
@@ -285,6 +294,39 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 			$html .= '<a href="' . get_edit_user_link($user->ID) . '">' . esc_attr($user->user_nicename) . '</a> <br />';
 		}
 
+		return $html;
+	}
+
+
+	/**
+	 * Adds and removes columns from the list of posts. The taxonomy column in particular (auto generated only on
+	 * WP 3.5+) will be relabelled.
+	 *
+	 * @param $columns
+	 * @return mixed
+	 */
+	public function post_list_columns($columns) {
+		// Relabel the taxonomy (student blog) column
+		if (isset($columns['taxonomy-'.self::TEACHBLOG_BLOG_TAXONOMY]))
+			$columns['taxonomy-'.self::TEACHBLOG_BLOG_TAXONOMY] = __('Blog', self::DOMAIN);
+
+		$columns[self::DOMAIN . '_last_edit'] = __('Last Edit By', self::DOMAIN);
+		return $columns;
+	}
+
+
+	/**
+	 * Populates the "last edited by" column.
+	 *
+	 * @todo implementation - stub only
+	 * @param $html
+	 * @param $column_name
+	 * @param $tag_id
+	 */
+	public function populate_post_columns($html, $column_name, $tag_id) {
+		if ($column_name !== self::DOMAIN . '_last_edit') return $html;
+
+		$html = 'TODO!';
 		return $html;
 	}
 }
