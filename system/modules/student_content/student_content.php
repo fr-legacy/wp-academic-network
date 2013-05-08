@@ -165,7 +165,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		add_filter('manage_edit-' . self::TEACHBLOG_BLOG_TAXONOMY . '_columns', array($this, 'blog_list_columns'));
 		add_filter('manage_' . self::TEACHBLOG_BLOG_TAXONOMY . '_custom_column', array($this, 'populate_assignee_columns'), 10, 3);
 		add_filter('manage_edit-' . self::TEACHBLOG_POST . '_columns', array($this, 'post_list_columns'));
-		add_filter('manage_' . self::TEACHBLOG_POST . '_custom_column', array($this, 'populate_post_columns'), 10, 3);
+		add_filter('manage_' . self::TEACHBLOG_POST . '_custom_column', array($this, 'populate_post_columns'), 10, 2);
 		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_add_form_fields', array($this, 'new_ownership_selector'));
 		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_edit_form_fields', array($this, 'existing_ownership_selector'));
 	}
@@ -323,7 +323,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	 * @param $column_name
 	 * @param $tag_id
 	 */
-	public function populate_post_columns($html, $column_name, $tag_id) {
+	public function populate_post_columns($html, $column_name) {
 		if ($column_name !== self::DOMAIN . '_last_edit') return $html;
 
 		$html = 'TODO!';
