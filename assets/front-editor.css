@@ -1,16 +1,23 @@
 .teachblog.editor .section {
+	background: #fafafa;
+	border: 1px solid #dadada;
+	border-radius: 0.24em;
 	margin-bottom: 2em;
+	padding: 0.5em 1em 1.6em;
 }
 
 .teachblog.editor .section label {
 	display: block;
 	font-weight: bold;
+	padding: 0em 0.23em 0.5em;
 }
 
 .teachblog.editor .section.status {
+	background: transparent;
+	border: 0;
 	margin: 0em 0em 0em 2em;
 	position: relative;
-	top: 1.42em;
+	top: 4.34em;
 }
 
 .teachblog.editor .section.title input {
@@ -33,6 +40,10 @@
 .teachblog.editor .section.status > div.pending { background: #ce8944; }
 .teachblog.editor .section.status > div.live { background: #50a050; }
 .teachblog.editor .section.status > div.offline { background: #c04040; }
+
+.teachblog.editor .section.content label {
+	padding-bottom: 0em;
+}
 
 .teachblog.editor .section.controls input {
 	margin-left: 1em;

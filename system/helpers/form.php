@@ -107,6 +107,7 @@ class Teachblog_Form {
 	 */
 	public static function is_posted($field, $value = null) {
 		if (!isset($_POST[$field])) return false;
+		if ($value === null) return true; // No inspection of the value
 		return ($_POST[$field] == $value);
 	}
 }

@@ -35,6 +35,11 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	 */
 	public $front_editor;
 
+	/**
+	 * @var Teachblog_Front_Submissions
+	 */
+	public $front_submissions;
+
 
 	protected function preflight() {
 		if (!$this->system->modules->is_enabled('student_content')) return false;
@@ -57,6 +62,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 	protected function setup_supporting_tools() {
 		$this->front_editor = new Teachblog_Front_Editor;
+		$this->front_submissions = new Teachblog_Front_Submissions;
 	}
 
 

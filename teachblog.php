@@ -99,6 +99,7 @@ class Teachblog {
 		'Teachblog_Blogger' => 'modules/student_content/blogger',
 		'Teachblog_Form' => 'helpers/form',
 		'Teachblog_Front_Editor' => 'modules/student_content/front_editor',
+		'Teachblog_Front_Submissions' => 'modules/student_content/front_submissions',
 		'Teachblog_General_Settings' => 'general_settings',
 		'Teachblog_Modules' => 'modules',
 		'Teachblog_Student_Content' => 'modules/student_content/student_content',

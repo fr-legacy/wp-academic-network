@@ -8,6 +8,17 @@ $content = isset($content) ? $content : '';
 	<form action="<?php esc_attr_e(Teachblog_Form::post_url(array('id'))) ?>" method="post">
 		<div class="teachblog editor">
 
+			<?php do_action('teachblog_editor_before_notices') ?>
+			<?php if (isset($notices) and is_array($notices) and count($notices) >= 1): ?>
+			<div class="section notices">
+				<?php foreach ($notices as $type => $message): ?>
+					<div class="<?php esc_attr_e($type) ?>">
+						<?php esc_html_e($message) ?>
+					</div>
+				<?php endforeach ?>
+			</div>
+			<?php endif ?>
+
 			<?php wp_nonce_field('teachblog_front_editor', 'teachblog_check') ?>
 
 			<?php do_action('teachblog_editor_before_status') ?>
@@ -51,7 +62,7 @@ $content = isset($content) ? $content : '';
 					<option value="save_draft"><?php _e('Save as Draft', TEACHBLOG_I18N) ?></option>
 					<option value="discard"><?php _e('Discard', TEACHBLOG_I18N) ?></option>
 				</select>
-				<input type="submit" value="<?php esc_attr_e('Save/Update', TEACHBLOG_I18N) ?>" name="Save"/>
+				<input type="submit" value="<?php esc_attr_e('Save/Update', TEACHBLOG_I18N) ?>" name="submit-teachblog-post"/>
 				<?php do_action('teachblog_editor_beside_publish_controls') ?>
 			</div>
 
