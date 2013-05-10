@@ -26,6 +26,24 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	 */
 	protected $user;
 
+	/**
+	 * Fields representing the post (title, content etc).
+	 *
+	 * @var array
+	 */
+	protected $postdata = array();
+
+	/**
+	 * Contains confirmation, warning and error notices to present to the end user.
+	 *
+	 * @var array
+	 */
+	public $notices = array();
+
+	const NOTICES = 'notices';
+	const WARNINGS = 'warnings';
+	const BAD_WARNINGS = 'bad_warnings'; // Updates/submissions will not be accepted if a bad warning is set
+
 
 	/**
 	 * Checks if a front end submission has been made, ensures basic security checks out then processes the submission
@@ -59,7 +77,11 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	 */
 	protected function start_processing() {
 		$this->user = Teachblog_Blogger::current_user();
-		$student_blogs = $this->get_target_blog();
+		$student_blogs = $this->get_target_blog(); // Blogs the post will be assigned to (can be more than one)
+
+		// Build and check out the posted fields
+		$this->build_postdata_array();
+		if (isset($this->notices[self::BAD_WARNINGS])) return false;
 	}
 
 
@@ -109,5 +131,31 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 		$blogs = $this->user->get_blog_ids();
 		if (count($blogs) === 1) return array_pop($blogs);
 		return false;
+	}
+
+
+	/**
+	 * We build an array to use with wp_insert_post() or wp_update_post(). The post ID is determined elsewhere if
+	 * appropriate.
+	 *
+	 * The title is passed through wp_strip_all_tags() as that is currently necessary, whereas the post content is
+	 * automatically sanitized at the correct level by the relevant WP insert/update function.
+	 */
+	protected function build_postdata_array() {
+		$title = Teachblog_Form::is_posted('title') ? wp_strip_all_tags(trim($_POST['title'])) : '';
+		$content = Teachblog_form::is_posted('teachblog-front-editor') ? trim($_POST['teachblog-front-editor']) : '';
+
+		if (empty($title)) $this->add_bad_warning(__('The title must not be empty!', self::DOMAIN));
+		if (empty($content)) $this->add_bad_warning(__('You must provide some content!', self::DOMAIN));
+
+		$this->postdata = array(
+			'post_title' => $title,
+			'post_content' => $content
+		);
+	}
+
+
+	protected function add_bad_warning($message) {
+		$this->notices[self::BAD_WARNINGS][] = $message;
 	}
 }

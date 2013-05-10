@@ -88,6 +88,28 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 
 
 	/**
+	 * Loads the requested blog post *if* the current user is assigned to the blog (or one of the blogs) to which it
+	 * belongs and if of course the post ID is valid. Otherwise, returns bool false.
+	 *
+	 * @param $post_id
+	 * @return bool|object
+	 */
+	public function load_post($post_id) {
+		$post = get_post($post_id);
+		if (!is_a($post, 'WP_Post')) return false;
+
+		$post_belongs_to = wp_get_post_terms($post->ID, Teachblog_Student_Content::TEACHBLOG_BLOG_TAXONOMY);
+		$user_belongs_to = $this->get_assigned_blog_list();
+
+		foreach ($post_belongs_to as $post_blog)
+			foreach ($user_belongs_to as $user_blog_id => $user_blog)
+				if ($post_blog->term_id == $user_blog_id) return $post;
+
+		return false;
+	}
+
+
+	/**
 	 * Indicates if the current user has a student blog.
 	 *
 	 * @return bool

@@ -11,9 +11,11 @@ $content = isset($content) ? $content : '';
 			<?php do_action('teachblog_editor_before_notices') ?>
 			<?php if (isset($notices) and is_array($notices) and count($notices) >= 1): ?>
 			<div class="section notices">
-				<?php foreach ($notices as $type => $message): ?>
+				<?php foreach ($notices as $type => $items): ?>
 					<div class="<?php esc_attr_e($type) ?>">
-						<?php esc_html_e($message) ?>
+						<?php foreach ($items as $message): ?>
+							<p> <?php esc_html_e($message) ?> </p>
+						<?php endforeach ?>
 					</div>
 				<?php endforeach ?>
 			</div>

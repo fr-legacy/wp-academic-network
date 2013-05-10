@@ -23,6 +23,11 @@
  */
 class Teachblog_Front_Editor extends Teachblog_Base_Object {
 	protected $id;
+	protected $post = false;
+
+	/**
+	 * @var Teachblog_Blogger
+	 */
 	protected $owner;
 
 	protected $actions = array(
@@ -41,21 +46,45 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 
 
 	public function public_editor() {
-		if (Teachblog_Blogger::current_user()->has_blog()) return $this->show_editor();
+		$this->owner = Teachblog_Blogger::current_user();
+		if ($this->owner->has_blog()) return $this->show_editor();
 		else return $this->blog_not_setup();
 	}
 
 
 	protected function show_editor() {
+		$this->load_current_post();
+
 		$vars = array(
 			'assignable_blogs' => Teachblog_Blogger::current_user()->get_assigned_blog_list(),
 			'current_blog' => null,
-			'title' => 'My first post',
-			'content' => 'Hello!',
-			'status' => array('new', _x('New!', 'post-status', self::DOMAIN))
+			'title' => $this->get_post_title(),
+			'content' => $this->get_post_content(),
+			'status' => array('new', _x('New!', 'post-status', self::DOMAIN)),
+			'notices' => $this->get_editor_notices()
 		);
 
 		return new Teachblog_Template('editor', $vars);
+	}
+
+
+	protected function load_current_post() {
+		if (Teachblog_Form::is_posted('post_id'))
+			$this->post = $this->owner->load_post(absint($_POST['post_id']));
+	}
+
+
+	protected function get_post_title() {
+		if (Teachblog_Form::is_posted('title')) return esc_attr($_POST['title']);
+		if (is_object($this->post) and isset($this->post->post_title)) return $this->post->post_title;
+		return apply_filters(self::DOMAIN.'_default_post_title', '');
+	}
+
+
+	protected function get_post_content() {
+		if (Teachblog_Form::is_posted('teachblog-front-editor')) return esc_attr($_POST['teachblog-front-editor']);
+		if (is_object($this->post) and isset($this->post->post_content)) return $this->post->post_content;
+		return apply_filters(self::DOMAIN.'_default_post_content', '');
 	}
 
 
@@ -65,5 +94,10 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 		));
 
 		return apply_filters(self::DOMAIN . '_editor_no_blog_available', $message);
+	}
+
+
+	protected function get_editor_notices() {
+		return (array) $this->system->student_content->front_submissions->notices;
 	}
 }
