@@ -88,6 +88,28 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 
 
 	/**
+	 * Supplies the user object (if loaded, else bool false).
+	 *
+	 * @return bool|object|WP_User
+	 */
+	public function get_user_object() {
+		if ($this->loaded) return $this->user;
+		return false;
+	}
+
+
+	/**
+	 * Supplies the user ID (if the user object was loaded, else bool false).
+	 *
+	 * @return bool|int
+	 */
+	public function get_user_id() {
+		if ($this->loaded) return $this->user->ID;
+		return false;
+	}
+
+
+	/**
 	 * Loads the requested blog post *if* the current user is assigned to the blog (or one of the blogs) to which it
 	 * belongs and if of course the post ID is valid. Otherwise, returns bool false.
 	 *
@@ -241,5 +263,19 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	protected function is_valid_blog($id) {
 		$term = get_term_by('id', $id, Teachblog_Student_Content::TEACHBLOG_BLOG_TAXONOMY);
 		return (!$term) ? false : true;
+	}
+
+
+	/**
+	 * Returns the "highest" post_status available for new posts created by this user. This will normally be Pending
+	 * Review ('pending') but may be Publish ('publish') for trusted student users.
+	 *
+	 * In the event no user object has loaded the returned string will be empty.
+	 *
+	 * @return string
+	 */
+	public function default_submit_status() {
+		if (!$this->loaded) return '';
+		else return apply_filters(self::DOMAIN.'_default_submit_status', 'pending', $this->user);
 	}
 }

@@ -60,17 +60,30 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 			'current_blog' => null,
 			'title' => $this->get_post_title(),
 			'content' => $this->get_post_content(),
-			'status' => array('new', _x('New!', 'post-status', self::DOMAIN)),
+			'status' => $this->post_status_array(),
 			'notices' => $this->get_editor_notices()
 		);
+
+		if ($this->post) $vars['id'] = $this->post->ID;
 
 		return new Teachblog_Template('editor', $vars);
 	}
 
 
 	protected function load_current_post() {
-		if (Teachblog_Form::is_posted('post_id'))
-			$this->post = $this->owner->load_post(absint($_POST['post_id']));
+		if (isset($_REQUEST['id']))
+			$this->post = $this->owner->load_post(absint($_REQUEST['id']));
+	}
+
+
+	protected function post_status_array() {
+		if (!$this->post) $status = array('new', _x('New!', 'post-status', self::DOMAIN));
+		else switch ($this->post->post_status) {
+			case 'publish': $status = array('live', _x('Published', 'post-status', self::DOMAIN)); break;
+			case 'pending': $status = array('pending', _x('Awaiting Approval', 'post-status', self::DOMAIN)); break;
+			case 'draft': $status = array('draft', _x('Draft', 'post-status', self::DOMAIN)); break;
+		}
+		return apply_filters(self::DOMAIN.'_front_editor_post_status', $status);
 	}
 
 

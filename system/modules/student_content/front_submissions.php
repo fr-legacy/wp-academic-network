@@ -22,9 +22,16 @@
  */
 class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	/**
-	 * @var WP_User
+	 * @var Teachblog_Blogger
 	 */
 	protected $user;
+
+	/**
+	 * Blogs (term IDs) to which submitted content should be posted.
+	 *
+	 * @var array
+	 */
+	protected $blogs = array();
 
 	/**
 	 * Fields representing the post (title, content etc).
@@ -77,11 +84,13 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	 */
 	protected function start_processing() {
 		$this->user = Teachblog_Blogger::current_user();
-		$student_blogs = $this->get_target_blog(); // Blogs the post will be assigned to (can be more than one)
+		$this->blogs = $this->get_target_blog(); // Blogs the post will be assigned to (can be more than one)
 
 		// Build and check out the posted fields
 		$this->build_postdata_array();
 		if (isset($this->notices[self::BAD_WARNINGS])) return false;
+
+		$this->create_or_update();
 	}
 
 
@@ -96,8 +105,11 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	 * @return array|bool
 	 */
 	protected function get_target_blog() {
-		if (!$this->user->loaded) return false;
-		if (!$this->user->has_blog()) return false;
+		if (!$this->user->loaded or !$this->user->has_blog()) {
+			$this->add_bad_warning(__('You do not have any active blogs &ndash; please seek help from a teacher or '
+				.'from an administrator.', self::DOMAIN));
+			return false;
+		}
 
 		if (Teachblog_Form::is_posted('assign_to')) return (array) $this->confirm_nominated_blog();
 		else return (array) $this->user_solitary_blog();
@@ -148,10 +160,54 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 		if (empty($title)) $this->add_bad_warning(__('The title must not be empty!', self::DOMAIN));
 		if (empty($content)) $this->add_bad_warning(__('You must provide some content!', self::DOMAIN));
 
-		$this->postdata = array(
+		$postdata = array(
 			'post_title' => $title,
-			'post_content' => $content
+			'post_content' => $content,
+			'post_status' => $this->user->default_submit_status(),
+			'post_author' => $this->user->get_user_id(),
+			'post_type' => Teachblog_Student_Content::TEACHBLOG_POST
 		);
+
+		$this->postdata = apply_filters(self::DOMAIN.'_submission_postdata', $postdata);
+	}
+
+
+	/**
+	 * Creates or updates the blog post.
+	 */
+	protected function create_or_update() {
+		if (Teachblog_Form::is_posted('id') and $this->user->load_post(absint($_POST['id'])))
+			$this->postdata['ID'] = $_POST['id'];
+
+		$post_id = wp_insert_post($this->postdata);
+
+		// Failed to create/update?
+		if ($post_id == 0) {
+			$this->add_bad_warning(__('The post could not be saved. Please try again or seek further advice from a '
+				.'teacher or administrator.', self::DOMAIN));
+			return;
+		}
+
+		$this->assign_to_blogs($post_id);
+		$this->add_notice(__('Your post was successfully submitted.', self::DOMAIN));
+	}
+
+
+	protected function assign_to_blogs($post_id) {
+		foreach ($this->blogs as $blog_id) {
+			wp_set_post_terms($post_id, $blog_id, Teachblog_Student_Content::TEACHBLOG_BLOG_TAXONOMY,
+				apply_filters(self::DOMAIN.'_maintain_existing_blog_relationships', true));
+		}
+	}
+
+
+	protected function add_notice($message) {
+		$this->notices[self::NOTICES][] = $message;
+	}
+
+
+	protected function add_warning($message) {
+		$this->notices[self::WARNINGS][] = $message;
 	}
 
 

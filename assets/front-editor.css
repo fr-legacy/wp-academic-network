@@ -46,7 +46,7 @@
 }
 
 .teachblog.editor .section.title input {
-	width: 70%;
+	width: 62%;
 }
 
 .teachblog.editor .section.status > div {
@@ -61,7 +61,7 @@
 }
 
 .teachblog.editor .section.status > div.new { background: #60b0c0; }
-.teachblog.editor .section.status > div.draft { background: #505050; }
+.teachblog.editor .section.status > div.draft { background: #808280; }
 .teachblog.editor .section.status > div.pending { background: #ce8944; }
 .teachblog.editor .section.status > div.live { background: #50a050; }
 .teachblog.editor .section.status > div.offline { background: #c04040; }

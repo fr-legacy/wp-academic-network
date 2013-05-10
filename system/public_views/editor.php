@@ -7,6 +7,9 @@ $content = isset($content) ? $content : '';
 <?php do_action('teachblog_editor_before_form') ?>
 	<form action="<?php esc_attr_e(Teachblog_Form::post_url(array('id'))) ?>" method="post">
 		<div class="teachblog editor">
+			<?php if (isset($id)): ?>
+				<input type="hidden" name="id" value="<?php esc_attr_e($id) ?>" />
+			<?php endif ?>
 
 			<?php do_action('teachblog_editor_before_notices') ?>
 			<?php if (isset($notices) and is_array($notices) and count($notices) >= 1): ?>
