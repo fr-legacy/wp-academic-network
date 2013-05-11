@@ -11,6 +11,9 @@ $content = isset($content) ? $content : '';
 				<input type="hidden" name="id" value="<?php esc_attr_e($id) ?>" />
 			<?php endif ?>
 
+			<input type="hidden" name="origin" value="<?php esc_attr_e($originating_post) ?>" />
+			<input type="hidden" name="origin_hash" value="<?php esc_attr_e($originating_hash) ?>" />
+
 			<?php do_action('teachblog_editor_before_notices') ?>
 			<?php if (isset($notices) and is_array($notices) and count($notices) >= 1): ?>
 			<div class="section notices">

@@ -59,6 +59,17 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	protected function setup() {
 		if (Teachblog_Form::is_posted('submit-teachblog-post') and $this->submission_sanity_checks())
 			$this->start_processing();
+
+		$this->setup_notices_after_redirect();
+	}
+
+
+	/**
+	 * Checks for submission states as part of the URL query.
+	 */
+	protected function setup_notices_after_redirect() {
+		if (isset($_GET['state']) and $_GET['state'] === 'success')
+			$this->add_notice(__('Success! Your post (and any changes) have been saved.', 'teachblog'));
 	}
 
 
@@ -189,7 +200,8 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 		}
 
 		$this->assign_to_blogs($post_id);
-		$this->add_notice(__('Your post was successfully submitted.', 'teachblog'));
+		$this->add_notice(__('Success! Your post (and any changes) have been saved.', 'teachblog'));
+		$this->redirect_on_success($post_id);
 	}
 
 
@@ -198,6 +210,35 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 			wp_set_post_terms($post_id, $blog_id, Teachblog_Student_Content::TEACHBLOG_BLOG_TAXONOMY,
 				apply_filters('teachblog_maintain_existing_blog_relationships', true));
 		}
+	}
+
+
+	/**
+	 * Once a successful submission is made this method attempts to perform a redirect to the front editor page.
+	 *
+	 * It's assumed the request was made from a shortcode in a page/post and that that is where the user should be
+	 * redirected to (which allows the newly created post ID to be appended in the query and primes the editor form with
+	 * the newly created/changed content.
+	 *
+	 * In other words, in the normal course of events if the editor form is at example.com/editor and that form is used
+	 * to make the submission, the user will be taken to example.com/editor?id=100&state=success
+	 *
+	 * @param $post_id
+	 */
+	protected function redirect_on_success($post_id) {
+		// Origin request to redirect to a specific post?
+		if (Teachblog_Form::is_posted('origin') and Teachblog_Form::is_posted('origin_hash'))
+			if ($_POST['origin_hash'] === hash('MD5', $_POST['origin'] . NONCE_KEY)) {
+				$GLOBALS['post'] = get_post($_POST['origin']);
+				$url = Teachblog_Form::post_url(array(
+					'id' => (int) $post_id,
+					'state' => 'success'
+				));
+		}
+
+		$url = apply_filters('teachblog_default_editor_redirect', $url);
+		wp_redirect($url);
+		exit();
 	}
 
 

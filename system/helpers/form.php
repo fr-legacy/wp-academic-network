@@ -60,10 +60,7 @@ class Teachblog_Form {
 		if ($get_params === null and !empty($_GET)) $query = http_build_query($_GET);
 
 		// Specified params only?
-		if (is_array($get_params)) {
-			$get_params = array_flip($get_params);
-			$query = http_build_query(array_intersect_key($_GET, $get_params));
-		}
+		if (is_array($get_params)) $query = http_build_query($get_params);
 
 		if (!empty($query)) $url .= "?$query";
 		return $url;

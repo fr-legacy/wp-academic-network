@@ -54,6 +54,7 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 
 	protected function show_editor() {
 		$this->load_current_post();
+		list($origin, $origin_hash) = $this->get_container_details();
 
 		$vars = array(
 			'assignable_blogs' => Teachblog_Blogger::current_user()->get_assigned_blog_list(),
@@ -61,7 +62,9 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 			'title' => $this->get_post_title(),
 			'content' => $this->get_post_content(),
 			'status' => $this->post_status_array(),
-			'notices' => $this->get_editor_notices()
+			'notices' => $this->get_editor_notices(),
+			'originating_post' => $origin,
+			'originating_hash' => $origin_hash
 		);
 
 		if ($this->post) $vars['id'] = $this->post->ID;
@@ -112,5 +115,15 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 
 	protected function get_editor_notices() {
 		return (array) $this->system->student_content->front_submissions->notices;
+	}
+
+
+	protected function get_container_details() {
+		global $post;
+
+		$post_id = (is_object($post) and isset($post->ID)) ? (int) $post->ID : '';
+		$hash = hash('MD5', $post_id . NONCE_KEY);
+
+		return array($post_id, $hash);
 	}
 }
