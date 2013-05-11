@@ -176,7 +176,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public function get_blog_ids() {
 		if (!$this->loaded) return false;
-		return (array) get_user_meta($this->user->ID, self::DOMAIN . '_assigned_blogs_' . get_current_blog_id());
+		return (array) get_user_meta($this->user->ID, 'teachblog_assigned_blogs_' . get_current_blog_id());
 	}
 
 
@@ -191,7 +191,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public static function get_assigned_users($blog_term_id) {
 		global $wpdb;
-		$local_assignments = self::DOMAIN . '_assigned_blogs_' . get_current_blog_id();
+		$local_assignments = 'teachblog_assigned_blogs_' . get_current_blog_id();
 
 		return $wpdb->get_col($wpdb->prepare(
 			"SELECT user_id FROM $wpdb->usermeta WHERE meta_key = %s AND meta_value = %d",
@@ -228,7 +228,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 		if (!$this->loaded or !$this->is_valid_blog($blog_id)) return false;
 
 		if ($make_exclusive) $this->unassign_from_all();
-		return add_user_meta($this->user->ID, self::DOMAIN . '_assigned_blogs_' . get_current_blog_id(), $blog_id);
+		return add_user_meta($this->user->ID, 'teachblog_assigned_blogs_' . get_current_blog_id(), $blog_id);
 	}
 
 
@@ -241,7 +241,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	public function unassign_from($blog_id) {
 		if (!$this->loaded or !$this->is_valid_blog($blog_id)) return false;
 
-		return delete_user_meta($this->user->ID, self::DOMAIN . '_assigned_blogs_' . get_current_blog_id(), $blog_id);
+		return delete_user_meta($this->user->ID, 'teachblog_assigned_blogs_' . get_current_blog_id(), $blog_id);
 	}
 
 
@@ -250,7 +250,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public function unassign_from_all() {
 		if (!$this->loaded) return false;
-		return delete_user_meta($this->user->ID, self::DOMAIN . '_assigned_blogs_' . get_current_blog_id());
+		return delete_user_meta($this->user->ID, 'teachblog_assigned_blogs_' . get_current_blog_id());
 	}
 
 
@@ -276,6 +276,6 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public function default_submit_status() {
 		if (!$this->loaded) return '';
-		else return apply_filters(self::DOMAIN.'_default_submit_status', 'pending', $this->user);
+		else return apply_filters('teachblog_default_submit_status', 'pending', $this->user);
 	}
 }

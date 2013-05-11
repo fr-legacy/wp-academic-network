@@ -31,7 +31,7 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 
 
 	public function add_settings_page() {
-		$title = _x('Educational Tools', 'menu-item', self::DOMAIN);
+		$title = _x('Educational Tools', 'menu-item', 'teachblog');
 		add_options_page($title, $title, 'manage_options', self::SETTINGS_SLUG, array($this, 'options_page'));
 	}
 
@@ -45,7 +45,7 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 		));
 
 		$this->admin->page('general_settings', array(
-			'title' => __('Educational Tools &ndash; Configuration', self::DOMAIN),
+			'title' => __('Educational Tools &ndash; Configuration', 'teachblog'),
 			'modules' => $this->system->modules,
 			'module_table' => $module_table
 		));

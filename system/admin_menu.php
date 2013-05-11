@@ -47,7 +47,7 @@ class Teachblog_Admin_Menu extends Teachblog_Base_Object {
 	 */
 	public function register_menu($title, $slug, $controller, $capability = '', $icon = '') {
 		// For l10n purposes the title translation needs to be assessed upstream of this method
-		$title = _x($title, 'menu-entry', self::DOMAIN);
+		$title = _x($title, 'menu-entry', 'teachblog');
 		$icon = empty($icon) ? $this->system->url . 'assets/menu-icon-set.png' : $icon;
 
 		add_menu_page(
@@ -60,7 +60,7 @@ class Teachblog_Admin_Menu extends Teachblog_Base_Object {
 	 */
 	public function register_submenu($title, $parent, $slug, $controller, $capability) {
 		// For l10n purposes the title translation needs to be assessed upstream of this method
-		$title = _x($title, 'menu-entry', self::DOMAIN);
+		$title = _x($title, 'menu-entry', 'teachblog');
 
 		add_submenu_page($parent, $title, $title, $capability, $slug, $controller);
 	}
@@ -73,7 +73,7 @@ class Teachblog_Admin_Menu extends Teachblog_Base_Object {
 		global $submenu;
 		if (!isset($submenu[$parent])) return;
 
-		$title = _x($title, 'menu-entry', self::DOMAIN); // For i18n the string can be obtained upstream
+		$title = _x($title, 'menu-entry', 'teachblog'); // For i18n the string can be obtained upstream
 		$slug = "edit-tags.php?taxonomy=$taxonomy";
 		$submenu[$parent][] = array($title, $capability, $slug, $title);
 

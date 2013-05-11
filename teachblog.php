@@ -136,7 +136,6 @@ class Teachblog {
 
 	protected function setup() {
 		spl_autoload_register(array($this, 'class_loader'));
-		if (!defined('TEACHBLOG_L10N')) define('TEACHBLOG_I18N', Teachblog_Base_Object::DOMAIN); // For use in views, templates etc
 	}
 
 

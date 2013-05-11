@@ -3,13 +3,13 @@
 		<?php
 		if (!empty($actions)) {
 			echo '<select name="actions-top">';
-			echo '<option value="">' . __('Bulk Actions', TEACHBLOG_I18N) . '</option>';
+			echo '<option value="">' . __('Bulk Actions', 'teachblog') . '</option>';
 
 			foreach ($actions as $title => $slug)
 				echo '<option value="' . esc_attr($slug) . '">' . esc_html($title) . '</option>';
 
 			echo '</select>';
-			echo '<input id="doaction" class="button action main-action" type="submit" value="' . _x('Apply &amp; Update', 'table-actions', TEACHBLOG_I18N) . '" name="">';
+			echo '<input id="doaction" class="button action main-action" type="submit" value="' . _x('Apply &amp; Update', 'table-actions', 'teachblog') . '" name="">';
 		}
 		?>
 

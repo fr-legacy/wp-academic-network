@@ -41,7 +41,7 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 
 
 	public function enqueue_styles() {
-		wp_enqueue_style(self::DOMAIN.'_front_editor', $this->system->url.'assets/front-editor.css');
+		wp_enqueue_style('teachblog_front_editor', $this->system->url.'assets/front-editor.css');
 	}
 
 
@@ -77,27 +77,27 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 
 
 	protected function post_status_array() {
-		if (!$this->post) $status = array('new', _x('New!', 'post-status', self::DOMAIN));
+		if (!$this->post) $status = array('new', _x('New!', 'post-status', 'teachblog'));
 		else switch ($this->post->post_status) {
-			case 'publish': $status = array('live', _x('Published', 'post-status', self::DOMAIN)); break;
-			case 'pending': $status = array('pending', _x('Awaiting Approval', 'post-status', self::DOMAIN)); break;
-			case 'draft': $status = array('draft', _x('Draft', 'post-status', self::DOMAIN)); break;
+			case 'publish': $status = array('live', _x('Published', 'post-status', 'teachblog')); break;
+			case 'pending': $status = array('pending', _x('Awaiting Approval', 'post-status', 'teachblog')); break;
+			case 'draft': $status = array('draft', _x('Draft', 'post-status', 'teachblog')); break;
 		}
-		return apply_filters(self::DOMAIN.'_front_editor_post_status', $status);
+		return apply_filters('teachblog_front_editor_post_status', $status);
 	}
 
 
 	protected function get_post_title() {
 		if (Teachblog_Form::is_posted('title')) return esc_attr($_POST['title']);
 		if (is_object($this->post) and isset($this->post->post_title)) return $this->post->post_title;
-		return apply_filters(self::DOMAIN.'_default_post_title', '');
+		return apply_filters('teachblog_default_post_title', '');
 	}
 
 
 	protected function get_post_content() {
 		if (Teachblog_Form::is_posted('teachblog-front-editor')) return esc_attr($_POST['teachblog-front-editor']);
 		if (is_object($this->post) and isset($this->post->post_content)) return $this->post->post_content;
-		return apply_filters(self::DOMAIN.'_default_post_content', '');
+		return apply_filters('teachblog_default_post_content', '');
 	}
 
 
@@ -106,7 +106,7 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 			'signed_in' => (get_current_user_id() > 0)
 		));
 
-		return apply_filters(self::DOMAIN . '_editor_no_blog_available', $message);
+		return apply_filters('teachblog_editor_no_blog_available', $message);
 	}
 
 

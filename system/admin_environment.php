@@ -35,11 +35,11 @@ class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 
 
 	public function admin_resources() {
-		wp_enqueue_style(self::DOMAIN . '_admin_theme', $this->system->url . 'assets/admin.css');
-		wp_enqueue_script(self::DOMAIN . '_admin_script', $this->system->url . 'assets/admin.js', array('jquery'));
-		wp_localize_script(self::DOMAIN . '_admin_script', self::DOMAIN, array(
-			'on' => __('On', self::DOMAIN),
-			'off' => __('Off', self::DOMAIN)
+		wp_enqueue_style('teachblog_admin_theme', $this->system->url . 'assets/admin.css');
+		wp_enqueue_script('teachblog_admin_script', $this->system->url . 'assets/admin.js', array('jquery'));
+		wp_localize_script('teachblog_admin_script', 'teachblog', array(
+			'on' => __('On', 'teachblog'),
+			'off' => __('Off', 'teachblog')
 		));
 	}
 

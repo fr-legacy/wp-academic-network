@@ -1,7 +1,7 @@
 <?php
 $module_table->use_checkbox(true)->set_columns(array(
-	__('Module', TEACHBLOG_I18N),
-	__('Active', TEACHBLOG_I18N)
+	__('Module', 'teachblog'),
+	__('Active', 'teachblog')
 ));
 
 $module_list = $modules->get_modules();

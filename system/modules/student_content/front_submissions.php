@@ -107,7 +107,7 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	protected function get_target_blog() {
 		if (!$this->user->loaded or !$this->user->has_blog()) {
 			$this->add_bad_warning(__('You do not have any active blogs &ndash; please seek help from a teacher or '
-				.'from an administrator.', self::DOMAIN));
+				.'from an administrator.', 'teachblog'));
 			return false;
 		}
 
@@ -157,8 +157,8 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 		$title = Teachblog_Form::is_posted('title') ? wp_strip_all_tags(trim($_POST['title'])) : '';
 		$content = Teachblog_form::is_posted('teachblog-front-editor') ? trim($_POST['teachblog-front-editor']) : '';
 
-		if (empty($title)) $this->add_bad_warning(__('The title must not be empty!', self::DOMAIN));
-		if (empty($content)) $this->add_bad_warning(__('You must provide some content!', self::DOMAIN));
+		if (empty($title)) $this->add_bad_warning(__('The title must not be empty!', 'teachblog'));
+		if (empty($content)) $this->add_bad_warning(__('You must provide some content!', 'teachblog'));
 
 		$postdata = array(
 			'post_title' => $title,
@@ -168,7 +168,7 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 			'post_type' => Teachblog_Student_Content::TEACHBLOG_POST
 		);
 
-		$this->postdata = apply_filters(self::DOMAIN.'_submission_postdata', $postdata);
+		$this->postdata = apply_filters('teachblog_submission_postdata', $postdata);
 	}
 
 
@@ -184,19 +184,19 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 		// Failed to create/update?
 		if ($post_id == 0) {
 			$this->add_bad_warning(__('The post could not be saved. Please try again or seek further advice from a '
-				.'teacher or administrator.', self::DOMAIN));
+				.'teacher or administrator.', 'teachblog'));
 			return;
 		}
 
 		$this->assign_to_blogs($post_id);
-		$this->add_notice(__('Your post was successfully submitted.', self::DOMAIN));
+		$this->add_notice(__('Your post was successfully submitted.', 'teachblog'));
 	}
 
 
 	protected function assign_to_blogs($post_id) {
 		foreach ($this->blogs as $blog_id) {
 			wp_set_post_terms($post_id, $blog_id, Teachblog_Student_Content::TEACHBLOG_BLOG_TAXONOMY,
-				apply_filters(self::DOMAIN.'_maintain_existing_blog_relationships', true));
+				apply_filters('teachblog_maintain_existing_blog_relationships', true));
 		}
 	}
 

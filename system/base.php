@@ -71,7 +71,7 @@ class Teachblog_Base_Object {
 	 * @return bool
 	 */
 	protected function local_setting($key, $value = null) {
-		$key = self::DOMAIN . "_$key";
+		$key = 'teachblog' . "_$key";
 		$t = get_option($key);
 		if (is_null($value)) return get_option($key);
 		else return update_option($key, $value);
@@ -86,7 +86,7 @@ class Teachblog_Base_Object {
 	 * @return bool
 	 */
 	protected function global_setting($key, $value = null) {
-		$key = self::DOMAIN . "_$key";
+		$key = 'teachblog' . "_$key";
 
 		if (is_null($value)) return get_site_option($key);
 		else return update_site_option($key, $value);

@@ -34,7 +34,7 @@ $content = isset($content) ? $content : '';
 
 			<?php do_action('teachblog_editor_before_title') ?>
 			<div class="section title">
-				<label> <?php _e('Title', TEACHBLOG_I18N) ?> </label>
+				<label> <?php _e('Title', 'teachblog') ?> </label>
 				<input type="text" name="title" value="<?php esc_attr_e(isset($title) ? $title : '') ?>"/>
 				<?php do_action('teachblog_editor_beside_title') ?>
 			</div>
@@ -42,7 +42,7 @@ $content = isset($content) ? $content : '';
 			<?php do_action('teachblog_editor_before_blog_selector') ?>
 			<?php if (count($assignable_blogs) >= 2): ?>
 			<div class="section assignable">
-				<label> <?php _e('Which blog should this post belong to?', TEACHBLOG_I18N) ?> </label>
+				<label> <?php _e('Which blog should this post belong to?', 'teachblog') ?> </label>
 				<select name="assign_to">
 					<?php foreach ($assignable_blogs as $blog_id => $blog_name): ?>
 						<option value="<?php esc_attr_e($blog_id) ?>"> <?php esc_html_e($blog_name) ?> </option>
@@ -54,20 +54,20 @@ $content = isset($content) ? $content : '';
 
 			<?php do_action('teachblog_editor_before_editor') ?>
 			<div class="section content">
-				<label> <?php _e('Content', TEACHBLOG_I18N) ?> </label>
+				<label> <?php _e('Content', 'teachblog') ?> </label>
 				<?php wp_editor(isset($content) ? $content : '', 'teachblog-front-editor') ?>
 				<?php do_action('teachblog_editor_beside_editor') ?>
 			</div>
 
 			<?php do_action('teachblog_editor_before_publish_controls') ?>
 			<div class="section controls">
-				<label><?php _e('Publishing options', TEACHBLOG_I18N) ?></label>
+				<label><?php _e('Publishing options', 'teachblog') ?></label>
 				<select name="publish_options">
-					<option value="publish"><?php _e('Submit', TEACHBLOG_I18N) ?></option>
-					<option value="save_draft"><?php _e('Save as Draft', TEACHBLOG_I18N) ?></option>
-					<option value="discard"><?php _e('Discard', TEACHBLOG_I18N) ?></option>
+					<option value="publish"><?php _e('Submit', 'teachblog') ?></option>
+					<option value="save_draft"><?php _e('Save as Draft', 'teachblog') ?></option>
+					<option value="discard"><?php _e('Discard', 'teachblog') ?></option>
 				</select>
-				<input type="submit" value="<?php esc_attr_e('Save/Update', TEACHBLOG_I18N) ?>" name="submit-teachblog-post"/>
+				<input type="submit" value="<?php esc_attr_e('Save/Update', 'teachblog') ?>" name="submit-teachblog-post"/>
 				<?php do_action('teachblog_editor_beside_publish_controls') ?>
 			</div>
 

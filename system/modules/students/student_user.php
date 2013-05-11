@@ -43,13 +43,13 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 	 * Defines the student user role and its default capabilities.
 	 */
 	protected function define_role() {
-		$capabilities = apply_filters(self::DOMAIN . '_student_user_capabilities', array(
+		$capabilities = apply_filters('teachblog_student_user_capabilities', array(
 			'delete_posts',
 			'edit_posts',
 			'read'
 		));
 
-		add_role(self::ROLE, _x('Student User', 'user-type', self::DOMAIN), $capabilities);
+		add_role(self::ROLE, _x('Student User', 'user-type', 'teachblog'), $capabilities);
 	}
 
 
