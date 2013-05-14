@@ -36,6 +36,11 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	public $front_editor;
 
 	/**
+	 * @var Teachblog_Front_Individual_List
+	 */
+	public $front_list;
+
+	/**
 	 * @var Teachblog_Front_Submissions
 	 */
 	public $front_submissions;
@@ -62,6 +67,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 	protected function setup_supporting_tools() {
 		$this->front_editor = new Teachblog_Front_Editor;
+		$this->front_list = new Teachblog_Front_Individual_List;
 		$this->front_submissions = new Teachblog_Front_Submissions;
 	}
 
