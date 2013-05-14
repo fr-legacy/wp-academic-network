@@ -26,6 +26,7 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 
 	public function setup() {
 		if ($this->role_undefined()) $this->define_role();
+		$this->prevent_admin_access();
 	}
 
 
@@ -60,5 +61,26 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 	 */
 	public static function list_users() {
 		return (array)get_users(array('role' => self::ROLE, 'orderby' => 'login', 'order' => 'ASC'));
+	}
+
+
+	/**
+	 * If a student user attempt to access the admin pages (dashboard etc) then they will be redirected to the public
+	 * site.
+	 */
+	protected function prevent_admin_access() {
+		// Do not interfere with users other than student users
+		$user = wp_get_current_user();
+		if (!is_a($user, 'WP_User') or !in_array(self::ROLE, $user->roles)) return;
+
+		$prevent_access = ($this->local_setting('allow_student_admin_access') !== true);
+		$prevent_access = apply_filters('teachblog_revent_student_admin_access', $prevent_access);
+
+		// We check that DOING_AJAX is undefined as many front end operations work through the admin-ajax controller,
+		// so we don't want to interrupt their flow
+		if ($prevent_access and is_admin() and !defined('DOING_AJAX')) {
+			wp_redirect(apply_filters('teachblog_redirect_students_from_admin', home_url()));
+			exit();
+		}
 	}
 }
