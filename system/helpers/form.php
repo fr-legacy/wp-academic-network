@@ -62,7 +62,11 @@ class Teachblog_Form {
 		// Specified params only?
 		if (is_array($get_params)) $query = http_build_query($get_params);
 
-		if (!empty($query)) $url .= "?$query";
+		// Do we need the question mark symbol to start the query segment?
+		// (useful if default permalinks are in use etc)
+		if (strpos($url, '?') === false) $query = "?$query";
+
+		if (!empty($query)) $url .= "$query";
 		return $url;
 	}
 

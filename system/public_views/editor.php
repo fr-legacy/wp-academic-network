@@ -66,7 +66,7 @@ $content = isset($content) ? $content : '';
 			<div class="section controls">
 				<label><?php _e('Publishing options', 'teachblog') ?></label>
 				<select name="publish_options">
-					<option value="publish"><?php _e('Submit', 'teachblog') ?></option>
+					<option value="save_update"><?php _e('Submit', 'teachblog') ?></option>
 					<option value="save_draft"><?php _e('Save as Draft', 'teachblog') ?></option>
 					<option value="discard"><?php _e('Discard', 'teachblog') ?></option>
 				</select>

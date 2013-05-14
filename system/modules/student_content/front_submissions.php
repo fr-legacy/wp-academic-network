@@ -47,6 +47,13 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	 */
 	public $notices = array();
 
+	/**
+	 * The submission post status determined during processing.
+	 *
+	 * @var string
+	 */
+	protected $post_status = '';
+
 	const NOTICES = 'notices';
 	const WARNINGS = 'warnings';
 	const BAD_WARNINGS = 'bad_warnings'; // Updates/submissions will not be accepted if a bad warning is set
@@ -68,8 +75,16 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	 * Checks for submission states as part of the URL query.
 	 */
 	protected function setup_notices_after_redirect() {
-		if (isset($_GET['state']) and $_GET['state'] === 'success')
-			$this->add_notice(__('Success! Your post (and any changes) have been saved.', 'teachblog'));
+		if (!isset($_GET['state'])) return;
+
+		switch ($_GET['state']) {
+			case 'updated':
+				$this->add_notice(__('Success! Your post (and any changes) have been saved.', 'teachblog'));
+			break;
+			case 'trashed':
+				$this->add_warning(__('Your post has been marked for deletion.', 'teachblog'));
+			break;
+		}
 	}
 
 
@@ -174,7 +189,7 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 		$postdata = array(
 			'post_title' => $title,
 			'post_content' => $content,
-			'post_status' => $this->user->default_submit_status(),
+			'post_status' => $this->determine_post_status(),
 			'post_author' => $this->user->get_user_id(),
 			'post_type' => Teachblog_Student_Content::TEACHBLOG_POST
 		);
@@ -214,6 +229,27 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 
 
 	/**
+	 * Determines the post_status level to use for the current submission.
+	 *
+	 * @return string
+	 */
+	protected function determine_post_status() {
+		$this->post_status = 'draft'; // If in doubt, save as a draft
+
+		if (Teachblog_Form::is_posted('publish_options'))
+			switch ($_POST['publish_options']) {
+				case 'save_update': $this->post_status = $this->user->default_submit_status(); break;
+				case 'save_draft': $this->post_status = 'draft'; break;
+				case 'discard': $this->post_status = 'trash'; break;
+			}
+
+		// Allow this behaviour to be modified
+		$this->post_status = apply_filters('teachblog_save_submission_post_status', $this->post_status);
+		return $this->post_status;
+	}
+
+
+	/**
 	 * Once a successful submission is made this method attempts to perform a redirect to the front editor page.
 	 *
 	 * It's assumed the request was made from a shortcode in a page/post and that that is where the user should be
@@ -228,19 +264,24 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	protected function redirect_on_success($post_id) {
 		// Origin request to redirect to a specific post?
 		if (Teachblog_Form::is_posted('origin') and Teachblog_Form::is_posted('origin_hash'))
-			if ($_POST['origin_hash'] === hash('MD5', $_POST['origin'] . NONCE_KEY)) {
-				$GLOBALS['post'] = get_post($_POST['origin']);
-				$url = Teachblog_Form::post_url(array(
-					'id' => (int) $post_id,
-					'state' => 'success'
-				));
-		}
+			$url = $this->get_original_post_url($post_id);
 
-		$url = apply_filters('teachblog_default_editor_redirect', $url);
+		$url = apply_filters('teachblog_default_editor_redirect', isset($url) ? $url : '');
+
 		wp_redirect($url);
 		exit();
 	}
 
+
+	protected function get_original_post_url($post_id) {
+		if ($_POST['origin_hash'] !== hash('MD5', $_POST['origin'] . NONCE_KEY)) return '';
+
+		$GLOBALS['post'] = get_post($_POST['origin']);
+		return Teachblog_Form::post_url(array(
+			'id' => (int) $post_id,
+			'state' => ($this->post_status === 'trash') ? 'trashed' : 'updated'
+		));
+	}
 
 	protected function add_notice($message) {
 		$this->notices[self::NOTICES][] = $message;

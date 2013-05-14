@@ -85,6 +85,7 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 			case 'publish': $status = array('live', _x('Published', 'post-status', 'teachblog')); break;
 			case 'pending': $status = array('pending', _x('Awaiting Approval', 'post-status', 'teachblog')); break;
 			case 'draft': $status = array('draft', _x('Draft', 'post-status', 'teachblog')); break;
+			case 'trash': $status = array('offline', _x('Trashed', 'post-status', 'teachblog')); break;
 		}
 		return apply_filters('teachblog_front_editor_post_status', $status);
 	}
