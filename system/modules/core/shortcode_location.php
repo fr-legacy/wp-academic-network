@@ -63,6 +63,34 @@ class Teachblog_Shortcode_Location extends Teachblog_Base_Object {
 
 
 	/**
+	 * Gets the URL if available (else returns an empty string) of the post containing the specified shortcode.
+	 *
+	 * If an optional array of query params are provided then these will be added to the URL query.
+	 *
+	 * @param $shortcode
+	 * @return string
+	 */
+	public function get_url($shortcode, array $query = null) {
+		$id = $this->get_location($shortcode);
+		if (!$id) return '';
+
+		$url = get_permalink($id);
+
+		if ($query !== null) {
+			$existing_query = parse_url($url, PHP_URL_QUERY);
+			$existing_query = str_replace('&amp;', '&', $existing_query);
+			$existing_query = empty($existing_query) ? array() : explode('&', $existing_query);
+
+			$query = http_build_query(array_merge($existing_query, $query));
+			$separator = strpos($url, '?') === false ? strlen($url) : strpos($url, '?');
+			$url = substr($url, 0, $separator)."?$query";
+		}
+
+		return $url;
+	}
+
+
+	/**
 	 * Returns the post ID of the post containing the specified shortcode (if it has been indexed) or else boolean false
 	 * if not known.
 	 *

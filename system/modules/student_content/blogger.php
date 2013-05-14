@@ -132,6 +132,37 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 
 
 	/**
+	 * Returns a list of all posts in all blogs that the current user participates in.
+	 *
+	 * @return array
+	 */
+	public function get_complete_post_list() {
+		$posts = array();
+		$blog_term_ids = array_flip($this->get_assigned_blog_list());
+
+		$query = new WP_Query(array(
+			'post_type' => Teachblog_Student_Content::TEACHBLOG_POST,
+			'tax_query' => array(array(
+				'taxonomy' => Teachblog_Student_Content::TEACHBLOG_BLOG_TAXONOMY,
+				'field' => 'id',
+				'terms' => $blog_term_ids
+			)),
+			'post_status' => apply_filters('teachblog_listable_post_states', array(
+				'publish', 'pending', 'draft', 'future', 'private'
+			))
+		));
+
+		while ($query->have_posts()) {
+			$query->the_post();
+			$posts[] = $GLOBALS['post'];
+		}
+		wp_reset_postdata(); // Cleanup
+
+		return $posts;
+	}
+
+
+	/**
 	 * Indicates if the current user has a student blog.
 	 *
 	 * @return bool

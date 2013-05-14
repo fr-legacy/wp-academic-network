@@ -165,9 +165,9 @@ class Teachblog {
 		$this->admin_environment = new Teachblog_Admin_Environment;
 		$this->general_settings = new Teachblog_General_Settings;
 		$this->admin_menu = new Teachblog_Admin_Menu;
+		$this->shortcode_location = new Teachblog_Shortcode_Location;
 		$this->student_user = new Teachblog_Student_User;
 		$this->student_content = new Teachblog_Student_Content;
-		$this->shortcode_location = new Teachblog_Shortcode_Location;
 	}
 }
 
