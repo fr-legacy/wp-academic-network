@@ -87,6 +87,11 @@ class Teachblog {
 	 */
 	public $modules;
 
+	/**
+	 * @var Teachblog_Shortcode_Location
+	 */
+	public $shortcode_location;
+
 
 	/**
 	 * @var array
@@ -103,8 +108,9 @@ class Teachblog {
 		'Teachblog_Front_Submissions' => 'modules/student_content/front_submissions',
 		'Teachblog_General_Settings' => 'general_settings',
 		'Teachblog_Modules' => 'modules',
+		'Teachblog_Shortcode_Location' => 'modules/core/shortcode_location',
 		'Teachblog_Student_Content' => 'modules/student_content/student_content',
-		'Teachblog_Student_User' => 'modules/students/student_user',
+		'Teachblog_Student_User' => 'modules/core/student_user',
 		'Teachblog_Template' => 'helpers/template'
 	);
 
@@ -161,6 +167,7 @@ class Teachblog {
 		$this->admin_menu = new Teachblog_Admin_Menu;
 		$this->student_user = new Teachblog_Student_User;
 		$this->student_content = new Teachblog_Student_Content;
+		$this->shortcode_location = new Teachblog_Shortcode_Location;
 	}
 }
 

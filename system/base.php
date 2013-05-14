@@ -41,11 +41,18 @@ class Teachblog_Base_Object {
 	 */
 	protected $admin;
 
+	/**
+	 * @var Teachblog_Shortcode_Location
+	 */
+	protected $shortcode;
+
 
 	public function __construct() {
+		// Key system object references/aliases
 		$this->system = Teachblog::core();
 		$this->admin = $this->system->admin_environment;
 		$this->admin_menu = $this->system->admin_menu;
+		$this->shortcode = $this->system->shortcode_location;
 
 		// Allow components the opportunity to determine if they should run or not
 		if (method_exists($this, 'preflight') and !$this->preflight()) return;
