@@ -37,8 +37,8 @@ class Teachblog_Shortcode_Location extends Teachblog_Base_Object {
 	 * @param $post
 	 */
 	public function check_for_shortcodes($post_id, $post) {
-		// "Anti-hijack" measure: do not record [teachblog_*] shortcodes when embedded in student posts
-		if ($post->post_type === Teachblog_Student_Content::TEACHBLOG_POST) return;
+		if ($post->post_type === Teachblog_Student_Content::TEACHBLOG_POST) return;	// "Anti-hijack" measure
+		if ($post-->post_status !== 'publish') return; // We don't want drafts/autosaves etc
 
 		// Use the post content as the "post"
 		$post = $post->post_content;
