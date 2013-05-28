@@ -44,6 +44,12 @@ class Teachblog_Template extends Teachblog_Base_Object {
 
 
 	public function __toString() {
+		if (empty($this->path)) {
+			_doing_it_wrong('Teachblog_Template::__toString()', 'Attempt made to load a non-existent template file.',
+				Teachblog::VERSION);
+			return '';
+		}
+
 		ob_start();
 		extract($this->vars);
 		include $this->path;
