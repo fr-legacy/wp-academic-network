@@ -18,7 +18,11 @@
 */
 
 /**
- * Sets up and manages student posts.
+ * Templates are a simple tool for loading public ("front end") views.
+ *
+ * It works on a cascading principle: by default the shipped view in the Teachblog public_views directory will be used,
+ * however this can be overriden by the existence of a template of the same name in the active theme's teachblog/views
+ * directory. In turn, either of these can be overriden using a filter hook.
  */
 class Teachblog_Template extends Teachblog_Base_Object {
 	protected $path;
@@ -28,8 +32,13 @@ class Teachblog_Template extends Teachblog_Base_Object {
 	public function __construct($path, array $vars = null) {
 		parent::__construct();
 
-		$path = $this->system->dir . "system/public_views/$path.php";
-		if (file_exists($path)) $this->path = $path;
+		$default_path = $this->system->dir . "system/public_views/$path.php";
+		$theme_path = locate_template("teachblog/views/$path.php");
+
+		if (!empty($theme_path) and file_exists($theme_path)) $this->path = $theme_path;
+		elseif (file_exists($default_path)) $this->path = $default_path;
+
+		$this->path = apply_filters('teachblog_template_path', $this->path);
 		if (is_array($vars)) $this->vars = $vars;
 	}
 
