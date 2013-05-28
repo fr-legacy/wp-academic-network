@@ -69,10 +69,12 @@ $content = isset($content) ? $content : '';
 			<?php do_action('teachblog_editor_before_publish_controls') ?>
 			<div class="section controls">
 				<label> <?php _e('Publishing options', 'teachblog') ?> </label>
+
 				<div class="left">
-					<input type="checkbox" name="allow_comments" value="1" />
+					<input type="checkbox" name="allow_comments" value="1" <?php if ($comment_status) echo 'checked="checked"' ?> />
 					<label> <?php _e('Allow comments', 'teachblog') ?> </label>
 				</div>
+
 				<div class="right">
 					<select name="publish_options">
 						<option value="save_update"><?php _e('Submit', 'teachblog') ?></option>
@@ -82,6 +84,7 @@ $content = isset($content) ? $content : '';
 					<input type="submit" value="<?php esc_attr_e('Save/Update', 'teachblog') ?>" name="submit-teachblog-post"/>
 					<?php do_action('teachblog_editor_beside_publish_controls') ?>
 				</div>
+
 			</div>
 
 		</div>

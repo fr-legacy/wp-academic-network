@@ -182,6 +182,7 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	protected function build_postdata_array() {
 		$title = Teachblog_Form::is_posted('title') ? wp_strip_all_tags(trim($_POST['title'])) : '';
 		$content = Teachblog_form::is_posted('teachblog-front-editor') ? trim($_POST['teachblog-front-editor']) : '';
+		$comments = Teachblog_form::is_posted('allow_comments') ? 'open' : 'closed';
 
 		if (empty($title)) $this->add_bad_warning(__('The title must not be empty!', 'teachblog'));
 		if (empty($content)) $this->add_bad_warning(__('You must provide some content!', 'teachblog'));
@@ -189,6 +190,7 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 		$postdata = array(
 			'post_title' => $title,
 			'post_content' => $content,
+			'comment_status' => $comments,
 			'post_status' => $this->determine_post_status(),
 			'post_author' => $this->user->get_user_id(),
 			'post_type' => Teachblog_Student_Content::TEACHBLOG_POST

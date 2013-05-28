@@ -61,6 +61,7 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 			'current_blog' => null,
 			'title' => $this->get_post_title(),
 			'content' => $this->get_post_content(),
+			'comment_status' => $this->get_post_comment_state(),
 			'status' => $this->post_status_array(),
 			'notices' => $this->get_editor_notices(),
 			'originating_post' => $origin,
@@ -102,6 +103,15 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 		if (Teachblog_Form::is_posted('teachblog-front-editor')) return esc_attr($_POST['teachblog-front-editor']);
 		if (is_object($this->post) and isset($this->post->post_content)) return $this->post->post_content;
 		return apply_filters('teachblog_default_post_content', '');
+	}
+
+
+	protected function get_post_comment_state() {
+		if (Teachblog_Form::is_posted('allow_comments'))
+			return ($_POST['allow_comments'] === 1) ? true : false;
+		if (is_object($this->post) and isset($this->post->comment_status))
+			return $this->post->comment_status === 'open' ? true : false;
+		return apply_filters('teachblog_default_post_comment_state', false);
 	}
 
 
