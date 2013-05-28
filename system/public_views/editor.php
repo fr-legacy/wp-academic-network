@@ -29,17 +29,13 @@ $content = isset($content) ? $content : '';
 
 			<?php wp_nonce_field('teachblog_front_editor', 'teachblog_check') ?>
 
-			<?php do_action('teachblog_editor_before_status') ?>
-			<div class="section status">
-				<div class="<?php esc_attr_e($status[0]) ?>"> <?php esc_html_e($status[1]) ?> </div>
-				<?php do_action('teachblog_editor_beside_status') ?>
-			</div>
-
 			<?php do_action('teachblog_editor_before_title') ?>
 			<div class="section title">
 				<label> <?php _e('Title', 'teachblog') ?> </label>
+
 				<input type="text" name="title" value="<?php esc_attr_e(isset($title) ? $title : '') ?>"/>
 				<?php do_action('teachblog_editor_beside_title') ?>
+
 			</div>
 
 			<?php do_action('teachblog_editor_before_blog_selector') ?>
@@ -57,21 +53,35 @@ $content = isset($content) ? $content : '';
 
 			<?php do_action('teachblog_editor_before_editor') ?>
 			<div class="section content">
+
+				<?php do_action('teachblog_editor_before_status') ?>
+				<div class="section status">
+					<div class="<?php esc_attr_e($status[0]) ?>"> <?php esc_html_e($status[1]) ?> </div>
+					<?php do_action('teachblog_editor_beside_status') ?>
+				</div>
+
 				<label> <?php _e('Content', 'teachblog') ?> </label>
+
 				<?php wp_editor(isset($content) ? $content : '', 'teachblog-front-editor') ?>
 				<?php do_action('teachblog_editor_beside_editor') ?>
 			</div>
 
 			<?php do_action('teachblog_editor_before_publish_controls') ?>
 			<div class="section controls">
-				<label><?php _e('Publishing options', 'teachblog') ?></label>
-				<select name="publish_options">
-					<option value="save_update"><?php _e('Submit', 'teachblog') ?></option>
-					<option value="save_draft"><?php _e('Save as Draft', 'teachblog') ?></option>
-					<option value="discard"><?php _e('Discard', 'teachblog') ?></option>
-				</select>
-				<input type="submit" value="<?php esc_attr_e('Save/Update', 'teachblog') ?>" name="submit-teachblog-post"/>
-				<?php do_action('teachblog_editor_beside_publish_controls') ?>
+				<label> <?php _e('Publishing options', 'teachblog') ?> </label>
+				<div class="left">
+					<input type="checkbox" name="allow_comments" value="1" />
+					<label> <?php _e('Allow comments', 'teachblog') ?> </label>
+				</div>
+				<div class="right">
+					<select name="publish_options">
+						<option value="save_update"><?php _e('Submit', 'teachblog') ?></option>
+						<option value="save_draft"><?php _e('Save as Draft', 'teachblog') ?></option>
+						<option value="discard"><?php _e('Discard', 'teachblog') ?></option>
+					</select>
+					<input type="submit" value="<?php esc_attr_e('Save/Update', 'teachblog') ?>" name="submit-teachblog-post"/>
+					<?php do_action('teachblog_editor_beside_publish_controls') ?>
+				</div>
 			</div>
 
 		</div>
