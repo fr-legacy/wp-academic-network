@@ -68,6 +68,7 @@ class Teachblog_Shortcode_Location extends Teachblog_Base_Object {
 	 * If an optional array of query params are provided then these will be added to the URL query.
 	 *
 	 * @param $shortcode
+	 * @param array $query
 	 * @return string
 	 */
 	public function get_url($shortcode, array $query = null) {
