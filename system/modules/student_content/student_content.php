@@ -323,7 +323,6 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 			$columns['taxonomy-'.self::TEACHBLOG_BLOG_TAXONOMY] = __('Blog', 'teachblog');
 
 		$columns['teachblog_last_edit'] = __('Last Edit By', 'teachblog');
-		$columns['teachblog_status'] = __('Status', 'teachblog');
 		return $columns;
 	}
 
