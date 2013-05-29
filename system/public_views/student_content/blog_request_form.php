@@ -11,6 +11,19 @@ $description = Teachblog_Form::is_posted('blog_description') ? esc_attr($_POST['
 <form action="<?php echo $action ?>" method="post">
     <div class="teachblog blog-request form">
 
+        <?php do_action('teachblog_editor_before_notices') ?>
+        <?php if (isset($notices) and is_array($notices) and count($notices) >= 1): ?>
+            <div class="section notices">
+                <?php foreach ($notices as $type => $items): ?>
+                    <div class="<?php esc_attr_e($type) ?>">
+                        <?php foreach ($items as $message): ?>
+                            <p> <?php esc_html_e($message) ?> </p>
+                        <?php endforeach ?>
+                    </div>
+                <?php endforeach ?>
+            </div>
+        <?php endif ?>
+
         <?php wp_nonce_field('teachblog_blog_request', 'teachblog_check') ?>
 
         <div class="section newuser">
@@ -32,7 +45,7 @@ $description = Teachblog_Form::is_posted('blog_description') ? esc_attr($_POST['
 
         <div class="section submit">
             <label for="submit"> <?php _e('Click on the submit button to send your request', 'teachblog') ?> </label>
-            <input type="submit" name="submit" value="<?php esc_attr_e('Submit request', 'teachblog') ?>" />
+            <input type="submit" id="submit" name="submit-blog-request" value="<?php esc_attr_e('Submit request', 'teachblog') ?>" />
         </div>
 
     </div>
