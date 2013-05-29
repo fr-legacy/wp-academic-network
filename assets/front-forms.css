@@ -1,0 +1,87 @@
+.teachblog.form .section {
+	background: #fafafa;
+	border: 1px solid #dadada;
+	border-radius: 0.24em;
+	margin-bottom: 2em;
+	overflow: auto;
+	padding: 0.5em 1em 1.6em;
+	width: 100%;
+}
+
+.teachblog.form .section div.left {
+	float: left;
+}
+
+.teachblog.form .section div.right {
+	float: right;
+}
+
+.teachblog.form .section > label {
+	display: block;
+	font-weight: bold;
+	padding: 0em 0.23em 0.5em;
+}
+
+.teachblog.form .section.notices {
+	background: none;
+	border: none;
+	margin-bottom: 2em;
+	padding-bottom: 0;
+}
+
+.teachblog.form .section.notices p {
+	font-weight: bold;
+	margin: 0em;
+	padding: 0.3em 1em;
+}
+
+.teachblog.form .section.notices > div {
+	background: #fffefa;
+	border: 1px dashed #ccc;
+	margin-bottom: 0.24em;
+}
+
+.teachblog.form .section.notices > div.bad_warnings p {
+	color:  #800;
+}
+
+.teachblog.form .section.status {
+	background: transparent;
+	border: 0;
+	display: inline-block;
+	float: right;
+	font-size: 0.86em;
+	margin: 0em;
+	padding: 0em;
+	width: auto;
+}
+
+.teachblog.form .section.title input {
+	width: 95%;
+}
+
+.teachblog.form .section.status > div {
+	background: #566864;
+	border-radius: 0.4em;
+	color: #fff;
+	float: right;
+	font-weight: bold;
+	padding: 0.28em 1.3em;
+	text-align: center;
+	width: auto;
+}
+
+.teachblog.form .section.status > div.new { background: #60b0c0; }
+.teachblog.form .section.status > div.draft { background: #808280; }
+.teachblog.form .section.status > div.pending { background: #ce8944; }
+.teachblog.form .section.status > div.live { background: #50a050; }
+.teachblog.form .section.status > div.offline { background: #c04040; }
+
+.teachblog.form .section.content label {
+	margin-bottom: 1em;
+	padding-bottom: 0em;
+}
+
+.teachblog.form .section.controls input {
+	margin-left: 1em;
+}

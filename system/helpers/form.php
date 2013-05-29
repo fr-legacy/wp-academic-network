@@ -64,7 +64,7 @@ class Teachblog_Form {
 
 		// Do we need the question mark symbol to start the query segment?
 		// (useful if default permalinks are in use etc)
-		if (strpos($url, '?') === false) $query = "?$query";
+		if (strpos($url, '?') === false and strlen($query) > 0) $query = "?$query";
 
 		if (!empty($query)) $url .= "$query";
 		return $url;

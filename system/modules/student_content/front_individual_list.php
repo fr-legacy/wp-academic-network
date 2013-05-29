@@ -50,7 +50,7 @@ class Teachblog_Front_Individual_List extends Teachblog_Base_Object {
 	 * @return mixed|void
 	 */
 	protected function no_blogs_to_show() {
-		$message = new Teachblog_Template('inform_no_blog', array(
+		$message = new Teachblog_Template('student_content/inform_no_blog', array(
 			'signed_in' => (get_current_user_id() > 0)
 		));
 		return apply_filters('teachblog_editor_no_blog_available', $message);
@@ -58,7 +58,7 @@ class Teachblog_Front_Individual_List extends Teachblog_Base_Object {
 
 
 	protected function list_posts() {
-		return new Teachblog_Template('list_blog_posts', array(
+		return new Teachblog_Template('student_content/list_blog_posts', array(
 			'posts' => $this->user->get_complete_post_list(),
 			'shortcode' => $this->shortcode
 		));

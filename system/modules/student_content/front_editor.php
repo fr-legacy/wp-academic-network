@@ -41,7 +41,7 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 
 
 	public function enqueue_styles() {
-		wp_enqueue_style('teachblog_front_editor', $this->system->url.'assets/front-editor.css');
+		wp_enqueue_style('teachblog_front_editor', $this->system->url.'assets/front-forms.css');
 	}
 
 
@@ -70,7 +70,7 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 
 		if ($this->post) $vars['id'] = $this->post->ID;
 
-		return new Teachblog_Template('editor', $vars);
+		return new Teachblog_Template('student_content/editor', $vars);
 	}
 
 
@@ -109,14 +109,16 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 	protected function get_post_comment_state() {
 		if (Teachblog_Form::is_posted('allow_comments'))
 			return ($_POST['allow_comments'] === 1) ? true : false;
+
 		if (is_object($this->post) and isset($this->post->comment_status))
 			return $this->post->comment_status === 'open' ? true : false;
+
 		return apply_filters('teachblog_default_post_comment_state', false);
 	}
 
 
 	protected function blog_not_setup() {
-		$message = new Teachblog_Template('inform_no_blog', array(
+		$message = new Teachblog_Template('student_content/inform_no_blog', array(
 			'signed_in' => (get_current_user_id() > 0)
 		));
 

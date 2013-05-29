@@ -109,6 +109,17 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	}
 
 
+    /**
+     * Returns true if the loaded user account relates to a student user.
+     *
+     * @return bool
+     */
+    public function is_student_user() {
+        if (!$this->loaded) return false;
+
+    }
+
+
 	/**
 	 * Loads the requested blog post *if* the current user is assigned to the blog (or one of the blogs) to which it
 	 * belongs and if of course the post ID is valid. Otherwise, returns bool false.
