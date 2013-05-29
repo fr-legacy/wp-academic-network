@@ -56,7 +56,14 @@ class Teachblog_Blog_Request_Form extends Teachblog_Base_Object {
 
 
     protected function request_form() {
-        $form = new Teachblog_Template('student_content/blog_request_form');
+        $form = new Teachblog_Template('student_content/blog_request_form', array(
+            'notices' => $this->get_form_notices()
+        ));
         return apply_filters('teachblog_request_form', $form);
+    }
+
+
+    protected function get_form_notices() {
+        return (array) $this->system->student_content->blog_request_submissions->notices;
     }
 }

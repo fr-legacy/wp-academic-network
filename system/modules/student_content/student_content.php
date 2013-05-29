@@ -50,6 +50,11 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
      */
     public $blog_request_form;
 
+    /**
+     * @var Teachblog_Blog_Request_Submissions
+     */
+    public $blog_request_submissions;
+
 
 	protected function preflight() {
 		if (!$this->system->modules->is_enabled('student_content')) return false;
@@ -75,6 +80,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		$this->front_list = new Teachblog_Front_Individual_List;
 		$this->front_submissions = new Teachblog_Front_Submissions;
         $this->blog_request_form = new Teachblog_Blog_Request_Form;
+        $this->blog_request_submissions = new Teachblog_Blog_Request_Submissions;
 	}
 
 

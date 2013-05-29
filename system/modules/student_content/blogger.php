@@ -116,7 +116,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
      */
     public function is_student_user() {
         if (!$this->loaded) return false;
-
+        return in_array(Teachblog_Student_User::ROLE, $this->user->roles);
     }
 
 

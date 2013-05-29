@@ -34,7 +34,7 @@ $description = Teachblog_Form::is_posted('blog_description') ? esc_attr($_POST['
             <input type="password" id="password_1" name="password_1" value="<?php echo $password_1 ?>" />
             <input type="password" id="password_2" name="password_2" value="<?php echo $password_2 ?>" />
         </div>
-                                 requested
+
         <div class="section newblog">
             <label for="blog_title"> <?php _e('What do you want to call your blog?', 'teachblog') ?> </label>
             <input type="text" id="blog_title" name="blog_title" value="<?php echo $title ?>" />

@@ -100,15 +100,30 @@ class Teachblog_Form {
 	}
 
 
-	/**
-	 * Checks if the specified field is present and (optionally) that it is also set to the specified value.
-	 *
-	 * @param $field
-	 * @return bool
-	 */
+    /**
+     * Checks if the specified field is present and (optionally) that it is also set to the specified value.
+     *
+     * @param $field
+     * @param null $value
+     * @return bool
+     */
 	public static function is_posted($field, $value = null) {
 		if (!isset($_POST[$field])) return false;
 		if ($value === null) return true; // No inspection of the value
 		return ($_POST[$field] == $value);
 	}
+
+
+    /**
+     * Checks if the specified fields (accepts multiple params) have been submitted as post data.
+     *
+     * @param fields, [ fields .. ]
+     * @return bool
+     */
+    public static function are_posted() {
+        foreach (func_get_args() as $field)
+            if (!self::is_posted($field)) return false;
+
+        return true;
+    }
 }
