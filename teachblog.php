@@ -104,6 +104,7 @@ class Teachblog {
 		'Teachblog_Blogger' => 'modules/student_content/blogger',
         'Teachblog_Blog_Request_Form' => 'modules/student_content/blog_request_form',
         'Teachblog_Blog_Request_Submissions' => 'modules/student_content/blog_request_submissions',
+        'Teachblog_Blog_Requests' => 'modules/student_content/blog_requests',
 		'Teachblog_Form' => 'helpers/form',
 		'Teachblog_Front_Editor' => 'modules/student_content/front_editor',
 		'Teachblog_Front_Individual_List' => 'modules/student_content/front_individual_list',

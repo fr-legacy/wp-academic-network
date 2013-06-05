@@ -8,6 +8,11 @@
 	width: 100%;
 }
 
+.teachblog.form .section > div.inline.notice {
+    color: #a78440;
+    font-style: italic;
+}
+
 .teachblog.form .section div.left {
 	float: left;
 }

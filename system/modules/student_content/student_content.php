@@ -46,14 +46,9 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	public $front_submissions;
 
     /**
-     * @var Teachblog_Blog_Request_Form
+     * @var Teachblog_Blog_Requests
      */
-    public $blog_request_form;
-
-    /**
-     * @var Teachblog_Blog_Request_Submissions
-     */
-    public $blog_request_submissions;
+    public $blog_requests;
 
 
 	protected function preflight() {
@@ -79,8 +74,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		$this->front_editor = new Teachblog_Front_Editor;
 		$this->front_list = new Teachblog_Front_Individual_List;
 		$this->front_submissions = new Teachblog_Front_Submissions;
-        $this->blog_request_form = new Teachblog_Blog_Request_Form;
-        $this->blog_request_submissions = new Teachblog_Blog_Request_Submissions;
+        $this->blog_requests = new Teachblog_Blog_Requests;
 	}
 
 

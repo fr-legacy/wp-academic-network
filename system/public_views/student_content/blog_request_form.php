@@ -27,6 +27,21 @@ $description = Teachblog_Form::is_posted('blog_description') ? esc_attr($_POST['
         <?php wp_nonce_field('teachblog_blog_request', 'teachblog_check') ?>
 
         <div class="section newuser">
+            <?php if ($is_user and !$has_blog) { ?>
+                <div class="inline notice"> <p> <?php _e('<strong>You are already logged in!</strong> '
+                    .'If you want to request a blog simply leave the username and password fields blank and proceed to '
+                    .'the next section. If you are helping someone else, or need to generate a separate user account '
+                    .'for some other reason, please go ahead and complete this section.', 'teachblog') ?> </p>
+                </div>
+            <?php } elseif ($is_user and $has_blog) { ?>
+                <div class="inline notice"> <p> <?php _e('<strong>You are already have a blog!</strong> '
+                    .'If you want to request an <strong>additional</strong> blog simply leave the username and '
+                    .'password fields blank and proceed to the next section. If you are helping someone else, or need '
+                    .'to generate a separate user account for some other reason, please go ahead and complete this '
+                    .'section.', 'teachblog') ?> </p>
+                </div>
+            <?php } ?>
+
             <label for="username"> <?php _e('What username do you wish to use?', 'teachblog') ?> </label>
             <input type="text" idrequested="username" name="username" value="<?php echo $username ?>" />
 

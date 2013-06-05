@@ -39,8 +39,8 @@ class Teachblog_Blog_Request_Submissions extends Teachblog_Base_Object {
 
 
     /**
-     * Checks if a front end blog request has been made, ensures basic security checks out then processes the
-     * submission further if so.
+     * Checks if a front end blog request has been made (and processes the submission
+     * further if so).
      */
     protected function setup() {
         if (Teachblog_Form::is_posted('submit-blog-request') and $this->submission_sanity_checks())
