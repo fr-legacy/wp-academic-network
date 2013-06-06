@@ -204,6 +204,8 @@ class Teachblog_Front_Submissions extends Teachblog_Base_Object {
 	 * Creates or updates the blog post.
 	 */
 	protected function create_or_update() {
+        // user->load_post() effectively confirms that they have permission to edit the specified post if set
+        // (ie, the post ID can't be an arbitrary post ID)
 		if (Teachblog_Form::is_posted('id') and $this->user->load_post(absint($_POST['id'])))
 			$this->postdata['ID'] = $_POST['id'];
 

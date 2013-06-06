@@ -21,6 +21,10 @@
  * Handles initial routing and processing of submissions from the front-end blog request form.
  */
 class Teachblog_Blog_Request_Submissions extends Teachblog_Base_Object {
+    protected $actions = array(
+        'teachblog_launch' => 'look_for_submissions'
+    );
+
     /**
      * @var Teachblog_Blogger
      */
@@ -33,6 +37,8 @@ class Teachblog_Blog_Request_Submissions extends Teachblog_Base_Object {
      */
     public $notices = array();
 
+    public $success = false;
+
     const NOTICES = 'notices';
     const WARNINGS = 'warnings';
     const BAD_WARNINGS = 'bad_warnings'; // Updates/submissions will not be accepted if a bad warning is set
@@ -42,11 +48,21 @@ class Teachblog_Blog_Request_Submissions extends Teachblog_Base_Object {
      * Checks if a front end blog request has been made (and processes the submission
      * further if so).
      */
-    protected function setup() {
+    public function look_for_submissions() {
         if (Teachblog_Form::is_posted('submit-blog-request') and $this->submission_sanity_checks())
             $this->start_processing();
 
-        //$this->setup_notices_after_redirect();
+        $this->setup_notices_after_redirect();
+    }
+
+
+    /**
+     * Checks for submission states as part of the URL query.
+     */
+    protected function setup_notices_after_redirect() {
+        if (!isset($_GET['success'])) return;
+        else $this->add_notice(__('Your request has been submitted!', 'teachblog'));
+        $this->success = true;
     }
 
 
@@ -64,7 +80,15 @@ class Teachblog_Blog_Request_Submissions extends Teachblog_Base_Object {
 
 
     protected function start_processing() {
-        if (Teachblog_Form::is_posted('username')) $this->handle_new_user_element();
+        $this->handle_new_user_element();
+        $this->check_for_essentials();
+        if (!empty($this->notices[self::BAD_WARNINGS]) or !empty($this->notices[self::WARNINGS])) return false;
+
+        $request = $this->create_request();
+        $this->system->student_content->blog_requests->new_request($request);
+        $this->add_notice(__('Your request has been submitted!', 'teachblog'));
+        $this->success = true;
+        $this->redirect_on_success();
     }
 
 
@@ -74,9 +98,11 @@ class Teachblog_Blog_Request_Submissions extends Teachblog_Base_Object {
      * If the request comes from an authenticated user it will be declined.
      */
     protected function handle_new_user_element() {
-        if (Teachblog_Blogger::current_user()->is_student_user()) {
-            $this->add_bad_warning(__('You are already logged in! You cannot create a new user account.', 'teachblog'));
-            return false;
+        $logged_in = Teachblog_Blogger::current_user()->get_user_id() !== false;
+
+        // If the username/password are empty and the user is logged in then we'll assume they are requesting an additional blog
+        if ($logged_in and Teachblog_Form::are_posted_and_empty('username', 'password_1', 'password_2')) {
+            return;
         }
 
         // Have a username and two passwords been submitted?
@@ -102,8 +128,62 @@ class Teachblog_Blog_Request_Submissions extends Teachblog_Base_Object {
             $this->add_bad_warning(__('Your passwords must match! Remember that passwords are case sensitive.', 'teachblog'));
             return false;
         }
+    }
 
 
+    protected function check_for_essentials() {
+        $title = Teachblog_Form::is_posted('blog_title') ? trim($_POST['blog_title']) : '';
+        if (empty($title)) $this->add_warning(__('Please provide a blog title!', 'teachblog'));
+    }
+
+    /**
+     * Builds a new account/blog request docket from the submitted post data.
+     *
+     * @return Teachblog_Blog_Request_Docket
+     */
+    protected function create_request() {
+        $request = new Teachblog_Blog_Request_Docket;
+
+        if (Teachblog_Form::are_posted('username', 'password_1')) {
+            $request->account_requested = true;
+            $request->account_username = $_POST['username'];
+            $request->account_password = $_POST['password_1'];
+            if (Teachblog_Form::is_posted('email')) $request->account_email = $_POST['email'];
+        }
+
+        if (Teachblog_Form::are_posted('blog_title', 'blog_description')) {
+            $request->blog_title = $_POST['blog_title'];
+            $request->blog_description = $_POST['blog_description'];
+        }
+
+        $current_user = Teachblog_Blogger::current_user()->get_user_id();
+        $request->submitting_user = (is_int($current_user) and $current_user > 0) ? $current_user : 0;
+
+        return $request;
+    }
+
+
+    /**
+     * Once a successful submission is made this method attempts to perform a redirect back to the submission form page.
+     *
+     * It's assumed the request was made from a shortcode in a page/post and that that is where the user should be
+     * redirected to - this partly mitigates the risk of multiple submissions of the same request by a student hitting
+     * refresh/ctrl+R.
+     */
+    protected function redirect_on_success() {
+        $url = $this->get_original_post_url(true);
+        $url = apply_filters('teachblog_acct_request_redirect', isset($url) ? $url : '');
+
+        wp_redirect($url);
+        exit();
+    }
+
+
+    protected function get_original_post_url($success) {
+        if ($_POST['origin_hash'] !== hash('MD5', $_POST['origin'] . NONCE_KEY)) return '';
+
+        $GLOBALS['post'] = get_post($_POST['origin']);
+        return Teachblog_Form::post_url($success ? array('success' => 1) : array());
     }
 
 

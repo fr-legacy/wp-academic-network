@@ -36,36 +36,31 @@ class Teachblog_Blog_Request_Form extends Teachblog_Base_Object {
     public function shortcode() {
         $this->user = Teachblog_Blogger::current_user();
 
-        /*if ($this->user->has_blog() or $this->user->get_user_id() !== false)
-            return $this->cannot_register();*/
-
         return $this->request_form();
     }
 
 
-    /**
-     * @todo revise: the inability to register (if have an existing blog/if not a student user) should be optional
-     */
-    protected function cannot_register() {
-        $message = new Teachblog_Template('student_content/cannot_register_blog', array(
-            'has_blog' => $this->user->has_blog(),
-            'is_user' => ($this->user->get_user_id() !== false)
-        ));
-        return apply_filters('teachblog_cannot_register_blog', $message);
-    }
-
-
     protected function request_form() {
+        list($origin, $origin_hash) = Teachblog_Form::get_container_references();
+
         $form = new Teachblog_Template('student_content/blog_request_form', array(
             'notices' => $this->get_form_notices(),
+            'successful_submission_made' => $this->check_for_successful_submission(),
             'has_blog' => $this->user->has_blog(),
-            'is_user' => ($this->user->get_user_id() !== false)
+            'is_user' => ($this->user->get_user_id() !== false),
+            'originating_post' => $origin,
+            'originating_hash' => $origin_hash
         ));
         return apply_filters('teachblog_request_form', $form);
     }
 
 
     protected function get_form_notices() {
-        return (array) $this->system->student_content->blog_request_submissions->notices;
+        return (array) $this->system->student_content->blog_requests->blog_request_submissions->notices;
+    }
+
+
+    protected function check_for_successful_submission() {
+        return (bool) $this->system->student_content->blog_requests->blog_request_submissions->success;
     }
 }

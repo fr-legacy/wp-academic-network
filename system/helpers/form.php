@@ -126,4 +126,34 @@ class Teachblog_Form {
 
         return true;
     }
+
+
+    /**
+     * Checks if the specified fields (accepts multiple params) have been submitted as post data and are all empty.
+     *
+     * @param fields, [ fields .. ]
+     * @return bool
+     */
+    public static function are_posted_and_empty() {
+        foreach (func_get_args() as $field)
+            if (!self::is_posted($field) or !empty($_POST[$field])) return false;
+
+        return true;
+    }
+
+
+    /**
+     * Returns an array containing the current post ID and a hash of the same. No check is made to ensure a valid
+     * post ID is currently set.
+     *
+     * @return array
+     */
+    public static function get_container_references() {
+        global $post;
+
+        $post_id = (is_object($post) and isset($post->ID)) ? (int) $post->ID : '';
+        $hash = hash('MD5', $post_id . NONCE_KEY);
+
+        return array($post_id, $hash);
+    }
 }

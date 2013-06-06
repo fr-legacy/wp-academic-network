@@ -27,7 +27,8 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	const TEACHBLOG_BLOGS_SLUG = 'teachblog_student_blogs';
 
 	protected $actions = array(
-		'admin_menu' => 'menu_structure'
+		'admin_menu' => 'menu_structure',
+        'init' => 'setup_supporting_tools'
 	);
 
 	/**
@@ -60,6 +61,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		$this->blog_setup();
 		$this->setup_content_support();
 		$this->setup_supporting_tools();
+        do_action('teachblog_student_content_init');
 	}
 
 
@@ -70,7 +72,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	}
 
 
-	protected function setup_supporting_tools() {
+	public function setup_supporting_tools() {
 		$this->front_editor = new Teachblog_Front_Editor;
 		$this->front_list = new Teachblog_Front_Individual_List;
 		$this->front_submissions = new Teachblog_Front_Submissions;
