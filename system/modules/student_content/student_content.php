@@ -349,4 +349,21 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		$html = 'TODO!';
 		return $html;
 	}
+
+
+    /**
+     * Creates a new blog with the provided title and optionally a description, and assigns to the specified user.
+     *
+     * @param $title
+     * @param string $description = '' (optional)
+     * @return mixed
+     */
+    public function create_blog($title, $description = '') {
+        $result = wp_insert_term($title, self::TEACHBLOG_BLOG_TAXONOMY, array(
+            'decription' => $description
+        ));
+
+        if (is_wp_error($result)) return false;
+        return $result['term_id'];
+    }
 }

@@ -23,6 +23,10 @@
 class Teachblog_Blog_Requests extends Teachblog_Base_Object {
     const POST_TYPE = 'teachblog_blog_req';
 
+    protected $actions = array(
+        'teachblog_launch' => 'admin_actions'
+    );
+
     /**
      * @var Teachblog_Blog_Request_Form
      */
@@ -37,6 +41,8 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
      * @var Teachblog_Blog_Request_Docket
      */
     protected $docket;
+
+    protected $approval_errors = array();
 
 
     protected function setup() {
@@ -59,11 +65,11 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
      */
     public function register_post_type() {
         register_post_type(self::POST_TYPE, array(
-            'label' => _x('Account Requests', 'blog-requests', 'teachblog'),
+            'label' => _x('New Blog Requests', 'blog-requests', 'teachblog'),
             'labels' => array(
-                'singular_name' => _x('Account Request', 'blog-requests-singular', 'teachblog'),
-                'not_found' => __('There are no new account/blog requests waiting to be processed.', 'teachblog'),
-                'edit_item' => _x('Account Request', 'blog-request-edit-text', 'teachblog')),
+                'singular_name' => _x('New Blog Request', 'blog-requests-singular', 'teachblog'),
+                'not_found' => __('There are no new blog requests waiting to be processed.', 'teachblog'),
+                'edit_item' => _x('Blog Request', 'blog-request-edit-text', 'teachblog')),
             'public' => false,
             'publicly_queryable' => false,
             'exclude_from_search' => true,
@@ -110,15 +116,13 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
 
 
     protected function existing_user_summary() {
-        if (!$this->docket->account_requested) return '';
-
         $user = get_user_by('id', (int) $this->docket->submitting_user);
-        return $user->user_login.' (#'.$user->ID.')';
+        return $user ? $user->user_login.' (#'.$user->ID.')' : __('Error &mdash; Unknown User', 'teachblog');
     }
 
     public function actions_meta_box($post) {
         $this->admin->view('blog_requests/actions_meta_box', array(
-            'post_id' => $post->ID
+            'request_id' => $post->ID
         ));
     }
 
@@ -182,5 +186,143 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
         $initial_chunk = Teachblog_Strings::truncate("$blog_name &ndash; $user_name", 65);
         $date = date(get_option('date_format', 'Y-m-d'));
         return esc_html("$initial_chunk ($date)");
+    }
+
+
+    /**
+     * Listens for approval/trash actions when the request is reviewed and takes appropriate action from there.
+     */
+    public function admin_actions() {
+        add_filter('post_updated_messages', array($this, 'add_notices'));
+
+        if (!is_admin() or !Teachblog_Form::are_posted('teachblog_approval', 'request_id')) return;
+        if (!wp_verify_nonce($_POST['teachblog_approval'], 'teachblog_account_request') or !current_user_can('manage_users')) return;
+
+        if (Teachblog_Form::is_posted('trash-request')) $this->trash_request($_POST['request_id']);
+        if (Teachblog_Form::is_posted('approve-request')) $this->approve_request($_POST['request_id']);
+    }
+
+
+    protected function trash_request($request_id) {
+        wp_delete_post($request_id);
+        wp_redirect(get_admin_url(null, 'edit.php?post_type='.Teachblog_Blog_Requests::POST_TYPE));
+        exit();
+    }
+
+
+    /**
+     * Approves the request (if everything checks out ... if there are problems they should be displayed in any case
+     * when the screen reloads.
+     *
+     * @param $request_id
+     */
+    protected function approve_request($request_id) {
+        if (!$this->load_docket_object(get_post($request_id))) return; // Exit if the docket couldn't be loaded
+
+        // Make changes sticky and check for errors
+        $this->persist_changes_during_approval($request_id);
+        $this->do_approval_checks();
+        if (!empty($this->approval_errors)) return;
+
+        // Build the blog/user account and clear the request
+        if ($this->process_request($request_id)) {
+            wp_redirect(get_admin_url(null, 'edit.php?post_type='.Teachblog_Blog_Requests::POST_TYPE));
+            exit();
+        }
+    }
+
+
+    /**
+     * The admin/teacher should be able to tweak the submitted request and have those changes persist even if they
+     * are denied for some reason (such as the username already being in use).
+     *
+     * @param $request_id
+     */
+    protected function persist_changes_during_approval($request_id) {
+        $this->docket->blog_title = sanitize_title($this->docket_or_sticky_val('blog_title'));
+        $this->docket->blog_description = wp_kses_post($this->docket_or_sticky_val('blog_description'));
+
+        if ($this->docket->account_requested)
+            $this->docket->account_username = sanitize_user($this->docket_or_sticky_val('account_username'));
+
+        wp_update_post(array(
+            'ID' => $request_id,
+            'post_content' => serialize($this->docket)
+        ));
+    }
+
+
+    protected function do_approval_checks() {
+        if ($this->docket->account_requested) {
+            $username = trim($this->docket_or_sticky_val('account_username'));
+
+            if (username_exists($username)) $this->approval_errors[] =
+                __('requested username is already in use', 'teachblog');
+
+            if ($username !== sanitize_user($username)) $this->approval_errors[] =
+                sprintf(__('requested username contains special characters that should not be used in this context &ndash; try: %s', 'teachblog'),
+                    sanitize_user($this->docket->account_username));
+
+            if (empty($username)) $this->approval_errors[] =
+                __('no username has been provided', 'teachblog');
+
+            $password = trim($this->docket->account_password);
+            if (empty($password)) $this->approval_errors[] =
+                __('request was submitted with an empty password', 'teachblog');
+
+            if (!empty($this->docket->account_email) and email_exists($this->docket->account_email)) $this->approval_errors[] =
+                __('an email was submitted with this request but is already in use', 'teachblog');
+        }
+
+        $blog_title = trim($this->docket_or_sticky_val('blog_title'));
+
+        if (empty($blog_title)) $this->approval_errors[] =
+            __('The blog title is empty! Please make sure it has a meaningful title.', 'teachblog');
+    }
+
+
+    public function add_notices(array $messages) {
+        // Do nothing if we are not dealing with a new blog request!
+        global $post;
+        if (!isset($post->post_type) or !$post->post_type === self::POST_TYPE) return;
+
+        $this->load_docket_object($post);
+        $this->do_approval_checks();
+
+        $message = join(', ', $this->approval_errors);
+
+        if (!empty($message)) {
+            $messages[self::POST_TYPE][1000] = __('Please note the following problems: ', 'teachblog') . $message . '.';
+            $_GET['message'] = 1000;
+        }
+
+        return $messages;
+    }
+
+
+    /**
+     * Processes the request and builds the new blog (+user account if required) then deletes the request.
+     *
+     * @param $request_id
+     * @return bool
+     */
+    protected function process_request($request_id) {
+        if ($this->docket->account_requested) {
+            $user = Teachblog_Blogger::create_blogger(
+                $this->docket->account_username,
+                $this->docket->account_password,
+                $this->docket->account_email
+            );
+        }
+        else {
+            $user = Teachblog_Blogger::load($this->docket->submitting_user);
+        }
+
+        $blog_id = $this->system->student_content->create_blog($this->docket->blog_title, $this->docket->blog_description);
+        if (false === $blog_id or false === $user) return false;
+
+        $user->assign_to_blog($blog_id);
+        wp_delete_post($request_id);
+        return true;
     }
 }

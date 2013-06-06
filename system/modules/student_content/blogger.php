@@ -320,4 +320,24 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 		if (!$this->loaded) return '';
 		else return apply_filters('teachblog_default_submit_status', 'pending', $this->user);
 	}
+
+
+    /**
+     * Creates a new student user and returns the Teachblog_Blogger object for same.
+     *
+     * @param $username
+     * @param $password
+     * @param string $email = '' (optional)
+     * @return Teachblog_Blogger
+     */
+    public static function create_blogger($username, $password, $email = '') {
+        $result = wp_insert_user(array(
+            'user_login' => $username,
+            'user_pass' => $password,
+            'user_email' => $email,
+            'role' => Teachblog_Student_User::ROLE
+        ));
+
+        return new self($result);
+    }
 }

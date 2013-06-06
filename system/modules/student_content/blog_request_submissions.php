@@ -22,7 +22,7 @@
  */
 class Teachblog_Blog_Request_Submissions extends Teachblog_Base_Object {
     protected $actions = array(
-        'teachblog_launch' => 'look_for_submissions'
+        'teachblog_launch' => 'look_for_submissions',
     );
 
     /**

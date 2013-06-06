@@ -13,12 +13,15 @@
         <td>
             <?php
             if (!$account_requested) {
-                sprintf(__('Existing user %s wishes this blog to be created and assigned to him/her', 'teachblog'), esc_html($user_summary));
+                printf(__('Existing user %s wishes this blog to be created and assigned to him/her', 'teachblog'),
+                    '<strong>'.esc_html($user_summary).'</strong>');
             }
             else {
                 _e('The blog should be associated with the following new user (to be created):', 'teachblog');
                 echo '<br/>';
-                echo '<input type="text" name="requested_username" id="new_user_login" value="'.esc_attr($account_username).'" />';
+                echo '<input type="text" name="account_username" id="new_user_login" value="'.esc_attr($account_username).'" />';
+                echo '<br/>';
+                _e('If you need to change this then you should also notify the person who submitted the request!', 'teachblog');
             }
             ?>
             </p>

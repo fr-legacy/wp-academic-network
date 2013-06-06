@@ -48,7 +48,7 @@ class Teachblog_Base_Object {
 
 
 	public function __construct() {
-		// Key system object references/aliases
+		// Key references/aliases
 		$this->system = Teachblog::core();
 		$this->admin = $this->system->admin_environment;
 		$this->admin_menu = $this->system->admin_menu;
