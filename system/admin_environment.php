@@ -62,7 +62,7 @@ class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 
 		if (!$render) ob_start();
 
-		extract($vars);
+		if (null !== $vars) extract($vars);
 		include $path;
 
 		if (!$render) return ob_get_clean();

@@ -33,6 +33,11 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
      */
     public $blog_request_submissions;
 
+    /**
+     * @var Teachblog_Blog_Request_Docket
+     */
+    protected $docket;
+
 
     protected function setup() {
         $this->register_post_type();
@@ -57,13 +62,89 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
             'label' => _x('Account Requests', 'blog-requests', 'teachblog'),
             'labels' => array(
                 'singular_name' => _x('Account Request', 'blog-requests-singular', 'teachblog'),
-                'not_found' => __('There are no new account/blog requests waiting to be processed.', 'teachblog')),
+                'not_found' => __('There are no new account/blog requests waiting to be processed.', 'teachblog'),
+                'edit_item' => _x('Account Request', 'blog-request-edit-text', 'teachblog')),
             'public' => false,
             'publicly_queryable' => false,
             'exclude_from_search' => true,
             'show_ui' => true,
-            'show_in_menu' => Teachblog_Student_Content::TEACHBLOG_MENU_SLUG
+            'show_in_menu' => Teachblog_Student_Content::TEACHBLOG_MENU_SLUG,
+            'capabilities' => array('manage_users'),
+            'register_meta_box_cb' => array($this, 'setup_meta_boxes')
         ));
+
+        remove_post_type_support(self::POST_TYPE, 'title');
+        remove_post_type_support(self::POST_TYPE, 'editor');
+    }
+
+
+    public function setup_meta_boxes() {
+        add_meta_box('acct_request_summary',
+            _x('Request Details', 'account-requests', 'teachblog'),
+            array($this, 'summary_meta_box'),
+            self::POST_TYPE,
+            'normal'
+        );
+
+        add_meta_box('acct_request_actions',
+            _x('Actions', 'account-requests', 'teachblog'),
+            array($this, 'actions_meta_box'),
+            self::POST_TYPE,
+            'side'
+        );
+
+        remove_meta_box('submitdiv', self::POST_TYPE, 'side');
+    }
+
+
+    public function summary_meta_box($post) {
+        $this->load_docket_object($post);
+        $this->admin->view('blog_requests/summary_meta_box', array(
+            'blog_title' => $this->docket_or_sticky_val('blog_title'),
+            'blog_description' => $this->docket_or_sticky_val('blog_description'),
+            'account_requested' => (bool) $this->docket_or_sticky_val('account_requested'),
+            'account_username' => $this->docket_or_sticky_val('account_username'),
+            'user_summary' => $this->existing_user_summary()
+        ));
+    }
+
+
+    protected function existing_user_summary() {
+        if (!$this->docket->account_requested) return '';
+
+        $user = get_user_by('id', (int) $this->docket->submitting_user);
+        return $user->user_login.' (#'.$user->ID.')';
+    }
+
+    public function actions_meta_box($post) {
+        $this->admin->view('blog_requests/actions_meta_box', array(
+            'post_id' => $post->ID
+        ));
+    }
+
+
+    protected function docket_or_sticky_val($field) {
+        if (Teachblog_Form::is_posted($field)) return $_POST[$field];
+        elseif (isset($this->docket->$field)) return $this->docket->$field;
+        return '';
+    }
+
+
+    /**
+     * Loads the request docket and populates $this->docket (returning bool true if so or bool false if the operation
+     * failed).
+     *
+     * The docket class definition will be preloaded before unserializing if necessary. The unserialize process uses
+     * error suppression to avoid errors where the data to be unserialized has been corrupted etc.
+     *
+     * @param $post
+     * @return bool
+     */
+    protected function load_docket_object($post) {
+        if (is_a($this->docket, 'Teachblog_Blog_Request_Docket')) return true;
+        if (!is_object($post)) return false;
+        if (!class_exists('Teachblog_Blog_Request_Docket')) Teachblog::class_loader('Teachblog_Blog_Request_Docket');
+        return (bool) ($this->docket = @unserialize($post->post_content));
     }
 
 
