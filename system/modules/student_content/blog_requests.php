@@ -98,7 +98,8 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
         }
         if (empty($user_name)) $user_name = __('Anonymous', 'teachblog');
 
+        $initial_chunk = Teachblog_Strings::truncate("$blog_name &ndash; $user_name", 65);
         $date = date(get_option('date_format', 'Y-m-d'));
-        return esc_html("$date &ndash; $blog_name &ndash; $user_name");
+        return esc_html("$initial_chunk ($date)");
     }
 }
