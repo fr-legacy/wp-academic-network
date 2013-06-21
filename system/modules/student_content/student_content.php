@@ -28,7 +28,6 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 	protected $actions = array(
 		'admin_menu' => 'menu_structure',
-        'init' => 'setup_supporting_tools'
 	);
 
 	/**
@@ -77,6 +76,13 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		$this->front_list = new Teachblog_Front_Individual_List;
 		$this->front_submissions = new Teachblog_Front_Submissions;
         $this->blog_requests = new Teachblog_Blog_Requests;
+
+		$this->register_widgets();
+	}
+
+
+	public function register_widgets() {
+		register_widget('Teachblog_Widget_My_Posts');
 	}
 
 
