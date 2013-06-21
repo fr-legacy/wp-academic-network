@@ -29,6 +29,24 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 		'admin_menu' => 'add_settings_page'
 	);
 
+	protected static $system_settings = array();
+	protected static $system_settings_updated = false;
+	protected static $shutdown_logic_set = false;
+
+
+	public function setup() {
+		self::$system_settings = (array) $this->global_setting('system');
+		$this->create_shutdown_handler();
+	}
+
+
+	public function create_shutdown_handler() {
+		if (!self::$shutdown_logic_set) {
+			add_action('shutdown', array($this, 'save_system_settings'));
+			self::$shutdown_logic_set = true;
+		}
+	}
+
 
 	public function add_settings_page() {
 		$title = _x('Educational Tools', 'menu-item', 'teachblog');
@@ -82,5 +100,22 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 	public function deactivate_selected_modules() {
 		foreach ($_POST['check_row'] as $module)
 			$this->system->modules->disable($module);
+	}
+
+
+	public function get_system_setting($name) {
+		if (isset($this->system_settings[$name])) return $this->system_settings[$name];
+		return null;
+	}
+
+
+	public function set_system_setting($name, $value) {
+		$this->system_settings[$name] = $value;
+		$this->system_settings_updated = true;
+	}
+
+
+	public function save_system_settings() {
+		$this->global_setting('system', self::$system_settings);
 	}
 }

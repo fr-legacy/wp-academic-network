@@ -137,6 +137,7 @@ class Teachblog {
 		$this->locate_self();
 		$this->setup();
 		add_action('init', array($this, 'launch'));
+		register_activation_hook(__FILE__, array($this, 'on_activation'));
 	}
 
 
@@ -175,6 +176,16 @@ class Teachblog {
 		$this->student_user = new Teachblog_Student_User;
 
         do_action('teachblog_launch');
+	}
+
+
+	public function on_activation() {
+		add_action('shutdown', array($this, 'update_rewrite_table'));
+	}
+
+
+	public function update_rewrite_table() {
+		flush_rewrite_rules(true);
 	}
 }
 
