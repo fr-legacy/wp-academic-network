@@ -253,7 +253,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
 
 
     protected function do_approval_checks() {
-        if ($this->docket->account_requested) {
+        if (is_object($this->docket) and $this->docket->account_requested) {
             $username = trim($this->docket_or_sticky_val('account_username'));
 
             if (username_exists($username)) $this->approval_errors[] =
