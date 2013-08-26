@@ -167,7 +167,7 @@ class Teachblog {
 
 
 	public function launch() {
-		$this->current_site = get_current_site();
+		$this->current_site = $this->get_current_site();
 		$this->modules = new Teachblog_Modules;
 		$this->admin_environment = new Teachblog_Admin_Environment;
 		$this->general_settings = new Teachblog_General_Settings;
@@ -177,6 +177,48 @@ class Teachblog {
 		$this->student_user = new Teachblog_Student_User;
 
         do_action('teachblog_launch');
+	}
+
+
+	/**
+	 * Returns an object representation in line with that returned by WP's get_current_site()
+	 * function, but does so even outside of a multisite installation.
+	 *
+	 * @return stdClass
+	 */
+	protected function get_current_site() {
+		if (function_exists('get_current_site')) return get_current_site();
+
+		list($domain, $path) = $this->get_domain_and_path();
+
+		return (object) array(
+			'domain' => $domain,
+			'id' => 0,
+			'path' => $path,
+			'site_name' => get_bloginfo('name')
+		);
+	}
+
+
+	/**
+	 * Attempts to determine the site domain and path from the home_url setting. Returns an array
+	 * of two elements.
+	 *
+	 * @return array
+	 */
+	protected function get_domain_and_path() {
+		$addr = home_url();
+		$break = strpos($addr, '/');
+		$path = '';
+
+		if (false === $break) $domain = $addr;
+		else {
+			$parts = explode('/', $addr);
+			$domain = array_shift($parts);
+			$path = join('/', $parts);
+		}
+
+		return array($domain, $path);
 	}
 
 
