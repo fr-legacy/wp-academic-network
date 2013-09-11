@@ -27,6 +27,19 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
         'teachblog_launch' => 'admin_actions'
     );
 
+	/**
+	 * By default we will use "promote_users" as the capability we test against before allowing admins (teachers) to
+	 * approve a new user/blog request.
+	 *
+	 * This flouts convention a little since we aren't using the existing create_users capability, however A) we
+	 * want Teachblog to be a light-as-possible-skin over WordPress B) an administrator on a MU install will not have
+	 * the create_users capability by default and C) promote_users isn't necessarily a terrible fit even if it's a
+	 * creative interpretation.
+	 *
+	 * @var string
+	 */
+	protected $approval_capability = 'promote_users';
+
     /**
      * @var Teachblog_Blog_Request_Form
      */
@@ -47,6 +60,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
 
     protected function setup() {
         $this->register_post_type();
+	    $this->approval_capability = apply_filters('teachblog_new_blog_approval_cap', $this->approval_capability);
         $this->blog_request_form = new Teachblog_Blog_Request_Form;
         $this->blog_request_submissions = new Teachblog_Blog_Request_Submissions;
     }
@@ -62,11 +76,6 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
      * "inherit" from public) simply to afford an extra safeguard if the post type is modified after it is initially
      * registered here, in which case those specific properties would both need to be overriden, not just the public
      * property.
-     *
-     * We're also flouting convention with the use of the promote_users capability (instead of create_users) as A) we
-     * want Teachblog to be a light-as-possible-skin over WordPress B) an administrator on a MU install will not have
-     * the create_users capability by default and C) promote_users isn't necessarily a terrible fit even if it's a
-     * creative interpretation.
      */
     public function register_post_type() {
         register_post_type(self::POST_TYPE, array(
@@ -80,7 +89,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
 			'exclude_from_search' => true,
 			'show_ui' => true,
 			'show_in_menu' => Teachblog_Student_Content::TEACHBLOG_MENU_SLUG,
-			'capabilities' => array('promote_users'),
+			'capabilities' => array($this->approval_capability),
 			'map_meta_cap' => true,
 			'register_meta_box_cb' => array($this, 'setup_meta_boxes')
         ));
@@ -202,7 +211,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
         add_filter('post_updated_messages', array($this, 'add_notices'));
 
         if (!is_admin() or !Teachblog_Form::are_posted('teachblog_approval', 'request_id')) return;
-        if (!wp_verify_nonce($_POST['teachblog_approval'], 'teachblog_account_request') or !current_user_can('manage_users')) return;
+        if (!wp_verify_nonce($_POST['teachblog_approval'], 'teachblog_account_request') or !current_user_can($this->approval_capability)) return;
 
         if (Teachblog_Form::is_posted('trash-request')) $this->trash_request($_POST['request_id']);
         if (Teachblog_Form::is_posted('approve-request')) $this->approve_request($_POST['request_id']);
