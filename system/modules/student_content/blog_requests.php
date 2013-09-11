@@ -70,23 +70,23 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
      */
     public function register_post_type() {
         register_post_type(self::POST_TYPE, array(
-            'label' => _x('New Blog Requests', 'blog-requests', 'teachblog'),
-            'labels' => array(
-                'singular_name' => _x('New Blog Request', 'blog-requests-singular', 'teachblog'),
-                'not_found' => __('There are no new blog requests waiting to be processed.', 'teachblog'),
-                'edit_item' => _x('Blog Request', 'blog-request-edit-text', 'teachblog')),
-            'public' => false,
-            'publicly_queryable' => false,
-            'exclude_from_search' => true,
-            'show_ui' => true,
-            'show_in_menu' => Teachblog_Student_Content::TEACHBLOG_MENU_SLUG,
-            'capabilities' => array('promote_users'),
-	        'map_meta_cap' => true,
-            'register_meta_box_cb' => array($this, 'setup_meta_boxes')
+			'label' => _x('New Blog Requests', 'blog-requests', 'teachblog'),
+			'labels' => array(
+				'singular_name' => _x('New Blog Request', 'blog-requests-singular', 'teachblog'),
+				'not_found' => __('There are no new blog requests waiting to be processed.', 'teachblog'),
+				'edit_item' => _x('Blog Request', 'blog-request-edit-text', 'teachblog')),
+			'public' => false,
+			'publicly_queryable' => false,
+			'exclude_from_search' => true,
+			'show_ui' => true,
+			'show_in_menu' => Teachblog_Student_Content::TEACHBLOG_MENU_SLUG,
+			'capabilities' => array('promote_users'),
+			'map_meta_cap' => true,
+			'register_meta_box_cb' => array($this, 'setup_meta_boxes')
         ));
 
-        remove_post_type_support(self::POST_TYPE, 'title');
-        remove_post_type_support(self::POST_TYPE, 'editor');
+		remove_post_type_support(self::POST_TYPE, 'title');
+		remove_post_type_support(self::POST_TYPE, 'editor');
     }
 
 
