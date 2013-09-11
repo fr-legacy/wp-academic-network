@@ -62,6 +62,11 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
      * "inherit" from public) simply to afford an extra safeguard if the post type is modified after it is initially
      * registered here, in which case those specific properties would both need to be overriden, not just the public
      * property.
+     *
+     * We're also flouting convention with the use of the promote_users capability (instead of create_users) as A) we
+     * want Teachblog to be a light-as-possible-skin over WordPress B) an administrator on a MU install will not have
+     * the create_users capability by default and C) promote_users isn't necessarily a terrible fit even if it's a
+     * creative interpretation.
      */
     public function register_post_type() {
         register_post_type(self::POST_TYPE, array(
@@ -75,7 +80,8 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
             'exclude_from_search' => true,
             'show_ui' => true,
             'show_in_menu' => Teachblog_Student_Content::TEACHBLOG_MENU_SLUG,
-            'capabilities' => array('manage_users'),
+            'capabilities' => array('promote_users'),
+	        'map_meta_cap' => true,
             'register_meta_box_cb' => array($this, 'setup_meta_boxes')
         ));
 
@@ -148,14 +154,14 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
         if (is_a($this->docket, 'Teachblog_Blog_Request_Docket')) return true;
         if (!is_object($post)) return false;
         if (!class_exists('Teachblog_Blog_Request_Docket')) Teachblog::class_loader('Teachblog_Blog_Request_Docket');
-        return (bool) ($this->docket = @unserialize($post->post_content));
+        return (bool) ($this->docket = @unserialize(base64_decode($post->post_content)));
     }
 
 
     public function new_request(Teachblog_Blog_Request_Docket $request) {
         wp_insert_post(array(
             'post_title' => $this->request_log_title($request),
-            'post_content' => serialize($request),
+            'post_content' => base64_encode(serialize($request)),
             'post_type' => self::POST_TYPE,
             'post_status' => 'pending' // partly a reflection of the true state of things, but also to avoid 'draft' showing in the admin UI
         ));
