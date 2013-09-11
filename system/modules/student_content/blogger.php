@@ -167,8 +167,8 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 			$query->the_post();
 			$posts[] = $GLOBALS['post'];
 		}
-		wp_reset_postdata(); // Cleanup
 
+		wp_reset_postdata(); // Cleanup
 		return $posts;
 	}
 

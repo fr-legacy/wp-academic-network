@@ -21,6 +21,9 @@
 					<strong> <?php esc_html_e($post->post_title) ?> </strong> <br />
 					<span class="actions">
 						<a href="<?php esc_attr_e($shortcode->get_url('teachblog_editor', array('id' => $post->ID)) ) ?>"> <?php _e('Edit', 'teachblog') ?> </a>
+						<?php if ('publish' === $post->post_status): ?>
+							| <a href="<?php esc_attr_e(get_permalink($post->ID)) ?>"> <?php _e('View', 'teachblog') ?> </a>
+						<?php endif ?>
 					</span>
 				</td>
 				<td> <?php esc_html_e(mysql2date(get_option('date_format'), $post->post_modified)) ?> </td>
