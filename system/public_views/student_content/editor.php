@@ -60,7 +60,7 @@ $content = isset($content) ? $content : '';
                 <?php do_action('teachblog_editor_beside_status') ?>
             </div>
 
-            <label> <?php _e('Content', 'teachblog') ?> front_editor</label>
+            <label> <?php _e('Content', 'teachblog') ?> </label>
 
             <?php wp_editor(isset($content) ? $content : '', 'teachblog-front-editor') ?>
             <?php do_action('teachblog_editor_beside_editor') ?>
