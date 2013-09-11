@@ -108,6 +108,7 @@ class Teachblog {
         'Teachblog_Blog_Requests' => 'modules/student_content/blog_requests',
 		'Teachblog_Form' => 'helpers/form',
 		'Teachblog_Front_Editor' => 'modules/student_content/front_editor',
+		'Teachblog_Front_Helper' => 'modules/core/front_helper',
 		'Teachblog_Front_Individual_List' => 'modules/student_content/front_individual_list',
 		'Teachblog_Front_Submissions' => 'modules/student_content/front_submissions',
 		'Teachblog_General_Settings' => 'general_settings',

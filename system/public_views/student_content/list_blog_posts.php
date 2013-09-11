@@ -27,7 +27,7 @@
 					</span>
 				</td>
 				<td> <?php esc_html_e(mysql2date(get_option('date_format'), $post->post_modified)) ?> </td>
-				<td> <span class="post state"> <?php esc_html_e($post->post_status) ?> </span> </td>
+				<td> <span class="post state"> <?php echo Teachblog_Front_Helper::readable_post_state($post) ?> </span> </td>
 			</tr>
 		<?php endforeach; endif ?>
 
