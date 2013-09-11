@@ -149,7 +149,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public function get_complete_post_list() {
 		$posts = array();
-		$blog_term_ids = array_flip($this->get_assigned_blog_list());
+		$blog_term_ids = array_values(array_flip($this->get_assigned_blog_list()));
 
 		$query = new WP_Query(array(
 			'post_type' => Teachblog_Student_Content::TEACHBLOG_POST,
