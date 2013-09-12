@@ -97,14 +97,14 @@ class Teachblog_Widget_My_Posts extends WP_Widget
 		$output = new Teachblog_Template('student_content/widgets/my-blog-posts', $vars);
 
 		wp_reset_postdata(); // Cleanup
-		return apply_filters('teachblog_widget_my_blog_posts', $output);
+		return apply_filters('teachblog_widget_blog_posts', $output, __CLASS__);
 	}
 
 
 	protected function instance_defaults($instance) {
 		return wp_parse_args($instance, array(
 			'after_widget' => '</div>',
-			'before_widget' => '<div class="teachblog shortcode_widget my_posts">',
+			'before_widget' => '<div class="teachblog shortcode_widget student_posts">',
 			'after_title' => '</h4>',
 			'before_title' => '<h4>',
 			'title' => __('My Posts', 'teachblog'),

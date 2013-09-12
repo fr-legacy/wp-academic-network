@@ -103,6 +103,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		register_widget('Teachblog_Widget_My_Posts');
 		register_widget('Teachblog_Widget_Blogger_Posts');
 		register_widget('Teachblog_Widget_Recent_Posts');
+		register_widget('Teachblog_Widget_Student_Blogs');
 	}
 
 

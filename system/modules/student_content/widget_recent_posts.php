@@ -59,6 +59,6 @@ class Teachblog_Widget_Recent_Posts extends Teachblog_Widget_My_Posts
 		$output = new Teachblog_Template('student_content/widgets/my-blog-posts', $vars);
 
 		wp_reset_postdata(); // Cleanup
-		return apply_filters('teachblog_widget_my_blog_posts', $output);
+		return apply_filters('teachblog_widget_recent_blog_posts', $output);
 	}
 }

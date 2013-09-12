@@ -28,7 +28,7 @@ class Teachblog_Widget_Student_Blogs extends WP_Widget
 	public function __construct($id_base = false, $name = false) {
 		$this->admin = Teachblog::core()->admin_environment;
 		add_shortcode(strtolower(__CLASS__), array($this, 'do_shortcode'));
-		$name = (false !== $name) ? $name : __('My Student Blog Posts', 'teachblog');
+		$name = (false !== $name) ? $name : __('Student Blog List', 'teachblog');
 		parent::__construct($id_base, $name);
 	}
 
@@ -50,9 +50,7 @@ class Teachblog_Widget_Student_Blogs extends WP_Widget
 	 * @return array|void
 	 */
 	public function update($settings, $prev_settings) {
-		$settings['show'] = (int) $settings['show'];
-		if (-1 > $settings['show']) $settings['show'] = -1;
-
+		$settings['hide_empties'] = ('1' === $settings['hide_empties']) ? true : false;
 		$settings['autohide'] = ('1' === $settings['autohide']) ? true : false;
 
 		return $settings;
@@ -62,9 +60,9 @@ class Teachblog_Widget_Student_Blogs extends WP_Widget
 	public function form($instance) {
 		$instance = $this->instance_defaults($instance);
 
-		$this->admin->view('student_content/widget_my_posts', array(
+		$this->admin->view('student_content/widget_blogs', array(
 			'autohide' => $instance['autohide'],
-			'show' => $instance['show'],
+			'hide_empties' => $instance['hide_empties'],
 			'title' => $instance['title'],
 			'widget' => $this
 		));
@@ -78,37 +76,30 @@ class Teachblog_Widget_Student_Blogs extends WP_Widget
 	 * If the author_id is provided but evaluates to 0 we will not display anything.
 	 */
 	public function do_shortcode($args) {
-		// If the current user is not logged in, or has no blog, hide! (Unless an author_id has been passed in)
-		$blogger = Teachblog_Blogger::current_user();
-		if (!isset($args['author_id']) && (!$blogger->loaded || !$blogger->has_blog()) ) return '';
-		if (isset($args['author_id']) && 0 == $args['author_id']) return '';
-
-		// Query for requested posts
-		$query = new WP_Query(array(
-			'author' => isset($args['author_id']) ? $args['author_id'] : $blogger->get_user_id(),
-			'posts_per_page' => (int) $args['show'],
-			'post_type' => apply_filters('teachblog_my_posts_widget_post_type', Teachblog_Student_Content::TEACHBLOG_POST)
+		// Query for student blogs
+		$blogs = get_terms(Teachblog_Student_Content::TEACHBLOG_BLOG_TAXONOMY, array(
+			'hide_empty' => $args['hide_empties'] ? true : false
 		));
 
-		// Auto-hide?
-		if (0 === $query->post_count && $args['autohide']) return '';
+		// Hide if errors / autohide if empty
+		if (is_wp_error($blogs)) return '';
+		if (empty($blogs) && $args['autohide']) return '';
 
-		$vars = array_merge($args, array('query' => $query));
-		$output = new Teachblog_Template('student_content/widgets/my-blog-posts', $vars);
+		$vars = array_merge($args, array('blogs' => $blogs));
+		$output = new Teachblog_Template('student_content/widgets/list-blogs', $vars);
 
-		wp_reset_postdata(); // Cleanup
-		return apply_filters('teachblog_widget_my_blog_posts', $output);
+		return apply_filters('teachblog_widget_blog_list', $output);
 	}
 
 
 	protected function instance_defaults($instance) {
 		return wp_parse_args($instance, array(
 			'after_widget' => '</div>',
-			'before_widget' => '<div class="teachblog shortcode_widget my_posts">',
+			'before_widget' => '<div class="teachblog shortcode_widget student_blogs">',
 			'after_title' => '</h4>',
 			'before_title' => '<h4>',
 			'title' => __('My Posts', 'teachblog'),
-			'show' => 5,
+			'hide_empties' => true,
 			'autohide' => true
 		));
 	}
