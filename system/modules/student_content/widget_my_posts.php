@@ -72,7 +72,7 @@ class Teachblog_Widget_My_Posts extends WP_Widget
 
 
 	/**
-	 * Added the teachblog_my_posts_widget_post_type to facilitate special cases where for instance the student
+	 * Added the teachblog_my_posts_widget_post_type filter to facilitate special cases where for instance the student
 	 * is also granted permission to create regular posts.
 	 *
 	 * If the author_id is provided but evaluates to 0 we will not display anything.
