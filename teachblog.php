@@ -118,6 +118,7 @@ class Teachblog {
 		'Teachblog_Student_Content' => 'modules/student_content/student_content',
 		'Teachblog_Student_User' => 'modules/core/student_user',
 		'Teachblog_Template' => 'helpers/template',
+		'Teachblog_Widget_Blogger_Posts' => 'modules/student_content/widget_blogger_posts',
 		'Teachblog_Widget_My_Posts' => 'modules/student_content/widget_my_posts'
 	);
 

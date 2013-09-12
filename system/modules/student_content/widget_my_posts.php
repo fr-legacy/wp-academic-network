@@ -20,13 +20,16 @@ along with this program.  If not, see <http: *www.gnu.org/licenses/>.
 /**
  * Widget listing posts by the currently authenticated user (if they do indeed have a blog/blog posts).
  */
-class Teachblog_Widget_My_Posts extends WP_Widget {
+class Teachblog_Widget_My_Posts extends WP_Widget
+{
 	protected $admin;
 
 
-	public function __construct() {
+	public function __construct($id_base = false, $name = false) {
 		$this->admin = Teachblog::core()->admin_environment;
-		parent::__construct(false, __('My Student Blog Posts', 'teachblog'));
+		add_shortcode('teachblog_current_user_posts', array($this, 'do_shortcode'));
+		$name = (false !== $name) ? $name : __('My Student Blog Posts', 'teachblog');
+		parent::__construct($id_base, $name);
 	}
 
 
@@ -71,18 +74,24 @@ class Teachblog_Widget_My_Posts extends WP_Widget {
 	/**
 	 * Added the teachblog_my_posts_widget_post_type to facilitate special cases where for instance the student
 	 * is also granted permission to create regular posts.
+	 *
+	 * If the author_id is provided but evaluates to 0 we will not display anything.
 	 */
 	public function do_shortcode($args) {
-		// If the current user is not logged in, or has no blog, hide!
+		// If the current user is not logged in, or has no blog, hide! (Unless an author_id has been passed in)
 		$blogger = Teachblog_Blogger::current_user();
-		if (!$blogger->loaded || !$blogger->has_blog()) return '';
+		if (!isset($args['author_id']) && (!$blogger->loaded || !$blogger->has_blog()) ) return '';
+		if (isset($args['author_id']) && 0 == $args['author_id']) return '';
 
 		// Query for requested posts
 		$query = new WP_Query(array(
-			'author' => $blogger->get_user_id(),
+			'author' => isset($args['author_id']) ? $args['author_id'] : $blogger->get_user_id(),
 			'posts_per_page' => (int) $args['show'],
 			'post_type' => apply_filters('teachblog_my_posts_widget_post_type', Teachblog_Student_Content::TEACHBLOG_POST)
 		));
+
+		// Auto-hide?
+		if (0 === $query->post_count && $args['autohide']) return '';
 
 		$vars = array_merge($args, array('query' => $query));
 		$output = new Teachblog_Template('student_content/widgets/my-blog-posts', $vars);

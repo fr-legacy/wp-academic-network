@@ -1,6 +1,5 @@
 <p>
- <?php _e('This widget will display the <em>currently logged in</em> student user&#146;s blog posts. '
-	 .'If the user is not logged in, or if they are not a student blogger, it will not appear.', 'teachblog'); ?>
+ <?php _e('This widget can be used to display the posts of a designated student blogger.', 'teachblog'); ?>
 </p>
 
 <p>
@@ -10,6 +9,22 @@
 	?>
 	<label for="widget-<?php echo $id ?>"> <?php _e('Title:', 'teachblog') ?> </label>
 	<input type="text" id="<?php echo $id ?>" name="<?php echo $name ?>" value="<?php esc_attr_e($title) ?>" class="widefat" />
+</p>
+
+<p>
+	<?php
+	$id = $widget->get_field_id('author_id');
+	$name = $widget->get_field_name('author_id');
+	?>
+	<label for="widget-<?php echo $id ?>"> <?php _e('Student blogger:', 'teachblog') ?> </label>
+	<select id="<?php echo $id ?>" name="<?php echo $name ?>" class="widefat">
+		<option value="0"> <?php _e('None selected', 'teachblog') ?> </option>
+		<?php foreach ($bloggers as $blogger): ?>
+			<option value="<?php esc_attr_e($blogger->ID) ?>"<?php if ($blogger->ID == $author_id) echo ' selected="selected"' ?>>
+				<?php esc_html_e($blogger->user_login) ?>
+			</option>
+		<?php endforeach ?>
+	</select>
 </p>
 
 <p>

@@ -57,10 +57,13 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 	/**
 	 * Returns a list of student user accounts as an array of objects (in alphabetical order by login field).
 	 *
+	 * @param bool $current_blog_only
 	 * @return array
 	 */
-	public static function list_users() {
-		return (array)get_users(array('role' => self::ROLE, 'orderby' => 'login', 'order' => 'ASC'));
+	public static function list_users($current_blog_only = false) {
+		$params = array('role' => self::ROLE, 'orderby' => 'login', 'order' => 'ASC');
+		if ($current_blog_only) $params['blog_id'] = get_current_blog_id();
+		return (array) get_users($params);
 	}
 
 
