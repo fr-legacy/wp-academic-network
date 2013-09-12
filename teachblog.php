@@ -120,7 +120,8 @@ class Teachblog {
 		'Teachblog_Template' => 'helpers/template',
 		'Teachblog_Widget_Blogger_Posts' => 'modules/student_content/widget_blogger_posts',
 		'Teachblog_Widget_My_Posts' => 'modules/student_content/widget_my_posts',
-		'Teachblog_Widget_Recent_Posts' => 'modules/student_content/widget_recent_posts'
+		'Teachblog_Widget_Recent_Posts' => 'modules/student_content/widget_recent_posts',
+		'Teachblog_Widget_Student_Blogs' => 'modules/student_content/widget_student_blogs'
 	);
 
 

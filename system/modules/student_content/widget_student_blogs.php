@@ -18,9 +18,9 @@ along with this program.  If not, see <http: *www.gnu.org/licenses/>.
 */
 
 /**
- * Widget listing posts by the currently authenticated user (if they do indeed have a blog/blog posts).
+ * Widget listing all student blogs.
  */
-class Teachblog_Widget_My_Posts extends WP_Widget
+class Teachblog_Widget_Student_Blogs extends WP_Widget
 {
 	protected $admin;
 
