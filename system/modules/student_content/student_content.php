@@ -28,6 +28,13 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 	protected $actions = array(
 		'admin_menu' => 'menu_structure',
+		'init' => array(
+			'blog_setup',
+			'setup_content_support',
+			'setup_supporting_tools',
+			'setup_complete'
+		),
+		'widgets_init' => 'register_widgets'
 	);
 
 	/**
@@ -56,15 +63,23 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		return true;
 	}
 
-	protected function setup() {
-		$this->blog_setup();
-		$this->setup_content_support();
-		$this->setup_supporting_tools();
-        do_action('teachblog_student_content_init');
+
+	/**
+	 * Integrates blogs and blog posts, hooks up event handlers, sets up UI tweaks etc.
+	 */
+	public function blog_setup() {
+		add_action('edited_' . self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
+		add_action('created_' . self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
+		add_filter('manage_edit-' . self::TEACHBLOG_BLOG_TAXONOMY . '_columns', array($this, 'blog_list_columns'));
+		add_filter('manage_' . self::TEACHBLOG_BLOG_TAXONOMY . '_custom_column', array($this, 'populate_assignee_columns'), 10, 3);
+		add_filter('manage_edit-' . self::TEACHBLOG_POST . '_columns', array($this, 'post_list_columns'));
+		add_filter('manage_' . self::TEACHBLOG_POST . '_custom_column', array($this, 'populate_post_columns'), 10, 2);
+		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_add_form_fields', array($this, 'new_ownership_selector'));
+		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_edit_form_fields', array($this, 'existing_ownership_selector'));
 	}
 
 
-	protected function setup_content_support() {
+	public function setup_content_support() {
 		$this->register_type();
 		$this->register_taxonomy();
 		$this->type_taxonomy_link();
@@ -76,13 +91,16 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		$this->front_list = new Teachblog_Front_Individual_List;
 		$this->front_submissions = new Teachblog_Front_Submissions;
         $this->blog_requests = new Teachblog_Blog_Requests;
+	}
 
-		$this->register_widgets();
+
+	public function setup_complete() {
+		do_action('teachblog_student_content_init');
 	}
 
 
 	public function register_widgets() {
-		register_widget('Teachblog_Widget_My_Posts');
+		#register_widget('Teachblog_Widget_My_Posts');
 	}
 
 
@@ -179,21 +197,6 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		);
 
 		$this->admin_menu->send_to_top(self::TEACHBLOG_MENU_SLUG, $slug);
-	}
-
-
-	/**
-	 * Integrates blogs and blog posts, hooks up event handlers, sets up UI tweaks etc.
-	 */
-	public function blog_setup() {
-		add_action('edited_' . self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
-		add_action('created_' . self::TEACHBLOG_BLOG_TAXONOMY, array($this, 'save_assigned_student'), 20, 1);
-		add_filter('manage_edit-' . self::TEACHBLOG_BLOG_TAXONOMY . '_columns', array($this, 'blog_list_columns'));
-		add_filter('manage_' . self::TEACHBLOG_BLOG_TAXONOMY . '_custom_column', array($this, 'populate_assignee_columns'), 10, 3);
-		add_filter('manage_edit-' . self::TEACHBLOG_POST . '_columns', array($this, 'post_list_columns'));
-		add_filter('manage_' . self::TEACHBLOG_POST . '_custom_column', array($this, 'populate_post_columns'), 10, 2);
-		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_add_form_fields', array($this, 'new_ownership_selector'));
-		add_action(self::TEACHBLOG_BLOG_TAXONOMY . '_edit_form_fields', array($this, 'existing_ownership_selector'));
 	}
 
 

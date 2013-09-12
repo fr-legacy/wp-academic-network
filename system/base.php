@@ -64,9 +64,13 @@ class Teachblog_Base_Object {
 
 
 	protected function setup_hooks($register, $map) {
-		if (property_exists($this, $map) and is_array($this->$map))
-			foreach ($this->$map as $hook => $callback)
-				$register($hook, array($this, $callback));
+		if (property_exists($this, $map) and is_array($this->$map)) {
+			foreach ($this->$map as $hook => $callbacks) {
+				// Support multiple callbacks per hook
+				if (!is_array($callbacks)) $callbacks = array($callbacks);
+				foreach ($callbacks as $callback) $register($hook, array($this, $callback));
+			}
+		}
 	}
 
 

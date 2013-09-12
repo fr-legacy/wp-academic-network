@@ -138,7 +138,7 @@ class Teachblog {
 	protected function __construct() {
 		$this->locate_self();
 		$this->setup();
-		add_action('init', array($this, 'launch'));
+		add_action('plugins_loaded', array($this, 'launch'));
 		register_activation_hook(__FILE__, array($this, 'on_activation'));
 	}
 
