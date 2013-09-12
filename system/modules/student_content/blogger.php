@@ -65,7 +65,7 @@ class Teachblog_Blogger extends Teachblog_Base_Object {
 	 */
 	public static function load($id = null) {
 		if ($id === null) $id = get_current_user_id();
-		$id = (int)$id;
+		$id = (int) $id;
 
 		if (isset(self::$blogger_instances[$id])) {
 			return self::$blogger_instances[$id];

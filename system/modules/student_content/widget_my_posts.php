@@ -35,22 +35,72 @@ class Teachblog_Widget_My_Posts extends WP_Widget {
 	 * @param array $instance
 	 * @todo
 	 */
-	public function widget($args, $instance) { }
+	public function widget($args, $instance) {
+		$instance = $this->instance_defaults(array_merge($instance, $args));
+		echo $this->do_shortcode($instance);
+	}
 
 
 	/**
-	 * @param array $new_instance
-	 * @param array $old_instance
+	 * @param array $settings
+	 * @param array $prev_settings
 	 * @return array|void
-	 * @todo
 	 */
-	public function update($new_instance, $old_instance) { }
+	public function update($settings, $prev_settings) {
+		$settings['show'] = (int) $settings['show'];
+		if (-1 > $settings['show']) $settings['show'] = -1;
+
+		$settings['autohide'] = ('1' === $settings['autohide']) ? true : false;
+
+		return $settings;
+	}
 
 
 	public function form($instance) {
+		$instance = $this->instance_defaults($instance);
+
 		$this->admin->view('student_content/widget_my_posts', array(
-			'id' => $instance['id'],
-			'title' => $instance['title']
+			'autohide' => $instance['autohide'],
+			'show' => $instance['show'],
+			'title' => $instance['title'],
+			'widget' => $this
+		));
+	}
+
+
+	/**
+	 * Added the teachblog_my_posts_widget_post_type to facilitate special cases where for instance the student
+	 * is also granted permission to create regular posts.
+	 */
+	public function do_shortcode($args) {
+		// If the current user is not logged in, or has no blog, hide!
+		$blogger = Teachblog_Blogger::current_user();
+		if (!$blogger->loaded || !$blogger->has_blog()) return '';
+
+		// Query for requested posts
+		$query = new WP_Query(array(
+			'author' => $blogger->get_user_id(),
+			'posts_per_page' => (int) $args['show'],
+			'post_type' => apply_filters('teachblog_my_posts_widget_post_type', Teachblog_Student_Content::TEACHBLOG_POST)
+		));
+
+		$vars = array_merge($args, array('query' => $query));
+		$output = new Teachblog_Template('student_content/widgets/my-blog-posts', $vars);
+
+		wp_reset_postdata(); // Cleanup
+		return apply_filters('teachblog_widget_my_blog_posts', $output);
+	}
+
+
+	protected function instance_defaults($instance) {
+		return wp_parse_args($instance, array(
+			'after_widget' => '</div>',
+			'before_widget' => '<div class="teachblog shortcode_widget my_posts">',
+			'after_title' => '</h4>',
+			'before_title' => '<h4>',
+			'title' => __('My Posts', 'teachblog'),
+			'show' => 5,
+			'autohide' => true
 		));
 	}
 }

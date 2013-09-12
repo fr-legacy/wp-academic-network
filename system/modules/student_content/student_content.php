@@ -100,7 +100,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 
 	public function register_widgets() {
-		#register_widget('Teachblog_Widget_My_Posts');
+		register_widget('Teachblog_Widget_My_Posts');
 	}
 
 
