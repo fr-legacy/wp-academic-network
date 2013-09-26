@@ -59,9 +59,19 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
 
 	protected function preflight() {
+        $this->register_module();
 		if (!$this->system->modules->is_enabled('student_content')) return false;
 		return true;
 	}
+
+
+    protected function register_module() {
+        $this->system->modules->register_module(
+            __('Student Content', 'teachblog'),
+            __('Provides tools to let students submit their own content and interact with others', 'teachblog'),
+            'student_content'
+        );
+    }
 
 
 	/**

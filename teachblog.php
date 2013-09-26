@@ -92,6 +92,11 @@ class Teachblog {
 	 */
 	public $shortcode_location;
 
+	/**
+	 * @var Teachblog_Content_Privacy
+	 */
+	public $content_privacy;
+
 
 	/**
 	 * @var array
@@ -102,10 +107,11 @@ class Teachblog {
 		'Teachblog_Admin_Table' => 'helpers/admin_table',
 		'Teachblog_Base_Object' => 'base',
 		'Teachblog_Blogger' => 'modules/student_content/blogger',
-        'Teachblog_Blog_Request_Docket' => 'modules/student_content/blog_request_docket',
-        'Teachblog_Blog_Request_Form' => 'modules/student_content/blog_request_form',
-        'Teachblog_Blog_Request_Submissions' => 'modules/student_content/blog_request_submissions',
-        'Teachblog_Blog_Requests' => 'modules/student_content/blog_requests',
+		'Teachblog_Blog_Request_Docket' => 'modules/student_content/blog_request_docket',
+		'Teachblog_Blog_Request_Form' => 'modules/student_content/blog_request_form',
+		'Teachblog_Blog_Request_Submissions' => 'modules/student_content/blog_request_submissions',
+		'Teachblog_Blog_Requests' => 'modules/student_content/blog_requests',
+		'Teachblog_Content_Privacy' => 'modules/content_privacy/content_privacy',
 		'Teachblog_Form' => 'helpers/form',
 		'Teachblog_Front_Editor' => 'modules/student_content/front_editor',
 		'Teachblog_Front_Helper' => 'modules/core/front_helper',
@@ -179,6 +185,7 @@ class Teachblog {
 		$this->shortcode_location = new Teachblog_Shortcode_Location;
         $this->student_content = new Teachblog_Student_Content;
 		$this->student_user = new Teachblog_Student_User;
+		$this->content_privacy = new Teachblog_Content_Privacy;
 
         do_action('teachblog_launch');
 	}
