@@ -3,7 +3,7 @@
 	Plugin Name: Teachblog
 	Description: Provides blogging and other tools to students within the framework of an existing site on a WP network.
 	Author: Barry Hughes (forthrobot.com)
-	Version: 0.1.0
+	Version: 0.1.1
 	Author URI: http://forthrobot.com
 	License: GPL3
 
