@@ -2,6 +2,7 @@
 $action = isset($action) ? $action : '';
 $title = isset($title) ? $title : '';
 $content = isset($content) ? $content : '';
+$editor_prefs = isset($editor_prefs) ? $editor_prefs : array();
 ?>
 
 <?php do_action('teachblog_editor_before_form') ?>
@@ -62,7 +63,7 @@ $content = isset($content) ? $content : '';
 
             <label> <?php _e('Content', 'teachblog') ?> </label>
 
-            <?php wp_editor(isset($content) ? $content : '', 'teachblog-front-editor') ?>
+            <?php wp_editor(isset($content) ? $content : '', 'teachblog-front-editor', $editor_prefs) ?>
             <?php do_action('teachblog_editor_beside_editor') ?>
         </div>
 

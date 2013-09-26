@@ -65,11 +65,13 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 			'status' => $this->post_status_array(),
 			'notices' => $this->get_editor_notices(),
 			'originating_post' => $origin,
-			'originating_hash' => $origin_hash
+			'originating_hash' => $origin_hash,
+			'editor_prefs' => apply_filters('teachblog_front_editor_tinymce_prefs', array(
+				'media_buttons' => true
+			))
 		);
 
 		if ($this->post) $vars['id'] = $this->post->ID;
-
 		return new Teachblog_Template('student_content/editor', $vars);
 	}
 

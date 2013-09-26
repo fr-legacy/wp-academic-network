@@ -28,7 +28,7 @@
  * Teachblog umbrella class. Sets up the plugin and loads key components.
  */
 class Teachblog {
-	const VERSION = '0.1.0';
+	const VERSION = '0.1.1';
 	const CODENAME = 'Busy Biretta';
 
 	protected static $instance = false;

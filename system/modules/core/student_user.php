@@ -27,6 +27,7 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 	public function setup() {
 		if ($this->role_undefined()) $this->define_role();
 		$this->prevent_admin_access();
+		$this->optionally_allow_file_upload();
 	}
 
 
@@ -51,6 +52,29 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 		));
 
 		add_role(self::ROLE, _x('Student User', 'user-type', 'teachblog'), $capabilities);
+	}
+
+
+	/**
+	 * Ordinarily student users will be of the subscriber role and won't have the upload_files capability. This method
+	 * facilitates dynamically adding it for applicable users and provides a filter - teachblog_grant_file_upload_cap -
+	 * that makes it easy to deny this privilege.
+	 */
+	protected function optionally_allow_file_upload() {
+		$blogger = Teachblog_Blogger::current_user();
+
+		if (!$blogger->is_student_user()) return;
+		if (!apply_filters('teachblog_grant_file_upload_cap', true, $blogger)) return;
+
+		add_filter('user_has_cap', array($this, 'add_upload_files_cap'), 10, 2);
+	}
+
+
+	public function add_upload_files_cap($cap_list, $cap) {
+		if (isset($cap_list[Teachblog_Student_User::ROLE]) && in_array('upload_files', $cap))
+			if (!in_array('upload_files', $cap_list, true)) $cap_list['upload_files'] = 'upload_files';
+
+		return $cap_list;
 	}
 
 
