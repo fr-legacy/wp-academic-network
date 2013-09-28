@@ -41,4 +41,14 @@ class Teachblog_Content_Privacy extends Teachblog_Base_Object
             'content_privacy'
         );
     }
+
+
+	protected function setup() {
+		$this->create_admin_screen();
+	}
+
+
+	protected function create_admin_screen() {
+
+	}
 }
