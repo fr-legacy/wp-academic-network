@@ -25,11 +25,26 @@ class Teachblog_Admin_Menu extends Teachblog_Base_Object {
 
 	/**
 	 * The menu start position uses a decimal value to avoid collisions,
-	 * this is a workaround recommended in the WP codex.
-	 *
-	 * When used with menu API calls it must be cast to string however.
+	 * this is a workaround suggested in the WP codex (when used with
+	 * menu API calls it must be cast to string, however).
 	 */
 	protected $menu_position = 50.256;
+
+	/**
+	 * Registered menu's "hook_suffix".
+	 *
+	 * @see http://codex.wordpress.org/Function_Reference/add_menu_page
+	 * @var string
+	 */
+	protected $menu_hook = '';
+
+	/**
+	 * Slug for the last (normally, the only) registered top level menu
+	 * created by this plugin.
+	 *
+	 * @var string
+	 */
+	protected $menu_slug = '';
 
 	/**
 	 * Used for re-ordering submenu admin items.
@@ -43,25 +58,28 @@ class Teachblog_Admin_Menu extends Teachblog_Base_Object {
 
 
 	/**
-	 * Registers a top level administrative menu.
+	 * Registers a top level administrative menu. Intended to be used once only.
 	 */
 	public function register_menu($title, $slug, $controller, $capability = '', $icon = '') {
 		// For l10n purposes the title translation needs to be assessed upstream of this method
 		$title = _x($title, 'menu-entry', 'teachblog');
 		$icon = empty($icon) ? $this->system->url . 'assets/menu-icon-set.png' : $icon;
 
-		add_menu_page(
+		$this->menu_hook = add_menu_page(
 			$title, $title, $capability, $slug, $controller, $icon, $this->safe_menu_position());
+
+		$this->menu_slug = $slug;
 	}
 
 
 	/**
 	 * Registers a submenu page.
 	 */
-	public function register_submenu($title, $parent, $slug, $controller, $capability) {
+	public function register_submenu($title, $slug, $controller, $capability, $parent = '') {
 		// For l10n purposes the title translation needs to be assessed upstream of this method
 		$title = _x($title, 'menu-entry', 'teachblog');
 
+		if (empty($parent)) $parent = $this->menu_slug;
 		add_submenu_page($parent, $title, $title, $capability, $slug, $controller);
 	}
 
@@ -121,8 +139,6 @@ class Teachblog_Admin_Menu extends Teachblog_Base_Object {
 
 		// Rebuild the entry
 		$entry[] = $subitem;
-
-
 	}
 
 

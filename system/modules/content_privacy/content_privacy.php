@@ -23,8 +23,10 @@
  */
 class Teachblog_Content_Privacy extends Teachblog_Base_Object
 {
-    protected $actions = array(
-    );
+	protected $actions = array(
+		'admin_init' => 'save_changes',
+		'admin_menu' => 'add_settings_page'
+	);
 
 
     protected function preflight() {
@@ -43,12 +45,19 @@ class Teachblog_Content_Privacy extends Teachblog_Base_Object
     }
 
 
-	protected function setup() {
-		$this->create_admin_screen();
+	public function save_changes() {
+		if (!Teachblog_Form::check_admin_url()) return;
 	}
 
 
-	protected function create_admin_screen() {
+	public function add_settings_page() {
+		$this->admin_menu->register_submenu('Privacy Mode', 'privacy_mode', array($this, 'controller'), 'manage_options', 'teachblog_student_content');
+	}
 
+
+	public function controller() {
+		$this->admin->page('content_privacy/settings', array(
+			'title' => 'Privacy Settings'
+		));
 	}
 }

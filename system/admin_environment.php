@@ -49,7 +49,7 @@ class Teachblog_Admin_Environment extends Teachblog_Base_Object {
 			'title' => 'Teachblog',
 			'menu' => '',
 			'content' => ''
-		), (array)$vars);
+		), (array) $vars);
 
 		$vars['content'] = $view = $this->view($view, $vars, false);
 		$this->view('admin_frame', $vars);
