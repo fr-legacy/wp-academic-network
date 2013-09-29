@@ -185,7 +185,7 @@ class Teachblog {
 		$this->shortcode_location = new Teachblog_Shortcode_Location;
         $this->student_content = new Teachblog_Student_Content;
 		$this->student_user = new Teachblog_Student_User;
-		$this->content_privacy = new Teachblog_Content_Privacy;
+		#$this->content_privacy = new Teachblog_Content_Privacy;
 
         do_action('teachblog_launch');
 	}
