@@ -67,7 +67,7 @@ class Teachblog_Front_Editor extends Teachblog_Base_Object {
 			'originating_post' => $origin,
 			'originating_hash' => $origin_hash,
 			'editor_prefs' => apply_filters('teachblog_front_editor_tinymce_prefs', array(
-				'media_buttons' => true
+				'media_buttons' => false # false until further groundwork laid in develop
 			))
 		);
 

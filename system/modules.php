@@ -32,12 +32,6 @@ class Teachblog_Modules extends Teachblog_Base_Object {
 
 
 	protected function setup() {
-		$this->register_module(
-			__('Student Content', 'teachblog'),
-			__('Provides tools to let students submit their own content and interact with others', 'teachblog'),
-			'student_content'
-		);
-
 		do_action('teachblog_register_modules', $this);
 	}
 

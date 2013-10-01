@@ -28,26 +28,26 @@
 
 		echo "</$section>";
 	}
-	?>
 
-	<tr>
-		<?php
-		// Print the rows
-		foreach ($data as $id => $columns) {
-			if ($checkbox) echo '<th scope="row" class="check-column"> <input type="checkbox" name="check_row[]" value="' . esc_attr($id) . '" /> </th>';
+	// Print the rows
+	foreach ($data as $id => $columns) {
+		echo '<tr>';
 
-			$count = 0;
+		if ($checkbox) echo '<th scope="row" class="check-column"> <input type="checkbox" name="check_row[]" value="' . esc_attr($id) . '" /> </th>';
 
-			foreach ($columns as $column) {
-				$count++;
+		$count = 0;
 
-				if ($count === 1) {
-					// @todo insert first column row actions
-					$row_actions = '<span class="row-actions"> </span>';
-				}
-				echo '<td> ' . $column . ' ' . $row_actions . ' </td>';
+		foreach ($columns as $column) {
+			$count++;
+
+			if ($count === 1) {
+				// @todo insert first column row actions
+				$row_actions = '<span class="row-actions"> </span>';
 			}
+			echo '<td> ' . $column . ' ' . $row_actions . ' </td>';
 		}
-		?>
-	</tr>
+
+		echo '</tr>';
+	}
+	?>
 </table>
