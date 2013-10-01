@@ -24,7 +24,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
     const POST_TYPE = 'teachblog_blog_req';
 
     protected $actions = array(
-        'teachblog_launch' => 'admin_actions'
+        'teachblog_student_content_init' => 'admin_actions'
     );
 
 	/**
