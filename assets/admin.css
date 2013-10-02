@@ -3,6 +3,12 @@
 	background-image: url("tango-web-icon-32.png");
 }
 
+/* Setting page sections */
+
+.teachblog .section {
+    padding-bottom: 1.42em;
+}
+
 /* On/off switches */
 
 .teachblog .onoffswitch > span {
