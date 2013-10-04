@@ -1,3 +1,4 @@
+<input type="hidden" name="teachblog_privacy_settings" value="<?php esc_attr_e(wp_create_nonce('privacy')) ?>" />
 <div class="section">
 
 	<h3> <?php _e('Privacy mode', 'teachblog') ?> </h3>
@@ -9,8 +10,9 @@
 				'teachblog') ?> </li>
 		</ul> </label>
 		<select name="mode" id="mode">
-			<option value="gateway"> <?php _e('Gateway login page', 'teachblog') ?> </option>
-			<option value="selective"> <?php _e('Auto-hide student content', 'teachblog') ?> </option>
+			<option value="disabled"> <?php _e('Disable content privacy', 'teachblog') ?> </option>
+			<option value="gateway" <?php if ('gateway' === $mode) echo 'selected="selected"' ?>> <?php _e('Gateway login page', 'teachblog') ?> </option>
+			<option value="selective" <?php if ('selective' === $mode) echo 'selected="selected"' ?>> <?php _e('Auto-hide student content', 'teachblog') ?> </option>
 		</select>
 	</p>
 
@@ -24,7 +26,7 @@
 		<label for="gateway_page"> <?php _e('You can choose a page which all non-authenticated users will be redirected '
 			.'too. That page can then be customized to provide login facilities, etc.', 'teachblog') ?> </label>
 		<br/>
-		<?php echo Teachblog_Form::page_list(0, 'gateway_page', 'gateway_page') ?>
+		<?php echo Teachblog_Form::page_list($gateway_id, 'gateway_page', 'gateway_page') ?>
 	</p>
 
 </div>

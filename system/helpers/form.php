@@ -180,8 +180,9 @@ class Teachblog_Form {
 			. '<option value="0">' . $init_choice . '</option>';
 
 		foreach ($pages as $page) {
-			$selected = ($selected == $page->ID) ? ' selected="selected" ' : ' ';
-			$output .= '<option value="' . esc_attr($page->ID) . '"' . $selected . '>' . esc_html($page->post_title) . '</option>';
+			$default = ($selected == $page->ID) ? ' selected="selected" ' : ' ';
+			$output .= '<option value="' . esc_attr($page->ID) . '"' . $default . '>'
+				. esc_html($page->post_title) . ' (' . esc_html($page->ID) . ') </option>';
 		}
 
 		return $output . '</select>';

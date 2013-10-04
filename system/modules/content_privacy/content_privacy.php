@@ -47,6 +47,25 @@ class Teachblog_Content_Privacy extends Teachblog_Base_Object
 
 	public function save_changes() {
 		if (!Teachblog_Form::check_admin_url()) return;
+		if (!wp_verify_nonce($_POST['teachblog_privacy_settings'], 'privacy')) return;
+
+		switch (Teachblog_Form::is_posted('mode') ? $_POST['mode'] : 'disabled') {
+			case 'gateway': $mode = 'gateway'; break;
+			case 'selective': $mode = 'selective'; break;
+			default: $mode = 'disabled'; break;
+		}
+
+		if (Teachblog_Form::is_posted('gateway_page')) {
+			$gateway_id = absint($_POST['gateway_page']);
+		}
+
+		$setting = $this->local_setting('content_privacy');
+		if (!is_array($setting)) $setting = array();
+
+		$setting['mode'] = $mode;
+		if (isset($gateway_id)) $setting['gateway_id'] = $gateway_id;
+
+		$this->local_setting('content_privacy', $setting);
 	}
 
 
@@ -56,8 +75,15 @@ class Teachblog_Content_Privacy extends Teachblog_Base_Object
 
 
 	public function controller() {
+		$setting = wp_parse_args((array) $this->local_setting('content_privacy'), array(
+			'mode' => 'disabled',
+			'gateway_id' => 0
+		));
+
 		$this->admin->page('content_privacy/settings', array(
-			'title' => 'Privacy Settings'
+			'title' => 'Privacy Settings',
+			'mode' => $setting['mode'],
+			'gateway_id' => $setting['gateway_id']
 		));
 	}
 }
