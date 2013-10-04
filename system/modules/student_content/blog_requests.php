@@ -135,6 +135,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
         return $user ? $user->user_login.' (#'.$user->ID.')' : __('Error &mdash; Unknown User', 'teachblog');
     }
 
+
     public function actions_meta_box($post) {
         $this->admin->view('blog_requests/actions_meta_box', array(
             'request_id' => $post->ID
@@ -254,7 +255,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
      * @param $request_id
      */
     protected function persist_changes_during_approval($request_id) {
-        $this->docket->blog_title = sanitize_title($this->docket_or_sticky_val('blog_title'));
+        $this->docket->blog_title = $this->docket_or_sticky_val('blog_title');
         $this->docket->blog_description = wp_kses_post($this->docket_or_sticky_val('blog_description'));
 
         if ($this->docket->account_requested)
@@ -262,7 +263,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
 
         wp_update_post(array(
             'ID' => $request_id,
-            'post_content' => serialize($this->docket)
+            'post_content' => base64_encode(serialize($this->docket))
         ));
     }
 
@@ -293,6 +294,8 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
 
         if (empty($blog_title)) $this->approval_errors[] =
             __('The blog title is empty! Please make sure it has a meaningful title.', 'teachblog');
+
+	    // @todo test for existence of blog title (they are really taxonomy terms and must be unique)
     }
 
 
