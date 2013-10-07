@@ -23,4 +23,21 @@
  */
 class Teachblog_Selective_Privacy extends Teachblog_Base_Object
 {
+	protected $authenticated = true;
+
+
+	protected function setup() {
+		if (is_admin() || defined('DOING_AJAX')) return;
+		if (!is_user_logged_in()) {
+			$this->authenticated = false;
+			add_filter('teachblog_student_content_type', array($this, 'make_student_content_private'));
+		}
+	}
+
+
+	public function make_student_content_private($properties) {
+		if ($this->authenticated) return $properties;
+		$properties['public'] = false;
+		return $properties;
+	}
 }

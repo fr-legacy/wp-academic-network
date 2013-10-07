@@ -128,7 +128,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 		if ($this->local_setting('post_revisions')) $supports[] = 'revisions';
 		if (current_theme_supports('post_thumbnails')) $supports[] = 'thumbnails';
 
-		register_post_type(self::TEACHBLOG_POST, array(
+		$type_properties = apply_filters('teachblog_student_content_type', array(
 			'label' => __('Student Posts', 'teachblog'),
 			'labels' => array(
 				'singular_name' => __('Student Post', 'teachblog'),
@@ -145,6 +145,8 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 			'rewrite' => array(
 				'slug' => _x('studentpost', 'student_post_slug', 'teachblog'))
 		));
+
+		register_post_type(self::TEACHBLOG_POST, $type_properties);
 	}
 
 
