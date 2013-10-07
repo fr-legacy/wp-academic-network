@@ -36,6 +36,17 @@ class Teachblog_Content_Privacy extends Teachblog_Base_Object
     }
 
 
+	protected function setup() {
+		$setting = $this->local_setting('content_privacy');
+		if (!isset($setting['mode'])) return;
+
+		switch ($setting['mode']) {
+			case 'gateway': new Teachblog_Gateway_Privacy; break;
+			case 'selective': new Teachblog_Selective_Privacy; break;
+		}
+	}
+
+
     protected function register_module() {
         $this->system->modules->register_module(
             __('Content Privacy', 'teachblog'),
