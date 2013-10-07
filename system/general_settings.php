@@ -44,7 +44,8 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 		if (!self::$shutdown_logic_set) {
 			add_action('shutdown', array($this, 'save_system_settings'));
 			self::$shutdown_logic_set = true;
-		}
+		}			else $this->system->modules->disable($slug);
+
 	}
 
 
@@ -71,6 +72,7 @@ class Teachblog_General_Settings extends Teachblog_Base_Object {
 
 
 	public function save_changes() {
+		if (!isset($_POST['teachblog_site_settings'])) return;
 		if (!Teachblog_Form::check_admin_url()) return;
 
 		// Look for individual module activation/deactivations

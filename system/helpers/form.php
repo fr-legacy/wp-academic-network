@@ -156,4 +156,35 @@ class Teachblog_Form {
 
         return array($post_id, $hash);
     }
+
+
+	/**
+	 * Returns a select element allowing users to select a page from a list of all pages (not posts).
+	 *
+	 * The option values are the post IDs.
+	 *
+	 * @param int $selected the post ID of any page to be selected by default
+	 * @param string $name
+	 * @param string $id
+	 * @return string
+	 */
+	public static function page_list($selected = 0, $name = 'page_list', $id = 'page_list') {
+		$pages = get_posts(array(
+			'posts_per_page' => -1,
+			'post_type' => 'page',
+			'post_status' => 'publish'
+		));
+
+		$init_choice = 0 === count($pages) ? __('No published pages found', 'teachblog') : __('Please select a page', 'teachblog');
+		$output = '<select id="' . $id . '" name="' . $name . '">'
+			. '<option value="0">' . $init_choice . '</option>';
+
+		foreach ($pages as $page) {
+			$default = ($selected == $page->ID) ? ' selected="selected" ' : ' ';
+			$output .= '<option value="' . esc_attr($page->ID) . '"' . $default . '>'
+				. esc_html($page->post_title) . ' (' . esc_html($page->ID) . ') </option>';
+		}
+
+		return $output . '</select>';
+	}
 }

@@ -9,7 +9,7 @@
 				echo '<option value="' . esc_attr($slug) . '">' . esc_html($title) . '</option>';
 
 			echo '</select>';
-			echo '<input id="doaction" class="button action main-action" type="submit" value="' . _x('Apply &amp; Update', 'table-actions', 'teachblog') . '" name="">';
+			echo '<input id="doaction" class="button action main-action" type="submit" value="' . _x('Apply &amp; Update', 'table-actions', 'teachblog') . '">';
 		}
 		?>
 

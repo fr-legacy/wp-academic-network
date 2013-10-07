@@ -1,3 +1,5 @@
+<input type="hidden" name="teachblog_site_settings" value="1" />
+
 <?php
 $module_table->use_checkbox(true)->set_columns(array(
 	__('Module', 'teachblog'),
