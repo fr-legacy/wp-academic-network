@@ -25,7 +25,8 @@ class Teachblog_Content_Privacy extends Teachblog_Base_Object
 {
 	protected $actions = array(
 		'admin_init' => 'save_changes',
-		'admin_menu' => 'add_settings_page'
+		'admin_menu' => 'add_settings_page',
+		'admin_print_scripts-student-content_page_privacy_mode' => 'add_script'
 	);
 
 
@@ -96,5 +97,10 @@ class Teachblog_Content_Privacy extends Teachblog_Base_Object
 			'mode' => $setting['mode'],
 			'gateway_id' => $setting['gateway_id']
 		));
+	}
+
+
+	public function add_script() {
+		wp_enqueue_script('teachblog_privacy_admin', $this->system->url . '/assets/admin-privacy.js');
 	}
 }

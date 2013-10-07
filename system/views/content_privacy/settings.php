@@ -18,7 +18,7 @@
 
 </div>
 
-<div class="section">
+<div class="section" id="gateway_settings">
 
 	<h3> <?php _e('Gateway mode settings', 'teachblog') ?> </h3>
 
