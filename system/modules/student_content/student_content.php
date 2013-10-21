@@ -410,7 +410,7 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
         // If $prevent is already false there's no need to make any further change
         if (false === $prevent) return $prevent;
 
-        // Do not interfere unless the request it is a student user's async upload request
+        // Do not interfere unless the request is a student user's async upload request
         if ('async-upload.php' !== $pagenow) return $prevent;
         if (!Teachblog_Blogger::current_user()->is_student_user()) return $prevent;
 
