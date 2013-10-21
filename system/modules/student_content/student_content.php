@@ -65,6 +65,11 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 	}
 
 
+    protected function setup() {
+        add_filter('teachblog_prevent_student_admin_access', array($this, 'do_not_impede_student_media_uploads'));
+    }
+
+
     protected function register_module() {
         $this->system->modules->register_module(
             __('Student Content', 'teachblog'),
@@ -389,5 +394,27 @@ class Teachblog_Student_Content extends Teachblog_Base_Object {
 
         if (is_wp_error($result)) return false;
         return $result['term_id'];
+    }
+
+
+    /**
+     * (Filter function) the system that optionally prevents admin access for student users can impede asynch media
+     * uploads. This method attempts to intelligently counter that.
+     *
+     * @param bool $prevent
+     * @return bool
+     */
+    public function do_not_impede_student_media_uploads($prevent) {
+        global $pagenow;
+
+        // If $prevent is already false there's no need to make any further change
+        if (false === $prevent) return $prevent;
+
+        // Do not interfere unless the request it is a student user's async upload request
+        if ('async-upload.php' !== $pagenow) return $prevent;
+        if (!Teachblog_Blogger::current_user()->is_student_user()) return $prevent;
+
+        // Allow!
+        return false;
     }
 }

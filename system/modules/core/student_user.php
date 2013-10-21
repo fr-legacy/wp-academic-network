@@ -42,13 +42,18 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 
 
 	/**
-	 * Defines the student user role and its default capabilities.
+	 * Defines the student user role and its default capabilities. They are essentially in line with the defaults for an
+     * Author-role user.
 	 */
 	protected function define_role() {
 		$capabilities = apply_filters('teachblog_student_user_capabilities', array(
 			'delete_posts',
+            'delete_published_posts',
 			'edit_posts',
-			'read'
+            'edit_published_posts',
+            'publish_posts',
+			'read',
+            'upload_files'
 		));
 
 		add_role(self::ROLE, _x('Student User', 'user-type', 'teachblog'), $capabilities);
@@ -101,7 +106,7 @@ class Teachblog_Student_User extends Teachblog_Base_Object {
 		if (!is_a($user, 'WP_User') or !in_array(self::ROLE, $user->roles)) return;
 
 		$prevent_access = ($this->local_setting('allow_student_admin_access') !== true);
-		$prevent_access = apply_filters('teachblog_revent_student_admin_access', $prevent_access);
+		$prevent_access = apply_filters('teachblog_prevent_student_admin_access', $prevent_access);
 
 		// We check that DOING_AJAX is undefined as many front end operations work through the admin-ajax controller,
 		// so we don't want to interrupt their flow
