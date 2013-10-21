@@ -3,7 +3,7 @@
 	Plugin Name: Teachblog
 	Description: Provides blogging and other tools to students within the framework of an existing site on a WP network.
 	Author: Barry Hughes (forthrobot.com)
-	Version: 0.2.0
+	Version: 0.3.0
 	Author URI: http://forthrobot.com
 	License: GPL3
 
@@ -28,8 +28,8 @@
  * Teachblog umbrella class. Sets up the plugin and loads key components.
  */
 class Teachblog {
-	const VERSION = '0.2.0';
-	const CODENAME = 'Beery Biretta';
+	const VERSION = '0.3.0';
+	const CODENAME = 'Bent Biretta';
 
 	protected static $instance = false;
 
