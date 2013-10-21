@@ -145,7 +145,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
 
     protected function docket_or_sticky_val($field) {
         if (Teachblog_Form::is_posted($field)) return $_POST[$field];
-        elseif (isset($this->docket->$field)) return $this->docket->$field;
+        elseif (isset($this->docket->$field)) return wp_unslash($this->docket->$field);
         return '';
     }
 
@@ -211,7 +211,7 @@ class Teachblog_Blog_Requests extends Teachblog_Base_Object {
     public function admin_actions() {
         add_filter('post_updated_messages', array($this, 'add_notices'));
 
-        if (!is_admin() or !Teachblog_Form::are_posted('teachblog_approval', 'request_id')) return;
+        if (!is_admin() || !Teachblog_Form::are_posted('teachblog_approval', 'request_id')) return;
         if (!wp_verify_nonce($_POST['teachblog_approval'], 'teachblog_account_request') or !current_user_can($this->approval_capability)) return;
 
         if (Teachblog_Form::is_posted('trash-request')) $this->trash_request($_POST['request_id']);

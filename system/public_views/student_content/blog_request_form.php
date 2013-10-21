@@ -1,10 +1,10 @@
 <?php
 $action = isset($action) ? $action : esc_attr(Teachblog_Form::post_url());
-$username = Teachblog_Form::is_posted('username') ? esc_attr($_POST['username']) : '';
-$password_1 = Teachblog_Form::is_posted('password_1') ? esc_attr($_POST['password_1']) : '';
-$password_2 = Teachblog_Form::is_posted('password_2') ? esc_attr($_POST['password_2']) : '';
-$title = Teachblog_Form::is_posted('blog_title') ? esc_attr($_POST['blog_title']) : '';
-$description = Teachblog_Form::is_posted('blog_description') ? esc_attr($_POST['blog_description']) : '';
+$username = Teachblog_Form::is_posted('username') ? esc_attr(wp_unslash($_POST['username'])) : '';
+$password_1 = Teachblog_Form::is_posted('password_1') ? esc_attr(wp_unslash($_POST['password_1'])) : '';
+$password_2 = Teachblog_Form::is_posted('password_2') ? esc_attr(wp_unslash($_POST['password_2'])) : '';
+$title = Teachblog_Form::is_posted('blog_title') ? esc_attr(wp_unslash($_POST['blog_title'])) : '';
+$description = Teachblog_Form::is_posted('blog_description') ? esc_attr(wp_unslash($_POST['blog_description'])) : '';
 ?>
 
 <?php do_action('teachblog_before_blog_request_form') ?>
