@@ -60,8 +60,7 @@ class Requests {
 	}
 
 	/**
-	 * Detect if a valid request action has been triggered (such as approving, placing on hold,
-	 * etc).
+	 * Detect if a valid request action has been triggered (such as approving, placing on hold, etc).
 	 */
 	protected function listen() {
 		// Has an item ID(s) been passed and is the nonce check satisfied?
@@ -98,6 +97,7 @@ class Requests {
 				case 'approve': $request_manager->change_status( $item_id, $request_manager::STATUS_APPROVED ); break;
 				case 'hold': $request_manager->change_status( $item_id, $request_manager::STATUS_ON_HOLD ); break;
 				case 'reject': $request_manager->change_status( $item_id, $request_manager::STATUS_REJECTED ); break;
+				case 'fulfill': $request_manager->trigger_fulfillment( $item_id ); break;
 				default: do_action( 'wpan_process_unknown_request_status_change', $item_id, $this->current_action ); break;
 			}
 		}

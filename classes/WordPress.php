@@ -63,4 +63,30 @@ class WordPress {
 
 		return $output . '</ul>';
 	}
+
+	/**
+	 * Attempts to generate a new user account. Accepts the same array of user params as would
+	 * wp_insert_user().
+	 *
+	 * The primary difference between this method and wp_insert_user() is that this method assumes the
+	 * password field has already been hashed (ie, it was not stored within the database in plain text
+	 * while waiting to be actioned).
+	 *
+	 * @see \wp_insert_user()
+	 * @param array $user_params
+	 * @return mixed boolean false on failure or the user ID upon success
+	 */
+	public static function create_user( array $user_params ) {
+		global $wpdb;
+
+		$user_id = \wp_insert_user( $user_params );
+		if ( \is_wp_error( $user_id ) ) return false;
+
+		// Update password (to prevent it being double-hashed)
+		$password = $user_params['user_pass'];
+		$result = $wpdb->update( $wpdb->users, array( 'user_pass' => $password ), array( 'ID', $user_id ),
+			array( '%s', '%s' ), array( '%s', '%d' ) );
+
+		return ( false === $result ) ? false : $user_id;
+	}
 }

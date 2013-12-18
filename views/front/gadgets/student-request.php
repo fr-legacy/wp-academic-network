@@ -41,7 +41,7 @@ if ( ! isset( $processing ) || ( isset( $processing ) && ! empty( $errors ) ) ):
 
 	<form method="post" action="<?php esc_attr_e( $form_action ) ?>">
 
-		<?php wp_nonce_field( 'wpan_new_student_request', 'student_request' ) ?>
+		<?php wp_nonce_field( 'wpan_new_teacher_request', 'wpan_service_request' ) ?>
 
 		<?php do_action( 'wpan_new_student_request_start' ) ?>
 

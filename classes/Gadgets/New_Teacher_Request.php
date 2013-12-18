@@ -31,9 +31,9 @@ class New_Teacher_Request extends Base {
 		$args = wp_parse_args( $args, $this->default_args() );
 		$request_manager = Request_Manager::object();
 
-		if ( $request_manager->is_processing_request() ) {
+		if ( $request_manager->teacher->request_received ) {
 			$instance['processing'] = true;
-			$instance['errors'] = $request_manager->get_in_progress_request()->get_errors();
+			$instance['errors'] = $request_manager->teacher->get_errors();
 		}
 		if ( ! isset( $instance['title'] ) ) $instance['title'] = __( 'New Teacher Request', 'wpan' );
 		if ( ! isset( $instance['form_action'] ) ) $instance['form_action'] = WordPress::safe_form_action();

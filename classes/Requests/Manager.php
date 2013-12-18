@@ -33,12 +33,6 @@ class Manager {
 	const STATUS_ALL = 'any_status';
 
 	/**
-	 * Used to contains any request that might currently be being processed.
-	 */
-	protected $request = false;
-
-
-	/**
 	 * Container for the Requests Management object.
 	 *
 	 * @var Manager
@@ -52,6 +46,20 @@ class Manager {
 	 * @var array
 	 */
 	protected $notices = array();
+
+	/**
+	 * Container for the teacher request handler.
+	 *
+	 * @var Teacher
+	 */
+	public $teacher;
+
+	/**
+	 * Container for the student request handler.
+	 *
+	 * @var Student
+	 */
+	public $student;
 
 
 	/**
@@ -72,6 +80,8 @@ class Manager {
 
 	public function init() {
 		register_post_type( self::POST_TYPE, array( 'public' => false ) );
+		$this->student = new Student;
+		$this->teacher = new Teacher;
 		$this->listen_for_requests();
 	}
 
@@ -86,24 +96,7 @@ class Manager {
 	 * Monitors the $_POST superglobal for signs of new student/teacher requests.
 	 */
 	public function listen_for_requests() {
-		if ( isset( $_POST['teacher_request'] ) )
-			if ( wp_verify_nonce( $_POST['teacher_request'], 'wpan_new_teacher_request') )
-				$this->request = new Teacher();
-
-		if ( isset( $_POST['student_request'] ) )
-			if ( wp_verify_nonce( $_POST['student_request'], 'wpan_new_student_request') )
-				$this->request = new Student();
-
-		if ( false !== $this->request ) $this->request->process_new( $_POST );
-	}
-
-
-	public function is_processing_request() {
-		return ( false !== $this->request );
-	}
-
-	public function get_in_progress_request() {
-		return $this->request;
+		if ( isset( $_POST['wpan_service_request'] ) ) do_action( 'wpan_service_request_received' );
 	}
 
 	public function create_request( $type, array $data ) {
@@ -114,6 +107,7 @@ class Manager {
 		$data = $this->add_origin_info( $data );
 		$data = $this->hash_password( $data );
 		$data = $this->ensure_submitting_user_recorded( $data );
+		$data = (array) apply_filters( 'wpan_new_request_data', $data );
 
 		// Set up the request (initial status is always pending)
 		wp_insert_post( array(
@@ -207,6 +201,7 @@ class Manager {
 			$result = json_decode( $result->post_content );
 			if ( ! is_object( $result ) ) $result = new \stdClass;
 
+			// Add properties based on various standard WP post fields
 			$result->type = $this->get_type_from_title( $post_data['post_title'] );
 			$result->created = new DateTime( $post_data['post_date'] );
 			$result->state = $post_data['post_status'];
@@ -317,51 +312,31 @@ class Manager {
 	}
 
 	/**
+	 * Means of triggering fulfillment of requests, if for instance it isn't automatically set in motion following
+	 * an approval event.
+	 *
+	 * @param $request_id
+	 */
+	public function trigger_fulfillment( $request_id ) {
+		// Ensure this is a bona fide request ID
+		if ( false === ( $request = $this->get_request( $request_id ) ) ) {
+			Log::error( sprintf( __( 'Attempt made to fulfill request failed: invalid request ID "%d".', 'wpan' ), $request_id ) );
+			return;
+		}
+
+		do_action( 'wpan_fulfill_request', $request );
+	}
+
+	/**
 	 * Determines if a given string is a valid request status.
 	 *
 	 * @param $status
 	 * @return bool
 	 */
 	protected function is_valid_state( $status ) {
-		$states = array( self::STATUS_APPROVED, self::STATUS_ON_HOLD, self::STATUS_SUBMITTED, self::STATUS_REJECTED );
+		$states = array( self::STATUS_APPROVED, self::STATUS_ON_HOLD, self::STATUS_SUBMITTED, self::STATUS_REJECTED,
+			self::STATUS_FAILED, self::STATUS_FULFILLED);
 		$valid = in_array( $status, $states );
 		return apply_filters( 'wpan_is_valid_request_state', $valid, $status );
-	}
-
-	/**
-	 * Attempts to fulfill an approved request for a new site/user account.
-	 *
-	 * If the method succeeds it sets the request status to self::STATUS_FULFILLED and returns true, otherwise
-	 * the request status will be set to self::STATUS_FAILED (if it was already a valid request of approved
-	 * status) and boolean false will be returned.
-	 *
-	 * @param $id
-	 * @return bool
-	 */
-	public function fulfill( $id ) {
-		// Ensure we're working with a valid request
-		if ( false === ( $request = $this->get_request( $id ) ) ) return false;
-		if ( self::STATUS_APPROVED === $request->type ) return false;
-
-		$user = $this->create_user( $request );
-		$domain = apply_filters( 'wpan_fulfill_blog_request_domain', '' );
-		$path = apply_filters( 'wpan_fulfill_blog_request_path', '' );
-		$title = apply_filters( 'wpan_fulfill_blog_request_title', __ ( 'Newly created blog!', 'wpan' ) );
-		$user_id = $user->ID;
-
-		wpmu_create_blog( $domain, $path, $title, $user_id );
-	}
-
-	/**
-	 * Create a new user object if possible based on the request object.
-	 *
-	 * If the request object includes an email property, and a user is already registered against the
-	 * same email address, then an object representing that user will be returned.
-	 *
-	 * @param $request
-	 * @return mixed
-	 */
-	protected function create_user( $request ) {
-
 	}
 }

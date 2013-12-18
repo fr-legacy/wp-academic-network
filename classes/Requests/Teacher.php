@@ -1,5 +1,6 @@
 <?php
 namespace WPAN\Requests;
+use WPAN\WordPress;
 
 
 /**
@@ -7,6 +8,8 @@ namespace WPAN\Requests;
  */
 class Teacher {
 	const TYPE = 'teacher';
+
+	public $request_received = false;
 
 	/**
 	 * @var array
@@ -18,11 +21,20 @@ class Teacher {
 
 
 	public function __construct() {
-		
+		add_action( 'wpan_service_request_received', array( $this, 'listen_for_new_requests' ) );
+		add_action( 'wpan_request_state_updated', array( $this, 'listen_for_status_updates' ), 10, 4 );
+		add_action( 'wpan_fulfill_request', array( $this, 'fulfill' ) );
+	}
+
+
+	public function listen_for_new_requests() {
+		if ( wp_verify_nonce( $_POST['wpan_service_request'], 'wpan_new_teacher_request') )
+			$this->process_new( $_POST );
 	}
 	
 	
 	public function process_new( array $fields ) {
+		$this->request_received = true;
 		$this->fields = $fields;		
 		$this->get_submission_data();
 		$this->check_for_errors();
@@ -75,7 +87,6 @@ class Teacher {
 		return (array) $this->errors;
 	}
 
-
 	/**
 	 * If the request passed validation, form the actual request object.
 	 */
@@ -84,7 +95,13 @@ class Teacher {
 		Manager::object()->create_request( self::TYPE, $this->fields );
 	}
 
-
+	/**
+	 * Utility function that retrieves counts for the number of different requests currently in the
+	 * system.
+	 *
+	 * @todo update to calculate fulfilled and failed requests
+	 * @return array
+	 */
 	public static function request_counts() {
 		$manager = Manager::object();
 
@@ -95,5 +112,69 @@ class Teacher {
 			'rejected' => $manager->count_requests( self::TYPE, $manager::STATUS_REJECTED ),
 			'submitted' => $manager->count_requests( self::TYPE, $manager::STATUS_SUBMITTED ),
 		);
+	}
+
+	/**
+	 * Listens for teacher requests being approved in order to start the fulfillment process.
+	 *
+	 * @param $new_status
+	 * @param $id
+	 * @param $request
+	 * @param $request_manager
+	 */
+	public function listen_for_status_updates( $new_status, $id, $request, $request_manager ) {
+		if ( Manager::STATUS_APPROVED !== $new_status || self::TYPE !== $request->type ) return;
+		if ( apply_filters( 'wpan_automatically_fulfill_teacher_requests', true ) ) $this->fulfill( $request );
+	}
+
+
+
+	/**
+	 * Attempts to fulfill an approved request for a new site/user account.
+	 *
+	 * If the method succeeds it sets the request status to self::STATUS_FULFILLED and returns true, otherwise
+	 * the request status will be set to self::STATUS_FAILED (if it was already a valid request of approved
+	 * status) and boolean false will be returned.
+	 *
+	 * @param $request
+	 * @return bool
+	 */
+	public function fulfill( $request ) {
+		// Ensure we're working with a valid request
+		if ( ! is_object( $request ) ) return false;
+		if ( Manager::STATUS_APPROVED === $request->type ) return false;
+
+		$user = $this->find_existing_or_generate_new_user( $request );
+		$domain = apply_filters( 'wpan_fulfill_blog_request_domain', '' );
+		$path = apply_filters( 'wpan_fulfill_blog_request_path', '' );
+		$title = apply_filters( 'wpan_fulfill_blog_request_title', __ ( 'Newly created blog!', 'wpan' ) );
+		$user_id = $user->ID;
+
+		wpmu_create_blog( $domain, $path, $title, $user_id );
+	}
+
+	/**
+	 * If an existing user (by email address) exists, return that user object. Otherwise, create a new
+	 * user and assign them to that address.
+	 *
+	 * @param $request
+	 */
+	protected function find_existing_or_generate_new_user( $request ) {
+		if ( email_exists( $request->email ) ) return get_user_by( 'email', $request->email );
+		else return $this->create_new_user( $request );
+	}
+
+	/**
+	 * Generates a new user based on the request parameters.
+	 *
+	 * @param $request
+	 */
+	protected function create_new_user( $request ) {
+		$new_user_params = apply_filters( 'wpan_new_teacher_user_params', array(
+			'user_login' => isset( $request->username ) ? $request->username : $request->email,
+			'user_pass' => $request->password
+		) );
+
+		return WordPress::create_user( $new_user_params );
 	}
 }

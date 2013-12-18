@@ -9,6 +9,8 @@ use WPAN\Network;
 class Student {
 	const TYPE = 'student';
 
+	public $request_received = false;
+
 	/**
 	 * @var array
 	 */
@@ -19,11 +21,17 @@ class Student {
 
 
 	public function __construct() {
-
+		add_action( 'wpan_service_request_received', array( $this, 'listen_for_new_requests' ) );
 	}
 
 
+	public function listen_for_new_requests() {
+		if ( wp_verify_nonce( $_POST['wpan_service_request'], 'wpan_new_student_request') )
+			$this->process_new( $_POST );
+	}
+
 	public function process_new( array $fields ) {
+		$this->request_received = true;
 		$this->fields = $fields;
 		$this->get_submission_data();
 		$this->check_for_errors();
