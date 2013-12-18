@@ -343,6 +343,25 @@ class Manager {
 		if ( false === ( $request = $this->get_request( $id ) ) ) return false;
 		if ( self::STATUS_APPROVED === $request->type ) return false;
 
+		$user = $this->create_user( $request );
+		$domain = apply_filters( 'wpan_fulfill_blog_request_domain', '' );
+		$path = apply_filters( 'wpan_fulfill_blog_request_path', '' );
+		$title = apply_filters( 'wpan_fulfill_blog_request_title', __ ( 'Newly created blog!', 'wpan' ) );
+		$user_id = $user->ID;
+
+		wpmu_create_blog( $domain, $path, $title, $user_id );
+	}
+
+	/**
+	 * Create a new user object if possible based on the request object.
+	 *
+	 * If the request object includes an email property, and a user is already registered against the
+	 * same email address, then an object representing that user will be returned.
+	 *
+	 * @param $request
+	 * @return mixed
+	 */
+	protected function create_user( $request ) {
 
 	}
 }

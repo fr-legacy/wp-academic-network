@@ -1,5 +1,6 @@
 <?php
 namespace WPAN\Requests;
+use WPAN\Network;
 
 
 /**
@@ -55,6 +56,10 @@ class Student {
 
 		if ( empty( $this->fields['password'] ) ) $this->errors['empty_password'] =
 			__( 'Empty passwords are not acceptable.', 'wpan' );
+
+		// The owner of the site where the submission takes place ought to be a teacher
+		$owner = Network::who_owns( get_current_blog_id() );
+
 
 		$this->errors = (array) apply_filters( 'wpan_student_request_submission_error_check', $this->errors, $this->fields );
 	}
