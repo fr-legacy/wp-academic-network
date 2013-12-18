@@ -44,7 +44,7 @@ class WordPress {
 	 *
 	 * @return string
 	 */
-	public static function subsubsub_tab_menu( array $tabs, $current ) {
+	public static function subsubsub_tab_menu( array $tabs, $base_url ) {
 		$output = '<ul class="subsubsub">';
 		$items = 0;
 
@@ -56,7 +56,9 @@ class WordPress {
 		foreach ( $tabs as $slug => $label ) {
 			if ( 1 < ++$items ) $output .= ' | ';
 			$class = ( $current === $slug ) ? ' class="current" ' : '';
-			$output .= '<li> <a href=""' . $class . '>' . $label . '</a> </li>';
+
+			$href = esc_url( add_query_arg( 'tab', $slug, $base_url ) );
+			$output .= '<li> <a href="' . $href . '"' . $class . '>' . $label . '</a> </li>';
 		}
 
 		return $output . '</ul>';

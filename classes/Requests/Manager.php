@@ -3,9 +3,10 @@ namespace WPAN\Requests;
 use WPAN\Gadgets;
 use WPAN\Log;
 use WPAN\Network;
+use DateTime;
 
 
-class Management {
+class Manager {
 	/**
 	 * Post type used to store requests.
 	 */
@@ -23,6 +24,8 @@ class Management {
 	const STATUS_ON_HOLD = 'wpan_on_hold';
 	const STATUS_APPROVED = 'wpan_approved';
 	const STATUS_REJECTED = 'wpan_rejected';
+	const STATUS_FULFILLED = 'wpan_fulfilled';
+	const STATUS_FAILED = 'wpan_failed';
 
 	/**
 	 * Used to indicate an interest in all request states.
@@ -38,13 +41,21 @@ class Management {
 	/**
 	 * Container for the Requests Management object.
 	 *
-	 * @var Management
+	 * @var Manager
 	 */
 	protected static $object;
 
+	/**
+	 * Warnings, successful operation notices etc are recorded here in the format
+	 * [ type, notice ] where type might be 'notice', 'warning', etc.
+	 *
+	 * @var array
+	 */
+	protected $notices = array();
+
 
 	/**
-	 * @return Management
+	 * @return Manager
 	 */
 	public static function object() {
 		if ( isset( self::$object ) ) return self::$object;
@@ -67,6 +78,7 @@ class Management {
 
 	public function widgets_init() {
 		Gadgets\New_Teacher_Request::register();
+		Gadgets\New_Student_Request::register();
 	}
 
 
@@ -153,8 +165,9 @@ class Management {
 	 *
 	 * @param string $type
 	 * @param string $status
-	 * @param $limit
+	 * @param int $limit
 	 * @param int $page
+	 * @return mixed
 	 */
 	public function get_requests( $type = self::TYPE_ALL, $status = self::STATUS_ALL, $limit = -1, $page = 1 ) {
 		global $wpdb;
@@ -175,12 +188,53 @@ class Management {
 		}
 
 		// Run the query!
-		$requests = $wpdb->get_results( $query );
-
-
-
+		return $this->convert_to_request_objects( (array) $wpdb->get_results( $query ) );
 	}
 
+	/**
+	 * Converts one or more post object results into corresponding request objects.
+	 *
+	 * @param $results
+	 * @return mixed
+	 */
+	protected function convert_to_request_objects( $results ) {
+		// Remember if we initially were passed a result or array of results (but let's treat as an array)
+		$is_array = is_array( $results );
+		$results = $is_array ? $results : array( $results );
+
+		foreach ( $results as &$result ) {
+			$post_data = (array) $result;
+			$result = json_decode( $result->post_content );
+			if ( ! is_object( $result ) ) $result = new \stdClass;
+
+			$result->type = $this->get_type_from_title( $post_data['post_title'] );
+			$result->created = new DateTime( $post_data['post_date'] );
+			$result->state = $post_data['post_status'];
+			$result->id = $post_data['ID'];
+			$result->guid = $post_data['post_name'];
+		}
+
+		// Return as an array or return a single result (if that was what we started with)
+		if ( ! $is_array ) return array_shift( $results );
+		return $results;
+	}
+
+	/**
+	 * Extracts and returns the request type from the post title.
+	 *
+	 * Request posts have the type stored in the title, in the format "Request: type". This method
+	 * simply parses out the type, or returns 'unknown' if it cannot.
+	 *
+	 * @param $title
+	 * @return string
+	 */
+	protected function get_type_from_title( $title ) {
+		static $key = 'Request: ';
+		static $key_length = 9;
+
+		if ( false === strpos( $title, $key ) || strlen( $title ) <= $key_length ) return 'unknown';
+		else return substr( $title, $key_length );
+	}
 
 	/**
 	 * Adds fields to help document the source of a request (IP address, user agent).
@@ -221,17 +275,74 @@ class Management {
 		return $data;
 	}
 
-
+	/**
+	 * Returns a single request object, or false if it does not exist.
+	 *
+	 * @param $id
+	 * @return bool|mixed
+	 */
 	public function get_request( $id ) {
 		$post = get_post( $id );
 		if ( null === $post || self::POST_TYPE !== $post->post_type ) return false;
+		return $this->convert_to_request_objects( $post );
+	}
 
-		$title_components = explode( '_', $post->post_title );
-		if ( ! is_array( $title_components ) || empty( $title_components ) ) return false;
+	/**
+	 * Attempts to change the status of the specified request. If it cannot, or the new state
+	 * is invalid, it returns bool false.
+	 *
+	 * @param $id
+	 * @param $new_status
+	 * @return bool
+	 */
+	public function change_status( $id, $new_status ) {
+		// Ensure this is a bona fide request ID
+		if ( false === ( $request = $this->get_request( $id ) ) ) {
+			Log::error( sprintf( __( 'Attempt made to change state to "%s" using invalid request ID "%d".', 'wpan' ), $new_status, $id ) );
+			return false;
+		}
+		// Ensure the new status is valid
+		if ( false === $this->is_valid_state( $new_status ) ) {
+			Log::error( sprintf( __( 'Attempt made to change request %d to invalid status of "%s".', 'wpan' ), $id, $new_status ) );
+			return false;
+		}
 
-		return (object) array(
-			'type' => isset( $title_components[0] ) ? $title_components[0] : 'Unknown',
-			'data' => @unserialize( base64_decode( $post->post_content ) )
-		);
+		// Update!
+		wp_update_post( array( 'ID' => $id, 'post_status' => $new_status ) );
+		Log::action( sprintf( __( 'Request %d updated by user %d, status is now "%s".', 'wpan' ), $id, wp_get_current_user()->ID, $new_status ) );
+
+		// Allow follow-on actions
+		do_action( 'wpan_request_state_updated', $new_status, $id, $request, $this );
+		return true;
+	}
+
+	/**
+	 * Determines if a given string is a valid request status.
+	 *
+	 * @param $status
+	 * @return bool
+	 */
+	protected function is_valid_state( $status ) {
+		$states = array( self::STATUS_APPROVED, self::STATUS_ON_HOLD, self::STATUS_SUBMITTED, self::STATUS_REJECTED );
+		$valid = in_array( $status, $states );
+		return apply_filters( 'wpan_is_valid_request_state', $valid, $status );
+	}
+
+	/**
+	 * Attempts to fulfill an approved request for a new site/user account.
+	 *
+	 * If the method succeeds it sets the request status to self::STATUS_FULFILLED and returns true, otherwise
+	 * the request status will be set to self::STATUS_FAILED (if it was already a valid request of approved
+	 * status) and boolean false will be returned.
+	 *
+	 * @param $id
+	 * @return bool
+	 */
+	public function fulfill( $id ) {
+		// Ensure we're working with a valid request
+		if ( false === ( $request = $this->get_request( $id ) ) ) return false;
+		if ( self::STATUS_APPROVED === $request->type ) return false;
+
+
 	}
 }

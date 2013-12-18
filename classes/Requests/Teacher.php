@@ -81,12 +81,12 @@ class Teacher {
 	 */
 	protected function formulate_request() {
 		if ( ! empty( $this->errors ) ) return; // Something doesn't validate
-		Management::object()->create_request( self::TYPE, $this->fields );
+		Manager::object()->create_request( self::TYPE, $this->fields );
 	}
 
 
 	public static function request_counts() {
-		$manager = Management::object();
+		$manager = Manager::object();
 
 		return array(
 			'all' => $manager->count_requests( self::TYPE ),

@@ -2,17 +2,17 @@
 namespace WPAN\Users;
 
 
-class Management {
+class Manager {
 	/**
 	 * Container for the Users Management object.
 	 *
-	 * @var Management
+	 * @var Manager
 	 */
 	protected static $object;
 
 
 	/**
-	 * @return Management
+	 * @return Manager
 	 */
 	public static function object() {
 		if ( isset( self::$object ) ) return self::$object;

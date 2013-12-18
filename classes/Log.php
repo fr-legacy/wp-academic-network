@@ -38,6 +38,16 @@ class Log {
 	}
 
 	public static function record( $issue, $type = self::GENERAL ) {
-		self::$session_log[] = array( date('Y-m-d H:i:s'), $type, $issue );
+		$timestamp = date('Y-m-d H:i:s');
+		self::$session_log[] = array( $timestamp, $type, $issue );
+		do_action( 'wpan_log_entry', $issue, $type, $timestamp );
+	}
+
+	public static function get_session_log() {
+		return self::$session_log;
+	}
+
+	public static function clear_session_log() {
+		self::$session_log = array();
 	}
 }

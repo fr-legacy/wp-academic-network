@@ -3,28 +3,27 @@ namespace WPAN\Gadgets;
 use WPAN\Requests\Manager as Request_Manager;
 use WPAN\WordPress;
 
-
 /**
  * Used to request a teacher or student presence on the network.
  *
  * @package WPAN\Gadgets
  */
-class New_Teacher_Request extends Base {
+class New_Student_Request extends Base {
 
 	protected function shortcode_name() {
-		return apply_filters( 'wpan_new_teacher_request_shortcode_name', 'wpan_new_teacher_request' );
+		return apply_filters( 'wpan_new_student_request_shortcode_name', 'wpan_new_student_request' );
 	}
 
 	protected function widget_base() {
-		return 'wpan_teacher_request';
+		return 'wpan_student_request';
 	}
 
 	protected function widget_name() {
-		return __( 'New Teacher Request Form', 'wpan' );
+		return __( 'New Student Request Form', 'wpan' );
 	}
 
 	protected function widget_description() {
-		return __( 'Allows teachers to apply for a site and user account on the network.', 'wpan' );
+		return __( 'Allows students to apply for a site and user account on the network.', 'wpan' );
 	}
 
 	public function widget( $args, $instance ) {
@@ -35,15 +34,15 @@ class New_Teacher_Request extends Base {
 			$instance['processing'] = true;
 			$instance['errors'] = $request_manager->get_in_progress_request()->get_errors();
 		}
-		if ( ! isset( $instance['title'] ) ) $instance['title'] = __( 'New Teacher Request', 'wpan' );
+		if ( ! isset( $instance['title'] ) ) $instance['title'] = __( 'New Student Request', 'wpan' );
 		if ( ! isset( $instance['form_action'] ) ) $instance['form_action'] = WordPress::safe_form_action();
 
-		echo $this->public_view( 'teacher-request', array_merge( $args, $instance ) );
+		echo $this->public_view( 'student-request', array_merge( $args, $instance ) );
 	}
 
 	public function form( $instance ) {
-		echo '<p>' . __( 'Generates a form used to solicit new user account and site requests from teachers.', 'wpan' ) . '</p>';
-		echo '<p>' . __( 'This can also be used from within posts and pages, via the [wpan_new_teacher_request] shortcode.', 'wpan' ) . '</p>';
+		echo '<p>' . __( 'Generates a form used to solicit new user account and site requests from students.', 'wpan' ) . '</p>';
+		echo '<p>' . __( 'This can also be used from within posts and pages, via the [wpan_new_student_request] shortcode.', 'wpan' ) . '</p>';
 	}
 
 	public function update( $new_instance, $old_instance ) {

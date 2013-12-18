@@ -25,7 +25,8 @@ class Admin extends User {
 		'wpan_create_site' => true,
 		'wpan_delete_site' => true,
 		'wpan_create_user' => true,
-		'wpan_delete_user' => true
+		'wpan_delete_user' => true,
+		'wpan_handle_requests' => true
 	);
 
 	public function get_role() {
