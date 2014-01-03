@@ -157,8 +157,8 @@ class WPAN_Loader {
 	 * Attempts to load any classes that exist within registered namespaces and/or any associated
 	 * vendor or supporting library classes.
 	 *
-	 * Not PSR-0 compatible nor does it strive to be (the older convention of relating underscores
-	 * to directory separators isn't used here).
+	 * Currently only accepts root namespaces (ie, we don't support having "vendor" in one dir
+	 * and "vendor\lib_a", "vendor\lib_b" in completely unrelated directories).
 	 *
 	 * @param $class
 	 */

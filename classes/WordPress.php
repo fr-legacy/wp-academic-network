@@ -89,4 +89,14 @@ class WordPress {
 
 		return ( false === $result ) ? false : $user_id;
 	}
+
+	/**
+	 * Returns the domain to be used when registering new sites. Assumes a standard subdir installation
+	 * where the domain is consistent across the network; can be filtered where this is undesirable.
+	 */
+	public static function get_new_site_domain() {
+		$site = get_current_site();
+		$domain = isset( $site->domain ) ? $site->domain : '';
+		return apply_filters( 'wpan_wordpress_new_site_domain', $domain );
+	}
 }

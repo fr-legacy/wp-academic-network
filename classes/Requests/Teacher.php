@@ -144,11 +144,10 @@ class Teacher {
 		if ( ! is_object( $request ) ) return false;
 		if ( Manager::STATUS_APPROVED === $request->type ) return false;
 
-		$user = $this->find_existing_or_generate_new_user( $request );
-		$domain = apply_filters( 'wpan_fulfill_blog_request_domain', '' );
-		$path = apply_filters( 'wpan_fulfill_blog_request_path', '' );
+		$user_id = $this->find_existing_or_generate_new_user( $request );
+		$domain = apply_filters( 'wpan_fulfill_blog_request_domain', WordPress::get_new_site_domain() );
+		$path = apply_filters( 'wpan_fulfill_blog_request_path', $this->path_from_username( $user_id ) );
 		$title = apply_filters( 'wpan_fulfill_blog_request_title', __ ( 'Newly created blog!', 'wpan' ) );
-		$user_id = $user->ID;
 
 		wpmu_create_blog( $domain, $path, $title, $user_id );
 	}
@@ -176,5 +175,18 @@ class Teacher {
 		) );
 
 		return WordPress::create_user( $new_user_params );
+	}
+
+	/**
+	 * Returns a possible blog name based on the user's username.
+	 *
+	 * @param $user_id
+	 * @return string
+	 */
+	protected function path_from_username( $user_id ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) return uniqid();
+		$path_name = strtolower( str_replace( ' ', '_', $user->display_name ) );
+		return apply_filters( 'wpan_teacher_blog_path_name', $path_name );
 	}
 }
