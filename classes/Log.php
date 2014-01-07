@@ -97,6 +97,7 @@ class Log {
 	 */
 	protected static function determine_source() {
 		$trace_steps = debug_backtrace();
+		$step = array();
 
 		foreach ( $trace_steps as $step )
 			if ( ! isset($step['class']) || __CLASS__ !== $step['class'] ) break;
@@ -111,10 +112,7 @@ class Log {
 		$line = isset( $step['line'] ) ? $step['line'] : '';
 		$line = $file . $line;
 
-		return array(
-			'src' => $line,
-			'function' => $function
-		);
+		return array( $line, $function );
 	}
 
 	/**
