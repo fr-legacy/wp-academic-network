@@ -1,19 +1,34 @@
 <?php
 namespace WPAN;
 
+use WP_User_Query;
+
 
 /**
- * Utility function for working within a WordPress network.
+ * Utility functions for working within a WordPress network.
  *
  * Class Network
  * @package WPAN
  */
-class Network {
+class Network
+{
 	/**
 	 * Used to identify blog meta entries.
 	 */
 	const META_KEY_PREFIX = 'wpan_blog_';
 
+	/**
+	 * @var Users
+	 */
+	protected $users;
+
+
+	/**
+	 * Sets up system objects ready for helpers to reference.
+	 */
+	public function __construct() {
+		$this->users = Core::object()->users();
+	}
 
 	/**
 	 * Determines if the specified site (or current site, if no site ID is provided) is the hub.
@@ -24,7 +39,7 @@ class Network {
 	 * @param null $blog_id
 	 * @return bool
 	 */
-	public static function is_hub( $blog_id = null ) {
+	public function is_hub( $blog_id = null ) {
 		return (bool) apply_filters( 'wpan_is_hub', is_main_site( $blog_id ), $blog_id );
 	}
 
@@ -36,114 +51,181 @@ class Network {
 	 *
 	 * @return int blog_id
 	 */
-	public static function get_hub_id() {
+	public function get_hub_id() {
 		global $current_site;
 		return (int) apply_filters( 'wpan_hub_id', $current_site->blog_id );
 	}
 
+
+
 	/**
-	 * Marks a specific user as owner of the specified site. By extension, the user account
-	 * will be assigned to the site.
-	 *
-	 * @param $user_id
-	 * @param null $blog_id
-	 * @param $role
+	 * Generates a new blog on the network belonging to a teacher.
 	 */
-	public static function assign_owner( $user_id, $blog_id, $role ) {
-		$blog_id = absint( $blog_id );
-		$user_id = absint( $user_id );
-		add_user_to_blog( $blog_id, $user_id, $role );
-		self::update_blog_meta( 'site_owner', $user_id, $blog_id );
+	public function create_teacher_blog( $path, $title, $teacher_id ) {
+		// Attempt to create the new blog
+		$path = apply_filters( 'wpan_new_teacher_blog_path', get_current_site()->path . $path, $teacher_id );
+		$domain = apply_filters( 'wpan_new_teacher_blog_domain', get_current_site()->domain, $teacher_id );
+		$blog_id = wpmu_create_blog( $domain, $path, $title, $teacher_id );
+
+		if ( is_wp_error( $blog_id ) ) {
+			Log::error( sprintf( __( 'Failed to create new teacher blog at %s on %s.', 'wpan' ), $path, $domain ) );
+			return false;
+		}
+
+		// The new teacher account will have been created as a regular administrator - make them a 'teacher'
+		$this->users->change_blog_role( $blog_id, $teacher_id, Users::TEACHER );
+		return true;
 	}
 
 	/**
-	 * Removes ownership of the specified blog from any given user.
+	 * Creates a student blog. Students do not require email addresses and so an artificial placeholder
+	 * address is used.
 	 *
-	 * @param $blog_id
-	 */
-	public static function clear_owner( $blog_id ) {
-		self::delete_blog_meta( 'site_owner', $blog_id );
-	}
-
-	/**
-	 * Returns the ID of the user who owns the specified site (or current site, if no site is
-	 * specified) or else boolean false if there is no owner.
-	 *
-	 * It will also return false if the owner's user account does not actually belong to the
-	 * same blog, which is a prerequisite for ownership.
-	 *
-	 * @param null $blog_id
-	 * @return mixed int|false
-	 */
-	public static function who_owns( $blog_id ) {
-		$blog_id = absint( $blog_id );
-		$user_id = self::get_blog_meta( 'site_owner', false, $blog_id ); // Rtns the ID as a string, or false
-		return ( false === $user_id ) ? false : (int) $user_id; // Correct to ensure an actual int is rtn'd
-	}
-
-	/**
-	 * Provides a list of all sites owned by the specified user.
-	 *
-	 * @param $user_id
-	 * @return array of site IDs
-	 */
-	public static function owned_by( $user_id ) {
-		$belongs_to = get_blogs_of_user( $user_id );
-		$owns = array();
-
-		foreach ( $belongs_to as $member_of )
-			if ( $user_id == self::who_owns( $member_of->userblog_id ) )
-				$owns[] = $member_of->userblog_id;
-
-		return $owns;
-	}
-
-	/**
-	 * Used to associate pieces of meta data with a specific blog. If the item does not already exist
-	 * it is created.
-	 *
-	 * Blog meta in a WPAN network context is stored at network level rather than within the individual
-	 * site options table. This is useful and efficient where the meta data is used to form a link
-	 * between different sites as multiple tables need not be traversed.
-	 *
-	 * @param $key
-	 * @param $value
-	 * @param null $blog_id
+	 * @param $path
+	 * @param $title
+	 * @param $supervising_teacher
 	 * @return bool
 	 */
-	public static function update_blog_meta( $key, $value, $blog_id = null ) {
-		$blog_id = ( null === $blog_id ) ? get_current_site()->id : $blog_id;
-		return update_site_option( self::META_KEY_PREFIX . $blog_id . '_' . $key, $value);
+	public function create_student_blog( $path, $title, $supervising_teacher = null ) {
+		// Attempt to create the new blog
+		$path = apply_filters( 'wpan_new_student_blog_path', get_current_site()->path . $path, $supervising_teacher );
+		$domain = apply_filters( 'wpan_new_student_blog_domain', get_current_site()->domain, $supervising_teacher );
+		$blog_id = wpmu_create_blog( $domain, $path, $title, $supervising_teacher );
+
+		if ( is_wp_error( $blog_id ) ) {
+			Log::error( sprintf( __( 'Failed to create new student blog at %s on %s.', 'wpan' ), $path, $domain ) );
+			return false;
+		}
+
+		// Assign the supervising teacher (if provided)
+		if ( null !== $supervising_teacher && $this->users->is_teacher( $supervising_teacher ) )
+			$this->assign_teacher_supervisor( $blog_id, $supervising_teacher );
+
+		return true;
 	}
 
 	/**
-	 * Retrieves a piece of meta data associated with a specific blog, or else the optional
-	 * default value is returned (defaults to false).
-	 *
-	 * As with Network::update_blog_meta() this operates at network level (individual site option
-	 * tables are not used).
-	 *
-	 * @param $key
-	 * @param bool $default
-	 * @param null $blog_id
-	 * @return mixed|void
+	 * Attempts to assign a teacher as one of the supervisors
+	 * @param $student_blog
+	 * @param $teacher_id
+	 * @return bool
 	 */
-	public static function get_blog_meta( $key, $default = false, $blog_id = null ) {
-		$blog_id = ( null === $blog_id ) ? get_current_site()->id : $blog_id;
-		return get_site_option( self::META_KEY_PREFIX . $blog_id . '_'  . $key, $default );
+	public function assign_teacher_supervisor( $student_blog, $teacher_id ) {
+		// Ensure the teacher ID does indeed represent a teacher-role user
+		if ( false === $this->users->is_teacher( $teacher_id ) ) {
+			Log::error( sprintf( __( 'User %d is not a teacher and cannot be assigned as a supervisor for blog %d.', 'wpan' ), $teacher_id, $student_blog ) );
+			return false;
+		}
+
+		// Is the target blog actually a student blog?
+		if ( false === $this->is_student_blog( $student_blog ) ) {
+			Log::error( sprintf( __( 'Blog %d is not the primary blog of any student users: cannot assign a teacher supervisor.', 'wpan' ), $student_blog ) );
+			return false;
+		}
+
+		return add_user_to_blog( $student_blog, $teacher_id, Users::TEACHER );
 	}
 
 	/**
-	 * Deletes a piece of meta data associated with a specific blog.
+	 * Unassigns a teacher from a student blog.
 	 *
-	 * As with Network::update_blog_meta() this operates at network level (individual site option
-	 * tables are not used).
-	 *
-	 * @param $key
-	 * @param null $blog_id
+	 * @param $student_blog
+	 * @param $teacher_id
+	 * @return bool
 	 */
-	public static function delete_blog_meta( $key, $blog_id = null ) {
-		$blog_id = ( null === $blog_id ) ? get_current_site()->id : $blog_id;
-		delete_site_option( self::META_KEY_PREFIX . $blog_id . '_' . $key );
+	public function unassign_teacher_supervisor( $student_blog, $teacher_id ) {
+		// Ensure the teacher ID does indeed represent a teacher-role user
+		if ( false === $this->users->is_teacher( $teacher_id ) )
+			Log::warning( sprintf( __( 'User %d is not a teacher but WPAN will attempt to remove them from blog %d anyway.', 'wpan' ), $teacher_id, $student_blog ) );
+
+		// Is the target blog actually a student blog?
+		if ( false === $this->is_student_blog( $student_blog ) )
+			Log::warning( sprintf( __( 'Unassign teacher request: blog %d is not the primary blog of any student users.', 'wpan' ), $student_blog ) );
+
+		if ( false === remove_user_from_blog( $teacher_id, $student_blog ) ) {
+			Log::error( sprintf( __( 'Failed to unassign teacher %d from blog %d.', 'wpan' ), $teacher_id, $student_blog ) );
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns the primary blog of the specified user or boolean false if the user does not
+	 * exist/does not have a primary blog.
+	 *
+	 * @param $user_id
+	 * @return mixed int | bool
+	 */
+	public function get_primary_blog ( $user_id ) {
+		$user = get_user_by( 'id', $user_id );
+
+		if ( false === $user ) {
+			Log::error( sprintf( __( 'Attempt to determine primary blog failed: unable to load user record for user %d.', 'wpan' ), $user_id ) );
+			return false;
+		}
+
+		$primary_blog = get_user_meta( $user_id, 'primary_blog', true );
+
+		if ( empty( $primary_blog ) ) {
+			Log::warning( sprintf( __( 'User %d exists but does not have a primary blog.', 'wpan' ), $user_id ) );
+			return false;
+		}
+
+		return absint( $primary_blog );
+	}
+
+	/**
+	 * Determines if the blog is a student-led blog: that is, it has a student-role user
+	 * assigned to it and it is the primary blog for that same student.
+	 *
+	 * @param $blog_id
+	 * @return bool
+	 */
+	public function is_student_blog( $blog_id ) {
+		// Does the blog exist?
+		if ( false === get_blog_details( $blog_id ) ) return false;
+
+		// Look for user meta records relating to this blog
+		$users = new WP_User_Query( array(
+			'meta_key' => 'primary_blog',
+			'meta_value' => $blog_id
+		) );
+
+		// No results indicates no users have this as their primary blog
+		if ( empty( $users->results) ) return false;
+
+		// Check each returned result and test to see if at least one user is a student
+		foreach ( $users->results as $user )
+			if ( $this->users->is_student( $user->ID ) ) return true;
+
+		return false;
+	}
+
+	/**
+	 * Determines if the blog is a teacher-led blog: that is, it has a teacher-role user
+	 * assigned to it and it is the primary blog for that same student.
+	 *
+	 * @param $blog_id
+	 * @return bool
+	 */
+	public function is_teacher_blog( $blog_id ) {
+		// Does the blog exist?
+		if ( false === get_blog_details( $blog_id ) ) return false;
+
+		// Look for user meta records relating to this blog
+		$users = new WP_User_Query( array(
+			'meta_key' => 'primary_blog',
+			'meta_value' => $blog_id
+		) );
+
+		// No results indicates no users have this as their primary blog
+		if ( empty( $users->results) ) return false;
+
+		// Check each returned result and test to see if at least one user is a student
+		foreach ( $users->results as $user )
+			if ( $this->users->is_teacher( $user->ID ) ) return true;
+
+		return false;
 	}
 }
