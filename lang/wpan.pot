@@ -1,0 +1,413 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Academic Network\n"
+"POT-Creation-Date: 2014-01-07 11:58-0800\n"
+"PO-Revision-Date: 2014-01-07 11:59-0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop;__;_e;_x\n"
+"X-Poedit-Basepath: /web/html/clients/sd79/wp-content/plugins/wpan\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: wpan.php:87
+msgid "PHP 5.3 or greater is required."
+msgstr ""
+
+#: wpan.php:90
+msgid "WordPress 3.7 or greater is required."
+msgstr ""
+
+#: wpan.php:123
+msgid ""
+"WP Academic Network cannot function as expected and will be deactivated "
+"until the following issues are resolved."
+msgstr ""
+
+#: classes/Users.php:97
+msgid "Academic Network Administrator"
+msgstr ""
+
+#: classes/Users.php:108
+msgid "Academic Network Teacher"
+msgstr ""
+
+#: classes/Users.php:119
+msgid "Academic Network Student"
+msgstr ""
+
+#: classes/Users.php:151
+#, php-format
+msgid "Unable to create new teacher user $s, UAID %s is already in use."
+msgstr ""
+
+#: classes/Users.php:159
+#, php-format
+msgid "Failed to create new teacher. User %s could not be created."
+msgstr ""
+
+#: classes/Users.php:183
+#, php-format
+msgid "Unable to create new student user $s, UAID %s is already in use."
+msgstr ""
+
+#: classes/Users.php:195
+#, php-format
+msgid "Failed to create new teacher blog. User %s could not be created."
+msgstr ""
+
+#: classes/Users.php:217
+#, php-format
+msgid "Attempt made to set academic role of non existent user #%s"
+msgstr ""
+
+#: classes/Users.php:241
+#, php-format
+msgid "Could not assign UAID %s to user %d, already assigned to user %d."
+msgstr ""
+
+#: classes/Users.php:308
+#, php-format
+msgid "Attempt made to retrieve academic role of non existent user #%s"
+msgstr ""
+
+#: classes/Users.php:365
+#, php-format
+msgid "Could not update role for user %d on blog %d."
+msgstr ""
+
+#: classes/Users.php:388
+#, php-format
+msgid "Attempt made to update student params for non student %d."
+msgstr ""
+
+#: classes/Users.php:393
+#, php-format
+msgid "It was not possible to update the student params for user %d."
+msgstr ""
+
+#: classes/Users.php:408
+#, php-format
+msgid "Attempt made to validate student %d failed: not a student."
+msgstr ""
+
+#: classes/Users.php:436
+#, php-format
+msgid "Record for student %d seems to have been validated in the future."
+msgstr ""
+
+#: classes/Users.php:450
+#, php-format
+msgid ""
+"Attempt made to find record validatation date for student %d failed: not a "
+"student."
+msgstr ""
+
+#: classes/Users.php:457
+#, php-format
+msgid "Record for student %d has never been validated."
+msgstr ""
+
+#: classes/Users.php:465
+#, php-format
+msgid "Validation data for student %d is invalid and may have been corrupted."
+msgstr ""
+
+#: classes/View.php:81
+#, php-format
+msgid "View could not be rendered, template \"%s\" not found."
+msgstr ""
+
+#: classes/Network.php:71
+#, php-format
+msgid "Failed to create new teacher blog at %s on %s."
+msgstr ""
+
+#: classes/Network.php:96
+#, php-format
+msgid "Failed to create new student blog at %s on %s."
+msgstr ""
+
+#: classes/Network.php:116
+#, php-format
+msgid ""
+"User %d is not a teacher and cannot be assigned as a supervisor for blog %d."
+msgstr ""
+
+#: classes/Network.php:122
+#, php-format
+msgid ""
+"Blog %d is not the primary blog of any student users: cannot assign a "
+"teacher supervisor."
+msgstr ""
+
+#: classes/Network.php:139
+#, php-format
+msgid ""
+"User %d is not a teacher but WPAN will attempt to remove them from blog %d "
+"anyway."
+msgstr ""
+
+#: classes/Network.php:143
+#, php-format
+msgid ""
+"Unassign teacher request: blog %d is not the primary blog of any student "
+"users."
+msgstr ""
+
+#: classes/Network.php:146
+#, php-format
+msgid "Failed to unassign teacher %d from blog %d."
+msgstr ""
+
+#: classes/Network.php:164
+#, php-format
+msgid ""
+"Attempt to determine primary blog failed: unable to load user record for "
+"user %d."
+msgstr ""
+
+#: classes/Network.php:171
+#, php-format
+msgid "User %d exists but does not have a primary blog."
+msgstr ""
+
+#: classes/Hub/Manager.php:53
+msgid "Hub Dashboard"
+msgstr ""
+
+#: classes/Hub/Manager.php:54
+msgid "Hub"
+msgstr ""
+
+#: classes/Hub/Manager.php:74
+msgid "Dashboard"
+msgstr ""
+
+#: classes/Hub/Manager.php:75
+msgid "Requests"
+msgstr ""
+
+#: classes/Hub/Requests.php:74
+msgid "Ambiguous request: no action provided!"
+msgstr ""
+
+#: classes/Hub/Requests.php:80
+msgid "You do not have the necessary permissions to perform this action."
+msgstr ""
+
+#: classes/Hub/Requests.php:121
+msgid "View all"
+msgstr ""
+
+#: classes/Hub/Requests.php:122
+msgid "Teacher requests"
+msgstr ""
+
+#: classes/Hub/Requests.php:123
+msgid "Student requests"
+msgstr ""
+
+#: classes/Hub/Requests.php:137
+msgid "All states"
+msgstr ""
+
+#: classes/Hub/Requests.php:138 views/admin/hub/requests.php:52
+msgid "Submitted"
+msgstr ""
+
+#: classes/Hub/Requests.php:139 views/admin/hub/requests.php:53
+msgid "On hold"
+msgstr ""
+
+#: classes/Hub/Requests.php:140 views/admin/hub/requests.php:54
+msgid "Approved"
+msgstr ""
+
+#: classes/Hub/Requests.php:141 views/admin/hub/requests.php:55
+msgid "Rejected"
+msgstr ""
+
+#: classes/Gadgets/New_Teacher_Request.php:23
+msgid "New Teacher Request Form"
+msgstr ""
+
+#: classes/Gadgets/New_Teacher_Request.php:27
+msgid "Allows teachers to apply for a site and user account on the network."
+msgstr ""
+
+#: classes/Gadgets/New_Teacher_Request.php:38
+msgid "New Teacher Request"
+msgstr ""
+
+#: classes/Gadgets/New_Teacher_Request.php:45
+msgid ""
+"Generates a form used to solicit new user account and site requests from "
+"teachers."
+msgstr ""
+
+#: classes/Gadgets/New_Teacher_Request.php:46
+msgid ""
+"This can also be used from within posts and pages, via the "
+"[wpan_new_teacher_request] shortcode."
+msgstr ""
+
+#: classes/Gadgets/New_Student_Request.php:22
+msgid "New Student Request Form"
+msgstr ""
+
+#: classes/Gadgets/New_Student_Request.php:26
+msgid "Allows students to apply for a site and user account on the network."
+msgstr ""
+
+#: classes/Gadgets/New_Student_Request.php:37
+msgid "New Student Request"
+msgstr ""
+
+#: classes/Gadgets/New_Student_Request.php:44
+msgid ""
+"Generates a form used to solicit new user account and site requests from "
+"students."
+msgstr ""
+
+#: classes/Gadgets/New_Student_Request.php:45
+msgid ""
+"This can also be used from within posts and pages, via the "
+"[wpan_new_student_request] shortcode."
+msgstr ""
+
+#: classes/Requests/Teacher.php:66
+msgid "Invalid email address provided."
+msgstr ""
+
+#: classes/Requests/Teacher.php:69
+msgid "Username already in use."
+msgstr ""
+
+#: classes/Requests/Teacher.php:72
+msgid "Email address already in use."
+msgstr ""
+
+#: classes/Requests/Teacher.php:75
+msgid "Empty passwords are not acceptable."
+msgstr ""
+
+#: classes/Requests/Teacher.php:150
+msgid "Newly created blog!"
+msgstr ""
+
+#: views/admin/hub/frame.php:2
+msgid "WP Academic Network &mdash; Hub Central"
+msgstr ""
+
+#: views/admin/hub/requests.php:22
+msgid "Bulk action"
+msgstr ""
+
+#: views/admin/hub/requests.php:23
+msgid "Approve"
+msgstr ""
+
+#: views/admin/hub/requests.php:24
+msgid "Place on hold"
+msgstr ""
+
+#: views/admin/hub/requests.php:25
+msgid "Reject"
+msgstr ""
+
+#: views/admin/hub/requests.php:36
+msgid "Summary"
+msgstr ""
+
+#: views/admin/hub/requests.php:37
+msgid "Type"
+msgstr ""
+
+#: views/admin/hub/requests.php:38
+msgid "Status"
+msgstr ""
+
+#: views/admin/hub/requests.php:39
+msgid "Dated"
+msgstr ""
+
+#: views/admin/hub/requests.php:47
+msgid "Teacher"
+msgstr ""
+
+#: views/admin/hub/requests.php:48
+msgid "Student"
+msgstr ""
+
+#: views/admin/hub/requests.php:71
+msgid "Fulfill now"
+msgstr ""
+
+#: views/admin/hub/requests.php:105 views/admin/hub/requests.php:106
+msgid "Unknown"
+msgstr ""
+
+#: views/admin/modules/admin_table/nav_footer.php:23
+#: views/admin/modules/admin_table/nav_header.php:32
+msgid "Page:"
+msgstr ""
+
+#: views/admin/modules/admin_table/table.php:80
+msgid "No data to display"
+msgstr ""
+
+#: views/admin/modules/admin_table/table.php:81
+msgid "Consider revising your search criteria or filter parameters."
+msgstr ""
+
+#: views/front/gadgets/student-request.php:21
+msgid ""
+"Students wishing to request a new user account and site on the network can "
+"do so here. Please complete the following fields."
+msgstr ""
+
+#: views/front/gadgets/student-request.php:50
+msgid "Desired blogname"
+msgstr ""
+
+#: views/front/gadgets/student-request.php:56
+#: views/front/gadgets/teacher-request.php:56
+msgid "Desired username"
+msgstr ""
+
+#: views/front/gadgets/student-request.php:62
+#: views/front/gadgets/teacher-request.php:62
+msgid "Password"
+msgstr ""
+
+#: views/front/gadgets/student-request.php:67
+#: views/front/gadgets/teacher-request.php:67
+msgid "Submit request"
+msgstr ""
+
+#: views/front/gadgets/student-request.php:68
+#: views/front/gadgets/teacher-request.php:68
+msgid "Send"
+msgstr ""
+
+#: views/front/gadgets/student-request.php:78
+#: views/front/gadgets/teacher-request.php:78
+msgid ""
+"Thank you for your submission. Your request is being processed and you "
+"should hear from us shortly."
+msgstr ""
+
+#: views/front/gadgets/teacher-request.php:21
+msgid ""
+"Teachers wishing to request a new user account and site on the network can "
+"do so here. Please complete the following fields."
+msgstr ""
+
+#: views/front/gadgets/teacher-request.php:50
+msgid "Email address"
+msgstr ""
