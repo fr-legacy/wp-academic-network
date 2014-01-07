@@ -78,15 +78,15 @@ class Network
 	}
 
 	/**
-	 * Creates a student blog. Students do not require email addresses and so an artificial placeholder
-	 * address is used.
+	 * Creates a student blog.
 	 *
 	 * @param $path
 	 * @param $title
+	 * @param $student_id
 	 * @param $supervising_teacher
 	 * @return bool
 	 */
-	public function create_student_blog( $path, $title, $supervising_teacher = null ) {
+	public function create_student_blog( $path, $title, $student_id, $supervising_teacher = null ) {
 		// Attempt to create the new blog
 		$path = apply_filters( 'wpan_new_student_blog_path', get_current_site()->path . $path, $supervising_teacher );
 		$domain = apply_filters( 'wpan_new_student_blog_domain', get_current_site()->domain, $supervising_teacher );
@@ -97,10 +97,22 @@ class Network
 			return false;
 		}
 
+		// Assign the student
+		if ( false === $this->users->is_student( $student_id ) ) {
+			Log::warning( sprintf( __( 'User %d is not a student: blog %d has been created but the user was not assigned.', 'wpan' ), $student_id, $blog_id) );
+			return false;
+		}
+
+		if ( false === add_user_to_blog( $blog_id, $student_id, Users::STUDENT ) ) {
+			Log::warning( sprintf( __( 'Student user %d could not be assigned blog %d.', 'wpan' ), $student_id, $blog_id) );
+			return false;
+		}
+
 		// Assign the supervising teacher (if provided)
 		if ( null !== $supervising_teacher && $this->users->is_teacher( $supervising_teacher ) )
 			$this->assign_teacher_supervisor( $blog_id, $supervising_teacher );
 
+		Log::action( sprintf( __( 'New student blog %d has been built at %s for student user %d.', 'wpan' ), $blog_id, $path, $student_id ) );
 		return true;
 	}
 
@@ -123,7 +135,12 @@ class Network
 			return false;
 		}
 
-		return add_user_to_blog( $student_blog, $teacher_id, Users::TEACHER );
+		$success = add_user_to_blog( $student_blog, $teacher_id, Users::TEACHER );
+
+		if ( $success )
+			Log::action( sprintf( __( 'Teacher %d assigned as a supervisor of blog %d.', 'wpan' ), $teacher_id, $student_blog ) );
+
+		return $success;
 	}
 
 	/**
@@ -147,6 +164,7 @@ class Network
 			return false;
 		}
 
+		Log::action( sprintf( __( 'Teacher %d removed as a supervisor of blog %d.', 'wpan' ), $teacher_id, $student_blog ) );
 		return true;
 	}
 
