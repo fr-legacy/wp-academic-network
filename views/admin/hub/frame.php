@@ -1,5 +1,5 @@
 <div class="wrap">
-	<h2> <?php _e( 'WP Academic Network &mdash; Hub Central', 'wpan' ) ?> </h2>
+	<h2> <?php _e( 'WP Academic Network', 'wpan' ) ?> </h2>
 
 	<?php echo isset( $menu_pages ) ? $menu_pages : '' ?>
 

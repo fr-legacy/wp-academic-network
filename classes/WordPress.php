@@ -44,9 +44,8 @@ class WordPress {
 	 *
 	 * @return string
 	 */
-	public static function subsubsub_tab_menu( array $tabs, $base_url ) {
-		$output = '<ul class="subsubsub">';
-		$items = 0;
+	public static function tab_menu( array $tabs, $base_url ) {
+		$output = '<h3 class="nav-tab-wrapper">';
 
 		// What is the current tab?
 		$tab_keys = array_keys( $tabs );
@@ -54,14 +53,12 @@ class WordPress {
 		else $current = array_shift( $tab_keys );
 
 		foreach ( $tabs as $slug => $label ) {
-			if ( 1 < ++$items ) $output .= ' | ';
-			$class = ( $current === $slug ) ? ' class="current" ' : '';
-
+			$class = ( $current === $slug ) ? 'nav-tab nav-tab-active' : 'nav-tab';
 			$href = esc_url( add_query_arg( 'tab', $slug, $base_url ) );
-			$output .= '<li> <a href="' . $href . '"' . $class . '>' . $label . '</a> </li>';
+			$output .= '<a href="' . $href . '" class="' . $class . '">' . $label . '</a> ';
 		}
 
-		return $output . '</ul>';
+		return $output . '</h3>';
 	}
 
 	/**
