@@ -26,12 +26,13 @@
 */
 
 
-define( 'WPAN_VERSION', '0.1.0' );
+define( 'WPAN_VERSION', '0.2.0' );
 define( 'WPAN_DIR', __DIR__ );
 define( 'WPAN_URL', plugin_dir_url( __FILE__ ) );
 
 
-class WPAN_Loader {
+class WPAN_Loader
+{
 	/**
 	 * Notes any problems found during preflight checks.
 	 *
@@ -110,7 +111,7 @@ class WPAN_Loader {
 
 		// Instantiate the core class safely (shouldn't trigger parser errors in a PHP 5.2 env)
 		//call_user_func( array( 'WPAN\\Core', 'object' ) );
-		WPAN\Core::object();
+		WPAN\Core::object()->setup();
 	}
 
 	/**
@@ -154,11 +155,16 @@ class WPAN_Loader {
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Attempts to load any classes that exist within registered namespaces and/or any associated
 	 * vendor or supporting library classes.
 	 *
 	 * Currently only accepts root namespaces (ie, we don't support having "vendor" in one dir
 	 * and "vendor\lib_a", "vendor\lib_b" in completely unrelated directories).
+=======
+	 * Attempts to load any classes that exist within registered (top level) namespaces and/or
+	 * any associated vendor or supporting library classes.
+>>>>>>> Change of tack: emphasis on User and Network suite
 	 *
 	 * @param $class
 	 */
