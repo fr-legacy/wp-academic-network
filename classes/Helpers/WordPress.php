@@ -40,8 +40,11 @@ class WordPress {
 
 
 	/**
-	 * Generates a .subsubsub menu for admin screens.
+	 * Generates a tabbed (h3.nav-tab-wrapper) menu for admin screens. It is expected that the
+	 * active tab will correspond to a 'tab' param in the URL query.
 	 *
+	 * @param array $tabs
+	 * @param $base_url
 	 * @return string
 	 */
 	public static function tab_menu( array $tabs, $base_url ) {
@@ -59,6 +62,34 @@ class WordPress {
 		}
 
 		return $output . '</h3>';
+	}
+
+	/**
+	 * Generates a horizontal list (ul.subsubsub) menu for admin screens. It is expected that the
+	 * active item will correspond to a 'subtab' param in the URL query.
+	 *
+	 * @param array $tabs
+	 * @param $base_url
+	 * @return string
+	 */
+	public static function sub_menu( array $tabs, $base_url ) {
+		$output = '<ul class="subsubsub">';
+		$items = 0;
+
+		// What is the current tab?
+		$tab_keys = array_keys( $tabs );
+		if ( isset( $_GET['subtab'] ) && in_array( $_GET['subtab'], $tab_keys ) ) $current = $_GET['subtab'];
+		else $current = array_shift( $tab_keys );
+
+		foreach ( $tabs as $slug => $label ) {
+			if ( 1 < ++$items ) $output .= ' | ';
+			$class = ( $current === $slug ) ? ' class="current" ' : '';
+
+			$href = esc_url( add_query_arg( 'tab', $slug, $base_url ) );
+			$output .= '<li> <a href="' . $href . '"' . $class . '>' . $label . '</a> </li>';
+		}
+
+		return $output . '</ul>';
 	}
 
 	/**
