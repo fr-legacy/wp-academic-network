@@ -2,8 +2,9 @@
 namespace WPAN\Hub;
 
 use WPAN\Core,
+	WPAN\Helpers\WordPress,
 	WPAN\Network,
-	WPAN\WordPress,
+	WPAN\Roster,
 	WPAN\View;
 
 
@@ -13,6 +14,16 @@ class Manager {
 	 */
 	protected $network;
 
+	/**
+	 * @var Roster
+	 */
+	protected $teacher_roster;
+
+	/**
+	 * @var Roster
+	 */
+	protected $student_roster;
+
 
 	/**
 	 * Sets up any hub-level facilities, admin screens and functionality that is required.
@@ -20,10 +31,7 @@ class Manager {
 	public function __construct() {
 		$this->network = Core::object()->network();
 		if ( ! $this->hub_environment() ) return;
-
-		$this->common_facilities();
 		$this->admin_facilities();
-		$this->front_facilities();
 	}
 
 	/**
@@ -37,13 +45,6 @@ class Manager {
 		if ( ! $this->network->is_hub() ) return false;
 		if ( ! wp_get_current_user()->has_cap( 'wpan_access_hub_tools' ) ) return false;
 		return true;
-	}
-
-	/**
-	 * Elements common to admin and frontend.
-	 */
-	protected function common_facilities() {
-
 	}
 
 	/**
@@ -92,7 +93,9 @@ class Manager {
 	protected function hub_page_tabs() {
 		$menu_pages = apply_filters( 'wpan_hub_admin_tabs', array(
 			'dashboard' => __( 'Dashboard', 'wpan' ),
-			'requests' => __( 'Requests', 'wpan' )
+			'teachers' => __( 'Teachers', 'wpan' ),
+			'students' => __( 'Students', 'wpan' ),
+			'maintenance' => __( 'Maintenance', 'wpan' )
 		) );
 
 		$admin_url = get_admin_url( get_current_blog_id(), 'admin.php?page=wpan_hub' );
@@ -110,23 +113,14 @@ class Manager {
 		$tab = isset( $_GET['tab'] ) ? $_GET['tab'] : '';
 
 		switch ( $tab ) {
-			case 'requests':
-				$view = Requests::controller();
-			break;
 			case 'dashboard':
 			default:
 				$view = View::admin( 'hub/dashboard' );
 			break;
 		}
 
-		return apply_filters( 'wpan_current_hub_page', $view, $tab );
+		return apply_filters( 'wpan_current_hub_view', $view, $tab );
 	}
 
-	/**
-	 * Front-end specific elements.
-	 */
-	protected function front_facilities() {
-		if ( is_admin() ) return;
-	}
 
 }

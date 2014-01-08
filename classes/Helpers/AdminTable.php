@@ -17,7 +17,7 @@ use WPAN\View;
  *
  * @package WPAN\Helpers
  */
-class Admin_Table {
+class AdminTable {
 	/**
 	 * A unique string that can be used to identify this table, used within filter/action hooks.
 	 *
@@ -89,7 +89,7 @@ class Admin_Table {
 	 * the class as a matter of style, as it can be followed immediately with chainable methods.
 	 *
 	 * @param $id
-	 * @return self
+	 * @return AdminTable
 	 */
 	public static function build( $id ) {
 		return new self( $id );

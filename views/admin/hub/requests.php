@@ -12,7 +12,7 @@
  * @var $current_page
  * @var $requests
  */
-use WPAN\Helpers\Admin_Table;
+use WPAN\Helpers\AdminTable;
 use WPAN\Requests\Manager;
 use WPAN\Requests\Student;
 use WPAN\Requests\Teacher;
@@ -32,7 +32,7 @@ switch ( $current_state_view ) {
 	case Manager::STATUS_REJECTED: unset( $bulk_actions['reject'] ); break;
 }
 
-$table = Admin_Table::build( 'hub_requests' )
+$table = AdminTable::build( 'hub_requests' )
 	->add_column( 'title', __( 'Summary', 'wpan' ) )
 	->add_column( 'type', __( 'Type', 'wpan' ) )
 	->add_column( 'status', __( 'Status', 'wpan' ) )

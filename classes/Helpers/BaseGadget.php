@@ -1,7 +1,8 @@
 <?php
 namespace WPAN\Gadgets;
-use WPAN\View;
-use WP_Widget;
+
+use WPAN\View,
+	WP_Widget;
 
 
 /**
@@ -10,7 +11,7 @@ use WP_Widget;
  *
  * @package WPAN\Gadgets
  */
-abstract class Base extends WP_Widget {
+abstract class BaseGadget extends WP_Widget {
 	public static function register() {
 		$class = get_called_class();
 		register_widget( $class );
