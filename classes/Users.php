@@ -344,10 +344,11 @@ class Users
 	 * @param int $offset
 	 * @param string $order_by
 	 * @param string $order
+	 * @param int $blog
 	 * @return array
 	 */
-	public function get_students( $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC' ) {
-		return $this->get_where( self::STUDENT, $limit, $offset, $order_by, $order );
+	public function get_students( $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0 ) {
+		return $this->get_where( self::STUDENT, $limit, $offset, $order_by, $order, $blog );
 	}
 
 	/**
@@ -359,10 +360,11 @@ class Users
 	 * @param int $offset
 	 * @param string $order_by
 	 * @param string $order
+	 * @param int blog
 	 * @return array
 	 */
-	public function get_teachers( $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC' ) {
-		return $this->get_where( self::TEACHER, $limit, $offset, $order_by, $order );
+	public function get_teachers( $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0 ) {
+		return $this->get_where( self::TEACHER, $limit, $offset, $order_by, $order, $blog );
 	}
 
 	/**
@@ -371,21 +373,25 @@ class Users
 	 * No limit on the number of results to be returned is assumed, but pagination and ordering is possible
 	 * via the additional optional params.
 	 *
+	 * Assumes we want results from across the entire network, however this can be locked down to a specific blog.
+	 *
 	 * @param $academic_role
 	 * @param int $limit
 	 * @param int $offset
 	 * @param string $order_by
 	 * @param string $order
+	 * @param int $blog
 	 * @return array
 	 */
-	public function get_where( $academic_role, $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC' ) {
+	public function get_where( $academic_role, $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0 ) {
 		$users = new WP_User_Query( array(
 			'meta_key' => 'wpan_academic_role',
 			'meta_value' => $academic_role,
 			'number' => $limit,
 			'offset' => $offset,
 			'orderby' => $order_by,
-			'order' => $order
+			'order' => $order,
+			'blog_id' => $blog
 		) );
 
 		return (array) $users->get_results();

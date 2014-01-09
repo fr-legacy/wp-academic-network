@@ -54,6 +54,7 @@ class Manager {
 	protected function admin_facilities() {
 		if ( ! is_admin() ) return;
 		add_action( 'admin_menu', array( $this, 'setup_hub_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_assets' ) );
 	}
 
 	/**
@@ -77,10 +78,12 @@ class Manager {
 	 * Puts together the admin page.
 	 */
 	public function hub_screen() {
-		echo View::admin( 'hub/frame', array(
+		$view = array(
 			'menu_pages' => $this->hub_page_tabs(),
 			'view' => $this->current_hub_tab()
-		) );
+		);
+
+		echo View::admin( 'hub/frame', $view );
 	}
 
 	/**
@@ -111,7 +114,7 @@ class Manager {
 	 * @return View
 	 */
 	protected function current_hub_tab() {
-		$tab = isset( $_GET['tab'] ) ? $_GET['tab'] : '';
+		$tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'teachers';
 		$html = '';
 
 		switch ( $tab ) {
@@ -122,6 +125,13 @@ class Manager {
 			$html = $controller->get_page();
 
 		return apply_filters( 'wpan_current_hub_view', $html, $tab );
+	}
+
+	/**
+	 * Enqueues admin scripts and styles.
+	 */
+	public function admin_assets() {
+		wp_enqueue_style( 'wpan_admin_css', WPAN_URL . 'resources/wpan-admin.css' );
 	}
 
 	/**

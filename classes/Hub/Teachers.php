@@ -4,9 +4,12 @@ namespace WPAN\Hub;
 use WP_User,
 	WPAN\Core,
 	WPAN\Helpers\AdminTable,
+	WPAN\Helpers\Log,
 	WPAN\Helpers\WordPress,
 	WPAN\Network,
+	WPAN\Roster,
 	WPAN\Users;
+use WPAN\Helpers\View;
 
 
 class Teachers
@@ -17,14 +20,16 @@ class Teachers
 	protected $table;
 
 	/**
-	 * @var Network
+	 * @var Roster
 	 */
-	protected $network;
+	protected $roster;
 
 	/**
-	 * @var Users
+	 * Records any errors, notices etc that need to be relayed to the user.
+	 *
+	 * @var array
 	 */
-	protected $users;
+	protected $notices = array();
 
 
 	/**
@@ -32,7 +37,16 @@ class Teachers
 	 */
 	public function __construct() {
 		$this->network = Core::object()->network();
-		$this->users = Core::object()->users();
+		$this->roster = new Roster( Users::TEACHER );
+		$this->listeners();
+	}
+
+	/**
+	 * Sets up filters as required.
+	 */
+	protected function listeners() {
+		$this->roster_uploads();
+		add_filter( 'wpan_roster_pagination', array( $this, 'pagination' ) );
 	}
 
 	/**
@@ -78,7 +92,10 @@ class Teachers
 	 * @return string
 	 */
 	protected function updates_view() {
-		return 'Updates';
+		return View::admin( 'hub/roster-updates-teacher', array(
+			'work_in_progress' => $this->roster->pending_changes(),
+			'job_details' => $this->roster->update_job_details()
+		) );
 	}
 
 	/**
@@ -112,35 +129,21 @@ class Teachers
 	 * Populates the table with teachers data.
 	 */
 	protected function populate_table() {
-		if ( ! $this->have_teachers() ) return;
+		if ( ! $this->roster->has_users() ) return;
 
-		foreach ( $this->get_teachers() as $teacher )
+		foreach ( $this->roster->get_users() as $teacher )
 			$this->table->add_row( $this->form_teacher_row( $teacher ) );
 	}
 
 	/**
-	 * Indicates if users assigned to the teacher (academic, network-wide) role exist.
-	 *
-	 * @return bool
-	 */
-	protected function have_teachers() {
-		$num_teachers = $this->users->count_academic_role( Users::TEACHER );
-		return ( 0 === $num_teachers ) ? false : true;
-	}
-
-	/**
-	 * Loads and returns an array of teachers matching the current request parameters.
+	 * Used to ensure the roster object knows which page of results has been requested and
+	 * how many results should be returned per page.
 	 *
 	 * @return array
 	 */
-	protected function get_teachers() {
-		$limit = apply_filters( 'wpan_roster_items_per_page', 20 );
-		$offset = ( $this->table->get_page_num() * $limit ) - $limit;
-
-		$order = apply_filters( 'wpan_roster_order', 'ASC' );
-		$order_by = apply_filters( 'wpan_roster_order_by', 'login' );
-
-		return $this->users->get_teachers( $limit, $offset, $order, $order_by );
+	public function pagination() {
+		$per_page = apply_filters( 'wpan_roster_teachers_per_page', 20 );
+		return array( $per_page, $this->table->get_page_num() );
 	}
 
 	/**
@@ -155,5 +158,27 @@ class Teachers
 			'user' => $teacher->user_login,
 			'primary_blog' => $this->network->get_primary_blog( $teacher->ID )
 		);
+	}
+
+	/**
+	 * Listens out for roster uploads.
+	 */
+	protected function roster_uploads() {
+		if ( ! isset( $_FILES['teacher_roster'] ) ) return;
+		if ( ! isset( $_POST['origin'] ) ) return;
+
+		if ( ! isset( $_POST[ wp_create_nonce( get_current_user_id() . $_POST['origin'] . 'Updated roster' ) ] ) ) {
+			$warning = __( 'A teacher roster update was uploaded to the server but was rejected due to security concerns.', 'wpan' );
+			$this->notices[] = $warning;
+			Log::warning( $warning );
+			return;
+		}
+
+		if ( UPLOAD_ERR_OK !== $_FILES['teacher_roster'] ) {
+			$warning = __( 'A teacher roster update was uploaded but a system error occured and it cannot be processed.', 'wpan' );
+			$this->notices[] = $warning;
+			Log::warning( $warning );
+			return;
+		}
 	}
 }

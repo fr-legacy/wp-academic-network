@@ -1,0 +1,24 @@
+/* Section wrapper divs */
+
+.section_wrapper {
+	border: 1px solid #bbb;
+	display: table;
+	padding: 0.4em 0.65em;
+}
+
+.section_wrapper.warning {
+	background: #ffc167;
+}
+
+/* Roster updates: CSV definition list */
+
+table.csv_headers_list th {
+	font-weight: normal;
+	font-family: monospace;
+	padding: 0.48em 1.6em 0.48em 0;
+	text-align: left;
+}
+
+table.csv_headers_list td  {
+	padding: 0.48em 0;
+}
