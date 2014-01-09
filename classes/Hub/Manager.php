@@ -2,10 +2,11 @@
 namespace WPAN\Hub;
 
 use WPAN\Core,
+	WPAN\Helpers\View,
 	WPAN\Helpers\WordPress,
 	WPAN\Network,
 	WPAN\Roster,
-	WPAN\View;
+	WPAN\Users;
 
 
 class Manager {
@@ -111,16 +112,37 @@ class Manager {
 	 */
 	protected function current_hub_tab() {
 		$tab = isset( $_GET['tab'] ) ? $_GET['tab'] : '';
+		$html = '';
 
 		switch ( $tab ) {
-			case 'dashboard':
-			default:
-				$view = View::admin( 'hub/dashboard' );
-			break;
+			case 'teachers': $controller = new Teachers; break;
 		}
 
-		return apply_filters( 'wpan_current_hub_view', $view, $tab );
+		if ( isset($controller) && method_exists( $controller, 'get_page' ) )
+			$html = $controller->get_page();
+
+		return apply_filters( 'wpan_current_hub_view', $html, $tab );
 	}
 
-
+	/**
+	 * Returns the student roster object.
+	 *
+	 * @return Roster
+	 */
+	public function get_student_roster() {
+		if ( ! isset( $this->student_roster ) )
+			$this->student_roster = new Roster( Users::STUDENT );
+		return $this->student_roster;
+	}
+	
+	/**
+	 * Returns the teacher roster object.
+	 *
+	 * @return Roster
+	 */
+	public function get_teacher_roster() {
+		if ( ! isset( $this->teacher_roster ) )
+			$this->teacher_roster = new Roster( Users::TEACHER );
+		return $this->teacher_roster;
+	}
 }

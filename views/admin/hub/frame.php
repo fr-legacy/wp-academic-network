@@ -3,7 +3,6 @@
 
 	<?php echo isset( $menu_pages ) ? $menu_pages : '' ?>
 
-	<br style="clear:both" />
 	<form method="get">
 		<?php
 		echo isset( $view ) ? $view : '';

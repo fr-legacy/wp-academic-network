@@ -1,5 +1,5 @@
 <?php
-namespace WPAN;
+namespace WPAN\Helpers;
 
 
 /**

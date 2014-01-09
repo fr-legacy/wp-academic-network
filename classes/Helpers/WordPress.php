@@ -85,7 +85,7 @@ class WordPress {
 			if ( 1 < ++$items ) $output .= ' | ';
 			$class = ( $current === $slug ) ? ' class="current" ' : '';
 
-			$href = esc_url( add_query_arg( 'tab', $slug, $base_url ) );
+			$href = esc_url( add_query_arg( 'subtab', $slug, $base_url ) );
 			$output .= '<li> <a href="' . $href . '"' . $class . '>' . $label . '</a> </li>';
 		}
 

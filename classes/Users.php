@@ -3,6 +3,7 @@ namespace WPAN;
 
 use DateTime,
 	Exception,
+	WPAN\Helpers\Log,
 	WP_User_Query;
 
 

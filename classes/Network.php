@@ -1,7 +1,8 @@
 <?php
 namespace WPAN;
 
-use WP_User_Query;
+use WPAN\Helpers\Log,
+	WP_User_Query;
 
 
 /**
