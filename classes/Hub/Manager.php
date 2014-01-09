@@ -93,10 +93,10 @@ class Manager {
 	 */
 	protected function hub_page_tabs() {
 		$menu_pages = apply_filters( 'wpan_hub_admin_tabs', array(
-			'dashboard' => __( 'Dashboard', 'wpan' ),
+			/*'dashboard' => __( 'Dashboard', 'wpan' ),*/
 			'teachers' => __( 'Teachers', 'wpan' ),
 			'students' => __( 'Students', 'wpan' ),
-			'maintenance' => __( 'Maintenance', 'wpan' )
+			/*'maintenance' => __( 'Maintenance', 'wpan' )*/
 		) );
 
 		$admin_url = get_admin_url( get_current_blog_id(), 'admin.php?page=wpan_hub' );
