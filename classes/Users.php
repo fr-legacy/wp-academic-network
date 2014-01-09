@@ -25,6 +25,11 @@ class Users
 	const UAID = 'wpan_uaid';
 
 	/**
+	 * Meta key used to hold teacher params (additional freeform data about the student).
+	 */
+	const TEACHER_PARAMS = 'wpan_teacher_params';
+
+	/**
 	 * Meta key used to hold student params (additional freeform data about the student).
 	 */
 	const STUDENT_PARAMS = 'wpan_student_params';
@@ -162,7 +167,7 @@ class Users
 		}
 
 		// Give them their network-wide designation as a teacher
-		$this->mark_academic_role( $user_id, Users::TEACHER );
+		$this->set_academic_role( $user_id, Users::TEACHER );
 
 		// Optionally assign UAID
 		if ( null !== $uaid ) $this->set_uaid( $user_id, $uaid );
@@ -198,28 +203,11 @@ class Users
 		}
 
 		// Give them their network-wide designation as a teacher
-		$this->mark_academic_role( $user_id, Users::TEACHER );
+		$this->set_academic_role( $user_id, Users::TEACHER );
 
 		// Optionally assign a UAID
 		if ( null !== $uaid ) $this->set_uaid( $user_id, $uaid );
 		return true;
-	}
-
-	/**
-	 * Marks the academic role of the user (ordinarily either a teacher or a student). Unlike a
-	 * conventional user role on a WordPress network, this does not vary by blog.
-	 *
-	 * @param $user_id
-	 * @param $role
-	 * @return bool
-	 */
-	public function mark_academic_role( $user_id, $role ) {
-		if ( false === get_user_by( 'id', $user_id ) ) {
-			Log::warning( sprintf( __( 'Attempt made to set academic role of non existent user #%s', 'wpan' ), $user_id ) );
-			return false;
-		}
-
-		return update_user_meta( $user_id, 'wpan_academic_role', $role );
 	}
 
 	/**
@@ -298,6 +286,23 @@ class Users
 	}
 
 	/**
+	 * Marks the academic role of the user (ordinarily either a teacher or a student). Unlike a
+	 * conventional user role on a WordPress network, this does not vary by blog.
+	 *
+	 * @param $user_id
+	 * @param $role
+	 * @return bool
+	 */
+	public function set_academic_role( $user_id, $role ) {
+		if ( false === get_user_by( 'id', $user_id ) ) {
+			Log::warning( sprintf( __( 'Attempt made to set academic role of non existent user #%s', 'wpan' ), $user_id ) );
+			return false;
+		}
+
+		return update_user_meta( $user_id, 'wpan_academic_role', $role );
+	}
+
+	/**
 	 * Returns the network-wide academic role of the user, if it can be determined, or else
 	 * returns boolean false.
 	 *
@@ -312,6 +317,78 @@ class Users
 
 		$role = get_user_meta( $user_id, 'wpan_academic_role', true );
 		return ( empty($role) ) ? false : $role;
+	}
+
+	/**
+	 * Returns the number of user accounts with the specified academic role.
+	 *
+	 * @param $role
+	 * @return int
+	 */
+	public function count_academic_role( $role ) {
+		global $wpdb;
+
+		$query = "SELECT COUNT( DISTINCT user_id ) FROM wp_usermeta "
+			. "WHERE meta_key = 'wpan_academic_role' AND meta_value = '%s';";
+
+		$count = $wpdb->get_var( $wpdb->prepare( $query, $role ) );
+		return absint( $count );
+	}
+
+	/**
+	 * Returns a list (as an array) of students, which may be empty.
+	 *
+	 * Optional params facilitate pagination and ordering as per the get_where() method.
+	 *
+	 * @param $limit
+	 * @param int $offset
+	 * @param string $order_by
+	 * @param string $order
+	 * @return array
+	 */
+	public function get_students( $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC' ) {
+		return $this->get_where( self::STUDENT, $limit, $offset, $order_by, $order );
+	}
+
+	/**
+	 * Returns a list (as an array) of teachers, which may be empty.
+	 *
+	 * Optional params facilitate pagination and ordering as per the get_where() method.
+	 *
+	 * @param $limit
+	 * @param int $offset
+	 * @param string $order_by
+	 * @param string $order
+	 * @return array
+	 */
+	public function get_teachers( $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC' ) {
+		return $this->get_where( self::TEACHER, $limit, $offset, $order_by, $order );
+	}
+
+	/**
+	 * Retrieves users by academic role.
+	 *
+	 * No limit on the number of results to be returned is assumed, but pagination and ordering is possible
+	 * via the additional optional params.
+	 *
+	 * @param $academic_role
+	 * @param int $limit
+	 * @param int $offset
+	 * @param string $order_by
+	 * @param string $order
+	 * @return array
+	 */
+	public function get_where( $academic_role, $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC' ) {
+		$users = new WP_User_Query( array(
+			'meta_key' => 'wpan_academic_role',
+			'meta_value' => $academic_role,
+			'number' => $limit,
+			'offset' => $offset,
+			'orderby' => $order_by,
+			'order' => $order
+		) );
+
+		return (array) $users->get_results();
 	}
 
 	/**
@@ -399,6 +476,21 @@ class Users
 	}
 
 	/**
+	 * Returns a student's params data (as an array) for this student. May be empty.
+	 *
+	 * @param $student_id
+	 * @return array
+	 */
+	public function get_student_params( $student_id ) {
+		if ( false === $this->is_student( $student_id ) ) {
+			Log::error( sprintf( __( 'Attempt made to retrieve student params for non student %d.', 'wpan' ), $student_id ) );
+			return false;
+		}
+
+		return (array) get_user_meta( $student_id, self::STUDENT_PARAMS, true );
+	}
+
+	/**
 	 * Confirms the student user account is still alive and valid.
 	 *
 	 * @param $student_id
@@ -468,5 +560,45 @@ class Users
 		}
 
 		return $datetime;
+	}
+
+	/**
+	 * Updates various bits of academic data pertaining to the teacher. This is freeform and might
+	 * contain the grade they typically lead, subjects they instruct in, student-friendly ways of
+	 * identifying them, etc.
+	 *
+	 * The teacher params should be provided as an array of key:value pairs.
+	 *
+	 * @param $teacher_id
+	 * @param array $data
+	 * @return bool
+	 */
+	public function set_teacher_params( $teacher_id, array $data = null ) {
+		if ( false === $this->is_teacher( $teacher_id ) ) {
+			Log::error( sprintf( __( 'Attempt made to update teacher params for non teacher %d.', 'wpan' ), $teacher_id ) );
+			return false;
+		}
+
+		if ( false === update_user_meta( $teacher_id, self::STUDENT_PARAMS, $data ) ) {
+			Log::error( sprintf( __( 'It was not possible to update the teacher params for user %d.', 'wpan' ), $teacher_id ) );
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Returns a teacher's params data (as an array) for this student. May be empty.
+	 *
+	 * @param $teacher_id
+	 * @return array
+	 */
+	public function get_teacher_params( $teacher_id ) {
+		if ( false === $this->is_teacher( $teacher_id ) ) {
+			Log::error( sprintf( __( 'Attempt made to retrieve teacher params for non teacher %d.', 'wpan' ), $teacher_id ) );
+			return false;
+		}
+
+		return (array) get_user_meta( $teacher_id, self::STUDENT_PARAMS, true );
 	}
 }

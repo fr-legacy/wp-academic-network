@@ -89,7 +89,7 @@ class WordPress {
 			$output .= '<li> <a href="' . $href . '"' . $class . '>' . $label . '</a> </li>';
 		}
 
-		return $output . '</ul>';
+		return $output . '</ul> <br style="clear:both" /> ';
 	}
 
 	/**

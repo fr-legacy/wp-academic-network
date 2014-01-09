@@ -1,6 +1,5 @@
 <?php
 namespace WPAN\Helpers;
-use WPAN\View;
 
 
 /**
@@ -138,6 +137,7 @@ class AdminTable {
 	 */
 	public function use_checkbox( $on_or_off ) {
 		$this->checkbox_column = (bool) $on_or_off;
+		return $this;
 	}
 
 	/**
@@ -240,6 +240,17 @@ class AdminTable {
 	}
 
 	/**
+	 * Returns the table output as a string.
+	 *
+	 * @return string
+	 */
+	public function as_string() {
+		ob_start();
+		$this->render();
+		return ob_get_clean();
+	}
+
+	/**
 	 * Renders the table.
 	 */
 	public function render() {
@@ -275,5 +286,23 @@ class AdminTable {
 		$this->columns = (array) apply_filters( $this->base . 'columns', $this->columns );
 		$this->rows = (array) apply_filters( $this->base . 'rows', $this->rows );
 		list( $this->current_page, $this->num_pages ) = (array) apply_filters( $this->base . 'pagination', array( $this->current_page, $this->num_pages ) );
+	}
+
+	/**
+	 * Helper to retrieve the requested page of results.
+	 *
+	 * @return int
+	 */
+	public function get_page_num() {
+		if ( isset( $_REQUEST['view_page_2'] ) && isset( $_REQUEST['results_page_2'] ) )
+			$page = absint( $_REQUEST['results_page_2'] );
+
+		else if ( isset( $_REQUEST['results_page'] ) )
+			$page = absint( $_REQUEST['results_page'] );
+
+		if ( ! isset( $page ) )
+			$page = 1;
+
+		return $page;
 	}
 }
