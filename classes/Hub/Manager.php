@@ -119,6 +119,7 @@ class Manager {
 		$html = '';
 
 		switch ( $tab ) {
+			case 'students': $controller = new Students; break;
 			case 'teachers': $controller = new Teachers; break;
 		}
 

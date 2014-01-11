@@ -11,7 +11,7 @@ use WP_User,
 	WPAN\Users;
 
 
-class Student
+class Students
 {
 	/**
 	 * @var AdminTable
