@@ -384,7 +384,7 @@ class Users
 	 * @return array
 	 */
 	public function get_where( $academic_role, $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0 ) {
-		$users = new WP_User_Query( array(
+		$args = array(
 			'meta_key' => 'wpan_academic_role',
 			'meta_value' => $academic_role,
 			'number' => $limit,
@@ -392,8 +392,11 @@ class Users
 			'orderby' => $order_by,
 			'order' => $order,
 			'blog_id' => $blog
-		) );
+		);
 
+		if ( -1 === $limit ) unset( $args['number'], $args['offset'] );
+
+		$users = new WP_User_Query( $args );
 		return (array) $users->get_results();
 	}
 
