@@ -120,10 +120,20 @@ class Teachers
 			'remove' => __( 'Purge completely', 'wpan' )
 		);
 
+		// Set up basic structure
 		$this->table = AdminTable::build( 'teacher_roster' )->use_checkbox( true )
 			->set_bulk_actions( $bulk_actions )
 			->add_column( 'user', __( 'User', 'wpan' ) )
 			->add_column( 'blog', __( 'Primary blog', 'wpan' ) );
+
+		// Pagination
+		list( $per_page ) = $this->pagination();
+		$num_teachers = $this->roster->how_many_users();
+		$pages = (int) ceil( $num_teachers / $per_page );
+		if ( 1 > $pages ) $pages = 1;
+
+		$this->table->set_total_pages( $pages )
+			->auto_set_page();
 	}
 
 	/**

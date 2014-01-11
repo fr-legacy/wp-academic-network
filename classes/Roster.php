@@ -288,6 +288,16 @@ class Roster
 	}
 
 	/**
+	 * Returns the total number of users in the roster.
+	 *
+	 * @return int
+	 */
+	public function how_many_users() {
+		if ( ! isset( $this->total_users ) ) $this->has_users(); // Trigger a count
+		return $this->total_users;
+	}
+
+	/**
 	 * Loads and returns an array of teachers matching the current request parameters.
 	 *
 	 * @return array

@@ -305,4 +305,12 @@ class AdminTable {
 
 		return $page;
 	}
+
+	/**
+	 * Tries to set the value of the pagination controls automatically. Equivalent to calling
+	 * set_page() and passing it the result of get_page_num().
+	 */
+	public function auto_set_page() {
+		$this->set_page( $this->get_page_num() );
+	}
 }
