@@ -237,7 +237,7 @@ class Teachers
 		unset( $csv );
 
 		if ( false === $records || empty( $records ) ) {
-			$warning = __( 'The roster update was received but appears to have been empty (or the contents could not be understood.', 'wpan' );
+			$warning = __( 'The roster update was received but appears to have been empty (or the contents could not be understood).', 'wpan' );
 			$this->notices[] = $warning;
 			Log::warning( $warning );
 			return null;
