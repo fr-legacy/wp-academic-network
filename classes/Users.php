@@ -394,6 +394,7 @@ class Users
 			'blog_id' => $blog
 		);
 
+		// Unlimited users?
 		if ( -1 === $limit ) unset( $args['number'], $args['offset'] );
 
 		$users = new WP_User_Query( $args );
