@@ -198,7 +198,7 @@ class Teachers
 		$records = $this->preprocess_upload();
 
 		if ( ! is_array( $records ) || empty( $records ) ) {
-			$warning = __( 'The roster update was received but appears to have been empty (or the contents could not be understood.', 'wpan' );
+			$warning = __( 'The roster update was received but appears to have been empty (or the contents could not be understood).', 'wpan' );
 			$this->notices[] = $warning;
 			Log::warning( $warning );
 			return;
