@@ -73,13 +73,25 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		 */
 		var in_progress = false;
 
+		/**
+		 * Flag is set after the job completes and the relevant message to the customer
+		 * has been displayed.
+		 *
+		 * @type {boolean}
+		 */
+		var completed = false;
+
 
 		/**
 		 * Displays a "job complete" message.
 		 */
 		function show_completion_msg() {
+			if ( completed ) return;
+			var completed = true;
+
 			var controls = $( "#worker_controls" );
 			var msg = '<div class="section_wrapper warning"> <p> ' + wpan_worker.completion_msg + ' </p> </div>';
+
 			controls.fadeOut( "slow", function() { controls.after( msg ) } );
 		}
 
@@ -116,8 +128,8 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		function response( data ) {
 			in_progress = false;
 
-			// Has the served indicated that the job is complete?
-			if ( undefined !== data.complete ) {
+			// Has the server indicated that the job is complete and was a job in progress?
+			if ( undefined !== data.complete && do_work ) {
 				show_completion_msg();
 				do_work = false;
 			}

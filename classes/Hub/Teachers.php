@@ -45,6 +45,7 @@ class Teachers
 	 */
 	protected function listeners() {
 		$this->roster_uploads();
+		$this->action_requests();
 		add_filter( 'wpan_roster_pagination', array( $this, 'pagination' ) );
 	}
 
@@ -108,7 +109,10 @@ class Teachers
 		$this->setup_table();
 		$this->populate_table();
 
-		return $this->table->as_string();
+		$view = $this->table->as_string();
+		$view .= '<input type="hidden" name="check" value="' . wp_create_nonce( 'teacher_actions' . get_current_user_id() ) . '" />';
+
+		return $view;
 	}
 
 	/**
@@ -117,7 +121,7 @@ class Teachers
 	protected function setup_table() {
 		$bulk_actions = array(
 			'unselected' => __( 'Bulk actions', 'wpan' ),
-			'remove' => __( 'Purge completely', 'wpan' )
+			'purge' => __( 'Purge completely', 'wpan' )
 		);
 
 		// Set up basic structure
@@ -132,8 +136,7 @@ class Teachers
 		$pages = (int) ceil( $num_teachers / $per_page );
 		if ( 1 > $pages ) $pages = 1;
 
-		$this->table->set_total_pages( $pages )
-			->auto_set_page();
+		$this->table->set_total_pages( $pages )->auto_set_page();
 	}
 
 	/**
@@ -153,7 +156,7 @@ class Teachers
 	 * @return array
 	 */
 	public function pagination() {
-		$per_page = apply_filters( 'wpan_roster_teachers_per_page', 20 );
+		$per_page = apply_filters( 'wpan_roster_teachers_per_page', 12 );
 		return array( $per_page, $this->table->get_page_num() );
 	}
 
@@ -166,7 +169,7 @@ class Teachers
 	protected function form_teacher_row( WP_User $teacher ) {
 		return array(
 			'row_id' => $teacher->ID,
-			'user' => $teacher->user_login,
+			'user' => View::admin( 'hub/teacher-roster/user-details', array( 'teacher' => $teacher ) ),
 			'primary_blog' => $this->network->get_primary_blog( $teacher->ID )
 		);
 	}
@@ -223,7 +226,7 @@ class Teachers
 			$warning = __( 'The roster update was received but could not be loaded into memory and parsed.', 'wpan' );
 			$this->notices[] = $warning;
 			Log::warning( $warning );
-			return;
+			return null;
 		}
 
 		// Normalize line endings (support *nix, MacOS and Windows formats in the source file)
@@ -237,7 +240,7 @@ class Teachers
 			$warning = __( 'The roster update was received but appears to have been empty (or the contents could not be understood.', 'wpan' );
 			$this->notices[] = $warning;
 			Log::warning( $warning );
-			return;
+			return null;
 		}
 
 		// The first line should be column headers: use to build an index:property map
@@ -252,7 +255,8 @@ class Teachers
 
 			foreach ( $record as $key => &$value ) {
 				$index = (int) $value;
-				$value = $source[$index];
+				if ( isset( $source[$index] ) ) $value = $source[$index];
+				else $value = '';
 			}
 		}
 
@@ -268,5 +272,43 @@ class Teachers
 			'work_in_progress' => $this->roster->pending_changes(),
 			'job_details' => $this->roster->get_job_details()
 		) );
+	}
+
+	/**
+	 * Listens for and handles bulk/single item actions.
+	 */
+	protected function action_requests() {
+		// Security check
+		if ( ! isset( $_REQUEST['check'] ) ) return;
+		if ( ! wp_verify_nonce( $_REQUEST['check'], 'teacher_actions' . get_current_user_id() ) ) return;
+
+		// Sanity checks
+		if ( isset( $_REQUEST['action_request'] ) ) $action = $_REQUEST['action'];
+		if ( isset( $_REQUEST['action_request_2'] ) ) $action = $_REQUEST['action_2'];
+		if ( ! isset( $action ) ) return;
+
+		switch ( $action ) {
+			case 'purge': $this->purge_requests(); break;
+		}
+	}
+
+	/**
+	 * Processes teacher purge requests.
+	 */
+	protected function purge_requests() {
+		if ( ! current_user_can( 'wpan_delete_user' ) || ! current_user_can( 'wpan_delete_site' ) ) {
+			Log::warning( sprintf( __( 'Attempt made to purge teacher account by unauthorized user %d.', 'wpan' ), get_current_user_id() ) );
+			return;
+		}
+
+		// Do we have items to action?
+		if ( ! isset($_REQUEST['item']) ) {
+			Log::warning( __( 'Unable to start purge operation, no items specified.', 'wpan' ) );
+			return;
+		}
+
+		// Purge!
+		foreach ( (array) $_REQUEST['item'] as $user )
+			if ( $this->roster->purge( $user ) );
 	}
 }

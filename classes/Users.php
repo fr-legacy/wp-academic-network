@@ -149,7 +149,7 @@ class Users
 	 * @param $password
 	 * @param $email
 	 * @param $uaid
-	 * @return bool
+	 * @return mixed int | bool
 	 */
 	public function create_teacher( $username, $password, $email, $uaid = null ) {
 		// If a UAID has been provided, ensure it is not already in use
@@ -171,7 +171,7 @@ class Users
 
 		// Optionally assign UAID
 		if ( null !== $uaid ) $this->set_uaid( $user_id, $uaid );
-		return true;
+		return (int) $user_id;
 	}
 
 	/**
@@ -198,7 +198,7 @@ class Users
 		$user_id = wpmu_create_user( $username, $password, $email );
 
 		if ( false === $user_id ) {
-			Log::error( sprintf( __( 'Failed to create new teacher blog. User %s could not be created.', 'wpan' ), $username ) );
+			Log::error( sprintf( __( 'Failed to create new student. User %s could not be created.', 'wpan' ), $username ) );
 			return false;
 		}
 
@@ -207,6 +207,17 @@ class Users
 
 		// Optionally assign a UAID
 		if ( null !== $uaid ) $this->set_uaid( $user_id, $uaid );
+		return (int) $user_id;
+	}
+
+	/**
+	 * Deletes the specified user account.
+	 *
+	 * @param $user_id
+	 * @return bool
+	 */
+	public function delete_user( $user_id ) {
+		wpmu_delete_user( $user_id );
 		return true;
 	}
 

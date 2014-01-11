@@ -118,6 +118,17 @@ class Network
 	}
 
 	/**
+	 * Deletes a blog.
+	 *
+	 * @param $blog_id
+	 * @return bool
+	 */
+	public function delete_blog( $blog_id ) {
+		wpmu_delete_blog( $blog_id, apply_filters( 'wpan_drop_tables_on_blog_deletion', true, $blog_id ) );
+		return true;
+	}
+
+	/**
 	 * Attempts to assign a teacher as one of the supervisors
 	 * @param $student_blog
 	 * @param $teacher_id

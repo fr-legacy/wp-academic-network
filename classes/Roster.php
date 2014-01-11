@@ -20,7 +20,16 @@ class Roster
 	 * Number of roster updates/new entries to process in a single batch (default value, it can be overridden using
 	 * a filter).
 	 */
-	const BATCH_SIZE = 8;
+	const BATCH_SIZE = 5;
+
+	/**
+	 * Time in seconds after which the processor should stop working to allow a client update to take place.
+	 * This is not a hard limit (ie, it will not rigidly stop on or before this time expires) but rather it indicates
+	 * that the process loop should exit at the next convenient point *after* the time expires.
+	 *
+	 * As with BATCH_SIZE it can be overridden with a filter.
+	 */
+	const AJAX_BATCH_TIME = 4;
 
 	/**
 	 * One of the user roles as defined in the Users class.
@@ -195,9 +204,16 @@ class Roster
 	public function process_update() {
 		$this->load_source();
 		$batch_size = apply_filters( 'wpan_roster_update_batch', self::BATCH_SIZE );
+		$batch_time = apply_filters( 'wpan_roster_ajax_batch_time', self::AJAX_BATCH_TIME );
+		$start = time();
 		$count = 0;
 
 		while ( ++$count <= $batch_size ) {
+			// Observe ajax (realtime processor) timeout
+			if ( defined( 'DOING_AJAX' ) && DOING_AJAX )
+				if ( ( time() - $start ) > $batch_time ) break;
+
+			// Grab the next record and process
 			$record = array_shift( $this->source );
 			$this->update_record( $record );
 		}
@@ -214,8 +230,16 @@ class Roster
 	protected function update_record( $record ) {
 		if ( ! $this->is_valid_record( $record ) ) return;
 
+		// Does the user already exist?
 		$user_id = $this->users->who_is( $record['uaid'] );
-		if ( false === $user_id ) $this->create_user( $record );
+		if ( false === $user_id ) $user_id = $this->create_user( $record );
+
+		// Success?
+		if ( ! is_int( $user_id ) || 0 >= $user_id ) return;
+
+		// Create a new blog for them if they don't already have one
+		$blog_id = $this->network->get_primary_blog( $user_id );
+		if ( false === $blog_id ) $this->create_blog( $user_id, $record );
 	}
 
 	/**
@@ -239,11 +263,31 @@ class Roster
 		}
 
 		if ( Users::STUDENT === $this->type ) {
-			$this->users->create_student( $record['username'], $record['password'], $record['uaid'] );
+			return $this->users->create_student( $record['username'], $record['password'], $record['uaid'] );
 		}
 		elseif ( Users::TEACHER === $this->type ) {
-			$this->users->create_teacher( $record['username'], $record['password'], $record['email'], $record['uaid'] );
+			return $this->users->create_teacher( $record['username'], $record['password'], $record['email'], $record['uaid'] );
 		}
+
+		return false;
+	}
+
+	/**
+	 * Attempts to create a new blog for the specified user.
+	 *
+	 * @param $user_id
+	 * @param $record
+	 * @return mixed
+	 */
+	protected function create_blog( $user_id, $record ) {
+		if ( Users::STUDENT === $this->type ) {
+			return $this->network->create_student_blog( $record['blogpath'], $record['blogtitle'], $user_id );
+		}
+		elseif ( Users::TEACHER === $this->type ) {
+			return $this->network->create_teacher_blog( $record['blogpath'], $record['blogtitle'], $user_id );
+		}
+
+		return false;
 	}
 
 	/**
@@ -312,5 +356,26 @@ class Roster
 		return $this->users->get_where( $this->type, $limit, $offset, $order, $order_by );
 	}
 
+	/**
+	 * Purges the specified user from the roster: this entails their user account and associated
+	 * blog being deleted.
+	 *
+	 * @param $id
+	 * @return bool
+	 */
+	public function purge( $id ) {
+		if ( $this->users->get_academic_role( $id ) !== $this->type ) {
+			Log::warning( sprintf( __( 'User %d could not be purged from the %s roster.', 'wpan' ), $this->type ) );
+			return false;
+		}
 
+		// Delete the user's primary blog (if they have one)
+		$blog_id = $this->network->get_primary_blog( $id );
+		if ( false !== $blog_id) $this->network->delete_blog( $blog_id );
+
+		// Delete the actual user
+		$this->users->delete_user( $id );
+
+		return true;
+	}
 }

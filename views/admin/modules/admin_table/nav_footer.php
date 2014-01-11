@@ -13,7 +13,7 @@ use WPAN\Helpers\Form;
 <div class="tablenav bottom">
 	<?php if ( isset( $bulk_actions ) && ! empty( $bulk_actions ) ): ?>
 		<div class="alignleft actions bulkactions">
-			<?php echo Form::select( 'action2' ,'wpan_apply_actions', $bulk_actions ); ?>
+			<?php echo Form::select( 'action_2' ,'wpan_apply_actions', $bulk_actions ); ?>
 			<input type="submit" name="action_request_2" value="<?php esc_attr_e( 'Apply', 'wpan' ) ?>" class="button action" />
 		</div>
 	<?php endif ?>

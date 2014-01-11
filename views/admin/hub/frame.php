@@ -1,4 +1,4 @@
-<div class="wrap">
+<div class="wrap wpan">
 	<h2> <?php _e( 'WP Academic Network', 'wpan' ) ?> </h2>
 
 	<?php echo isset( $menu_pages ) ? $menu_pages : '' ?>
