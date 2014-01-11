@@ -94,7 +94,7 @@ class Teachers
 	 * @return string
 	 */
 	protected function updates_view() {
-		return View::admin( 'hub/roster-updates-teacher', array(
+		return View::admin( 'hub/teacher-roster/updates', array(
 			'work_in_progress' => $this->roster->pending_changes(),
 			'job_details' => $this->roster->get_job_details()
 		) );
@@ -170,7 +170,7 @@ class Teachers
 		return array(
 			'row_id' => $teacher->ID,
 			'user' => View::admin( 'hub/teacher-roster/user-details', array( 'teacher' => $teacher ) ),
-			'primary_blog' => $this->network->get_primary_blog( $teacher->ID )
+			'primary_blog' => View::admin( 'hub/teacher-roster/blog-details', array( 'blog_id' => $this->network->get_primary_blog( $teacher->ID ) ) )
 		);
 	}
 
