@@ -9,9 +9,12 @@
 
 <?php if ( $work_in_progress) : ?>
 	<div class="section_wrapper warning"> <p>
-		<strong> <?php _e( 'Roster updates are currently in progress.', 'wpan') ?> </strong>
-		<?php _e( 'You can upload a new set of roster updates, however doing so will destroy the current update task and replace it with the new one.', 'wpan' ) ?>
-	</p> </div>
+		<strong> <?php _e( 'A set of roster updates have been uploaded.', 'wpan') ?> </strong>
+		<?php _e( 'These will be processed in the background if background processing is enabled, or else you can use the realtime processing tool.', 'wpan') ?>
+		<?php _e( 'You can upload a new set of roster updates, however please note that doing so will destroy the current update task and replace it with the new one.', 'wpan' ) ?>
+	</p> <p>
+		<?php _e( 'This message will disappear once the current set of updates have been processed.', 'wpan' ) ?>
+	</p></div>
 <?php endif ?>
 
 <?php

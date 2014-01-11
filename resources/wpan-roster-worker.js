@@ -75,6 +75,15 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 
 
 		/**
+		 * Displays a "job complete" message.
+		 */
+		function show_completion_msg() {
+			var controls = $( "#worker_controls" );
+			var msg = '<div class="section_wrapper warning"> <p> ' + wpan_worker.completion_msg + ' </p> </div>';
+			controls.fadeOut( "slow", function() { controls.after( msg ) } );
+		}
+
+		/**
 		 * Updates the progress indicator.
 		 *
 		 * @param processed
@@ -106,8 +115,14 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		 */
 		function response( data ) {
 			in_progress = false;
-			if ( undefined !== data.complete ) do_work = false;
 
+			// Has the served indicated that the job is complete?
+			if ( undefined !== data.complete ) {
+				show_completion_msg();
+				do_work = false;
+			}
+
+			// Update progress stats
 			var total = data.total_rows;
 			var remaining = data.remaining_rows;
 			var processed = total - remaining;

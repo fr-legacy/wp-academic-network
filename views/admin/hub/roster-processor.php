@@ -29,7 +29,7 @@ $progress = absint( $progress ) . '%';
 
 	<p> <?php _e( 'Please note if you navigate away from this page while the realtime processor is running it will automatically stop shortly thereafter. If you need it to run until the current update completes, please keep the page open in your browser.', 'wpan' ) ?> </p>
 
-	<table class="controls">
+	<table class="controls" id="worker_controls">
 		<tr>
 			<th scope="row"> <?php _e( 'Progress', 'wpan' ) ?> </th>
 			<td>
@@ -57,8 +57,6 @@ $progress = absint( $progress ) . '%';
 				<div id="worker_advice_js">
 					<p> <em> <?php _e( 'If this advice does not disappear then a technical issue may be preventing the realtime processor from working as expected.', 'wpan' ) ?> </em> </p>
 				</div>
-
-
 			</td>
 		</tr>
 	</table>
@@ -66,12 +64,13 @@ $progress = absint( $progress ) . '%';
 	<script type="text/javascript" src="<?php echo esc_url( WPAN_URL . 'resources/wpan-roster-worker.js' ) ?>"></script>
 	<script type="text/javascript">
 		var wpan_worker = {
-			<?php if ( isset($_GET['do']) && 'now' === $_GET['do'] ) echo 'immediate: "1",'; ?>
+			<?php if ( isset( $_GET['do'] ) && 'now' === $_GET['do'] ) echo 'immediate: "1",'; ?>
 			action: "wpan_roster_update",
 			origin: "<?php esc_html_e( $origin ) ?>",
 			check: "<?php esc_html_e( $check ) ?>",
 			type: "<?php esc_html_e( Users::TEACHER ) ?>",
-			typecheck: "<?php esc_html_e( $typecheck ) ?>"
+			typecheck: "<?php esc_html_e( $typecheck ) ?>",
+			completion_msg: "<?php _e( '<strong>The update task has now completed.</strong> Please view the <em>current roster</em> to confirm everything is in order.', 'wpan' ) ?>"
 		};
 	</script>
 
