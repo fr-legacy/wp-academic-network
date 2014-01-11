@@ -5,11 +5,10 @@ use WP_User,
 	WPAN\Core,
 	WPAN\Helpers\AdminTable,
 	WPAN\Helpers\Log,
+	WPAN\Helpers\View,
 	WPAN\Helpers\WordPress,
-	WPAN\Network,
 	WPAN\Roster,
 	WPAN\Users;
-use WPAN\Helpers\View;
 
 
 class Teachers
@@ -66,8 +65,9 @@ class Teachers
 	protected function menu() {
 		$base_url = get_admin_url( get_current_blog_id(), 'admin.php?page=wpan_hub&tab=teachers' );
 		$subtabs = array(
-			'current' => __( 'Current Roster', 'wpan' ),
-			'update' => __( 'Update/Import', 'wpan' )
+			'current' => __( 'Current roster', 'wpan' ),
+			'update' => __( 'Update/import', 'wpan' ),
+			'process' => __( 'Realtime processor', 'wpan' )
 		);
 		return WordPress::sub_menu( $subtabs, $base_url );
 	}
@@ -81,6 +81,7 @@ class Teachers
 		$subtab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : '';
 
 		switch ( $subtab ) {
+			case 'process': return $this->process_view(); break;
 			case 'update': return $this->updates_view(); break;
 			default: return $this->roster_view(); break;
 		}
@@ -94,7 +95,7 @@ class Teachers
 	protected function updates_view() {
 		return View::admin( 'hub/roster-updates-teacher', array(
 			'work_in_progress' => $this->roster->pending_changes(),
-			'job_details' => $this->roster->update_job_details()
+			'job_details' => $this->roster->get_job_details()
 		) );
 	}
 
@@ -167,18 +168,95 @@ class Teachers
 		if ( ! isset( $_FILES['teacher_roster'] ) ) return;
 		if ( ! isset( $_POST['origin'] ) ) return;
 
-		if ( ! isset( $_POST[ wp_create_nonce( get_current_user_id() . $_POST['origin'] . 'Updated roster' ) ] ) ) {
+		if ( ! wp_verify_nonce( $_POST['check'], get_current_user_id() . $_POST['origin'] . 'Updated roster' ) ) {
 			$warning = __( 'A teacher roster update was uploaded to the server but was rejected due to security concerns.', 'wpan' );
 			$this->notices[] = $warning;
 			Log::warning( $warning );
 			return;
 		}
 
-		if ( UPLOAD_ERR_OK !== $_FILES['teacher_roster'] ) {
+		if ( UPLOAD_ERR_OK !== $_FILES['teacher_roster']['error'] ) {
 			$warning = __( 'A teacher roster update was uploaded but a system error occured and it cannot be processed.', 'wpan' );
 			$this->notices[] = $warning;
 			Log::warning( $warning );
 			return;
 		}
+
+		$records = $this->preprocess_upload();
+
+		if ( ! is_array( $records ) || empty( $records ) ) {
+			$warning = __( 'The roster update was received but appears to have been empty (or the contents could not be understood.', 'wpan' );
+			$this->notices[] = $warning;
+			Log::warning( $warning );
+			return;
+		}
+
+		$this->roster->update_roster( $records );
+
+		// If the user wants the changes to be processed instantly, move them to the realtime processor
+		if ( isset( $_POST['process_instantly'] ) ) {
+			$_GET['subtab'] = 'process';
+			$_GET['do'] = 'now';
+		}
+	}
+
+	/**
+	 * If a roster update file was successfully uploaded, lets aim to convert it from CSV to an array
+	 * structure.
+	 *
+	 * @return mixed null | array
+	 */
+	protected function preprocess_upload() {
+		$csv = file_get_contents( $_FILES['teacher_roster']['tmp_name'] );
+
+		if ( false === $csv ) {
+			$warning = __( 'The roster update was received but could not be loaded into memory and parsed.', 'wpan' );
+			$this->notices[] = $warning;
+			Log::warning( $warning );
+			return;
+		}
+
+		// Normalize line endings (support *nix, MacOS and Windows formats in the source file)
+		$csv = str_replace( "\n\n", "\n", str_replace( "\r", "\n", $csv ) );
+
+		// Break into an array representing each individual line
+		$records = explode( "\n", $csv );
+		unset( $csv );
+
+		if ( false === $records || empty( $records ) ) {
+			$warning = __( 'The roster update was received but appears to have been empty (or the contents could not be understood.', 'wpan' );
+			$this->notices[] = $warning;
+			Log::warning( $warning );
+			return;
+		}
+
+		// The first line should be column headers: use to build an index:property map
+		$headers = array_shift( $records );
+		$map = array_flip( str_getcsv( str_replace( ' ', '', $headers ) ) );
+
+		// Convert each record to an array structure based on the index:property map
+		foreach ( $records as &$record ) {
+			$source = (array) str_getcsv( $record );
+			$source = array_map( 'trim', $source );
+			$record = $map;
+
+			foreach ( $record as $key => &$value ) {
+				$index = (int) $value;
+				$value = $source[$index];
+			}
+		}
+
+		return $records;
+	}
+
+	/**
+	 * Generates the realtime processor view (useful to review the status of work in progress and to
+	 * force processing of roster updates without waiting for scheduled tasks to fire).
+	 */
+	protected function process_view() {
+		return View::admin( 'hub/roster-processor', array(
+			'work_in_progress' => $this->roster->pending_changes(),
+			'job_details' => $this->roster->get_job_details()
+		) );
 	}
 }

@@ -55,6 +55,7 @@ class Manager {
 		if ( ! is_admin() ) return;
 		add_action( 'admin_menu', array( $this, 'setup_hub_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_assets' ) );
+		add_action( 'wp_ajax_wpan_roster_update', array( $this, 'roster_worker' ) );
 	}
 
 	/**
@@ -154,5 +155,34 @@ class Manager {
 		if ( ! isset( $this->teacher_roster ) )
 			$this->teacher_roster = new Roster( Users::TEACHER );
 		return $this->teacher_roster;
+	}
+
+	/**
+	 * Handles realtime worker requests.
+	 *
+	 *
+	 */
+	public function roster_worker() {
+		// Security check failed? Gracefully shutdown the cycle
+		if ( ! wp_verify_nonce( $_POST['check'], $_POST['origin'] . get_current_user_id() . 'WPAN worker' ) )
+			exit( json_encode( array( 'complete' => 1 ) ) );
+
+		// Valid type? ... if not, gracefully shutdown the cycle
+		$typecheck = hash( 'md5', $_POST['type'] . $_POST['check'] . $_POST['origin'] );
+		if ( $typecheck !== $_POST['typecheck'] )
+			exit( json_encode( array( 'complete' => 1 ) ) );
+
+		// Get the roster object
+		$roster = new Roster( $_POST['type'] );
+
+		// Run a processing batch
+		$roster->process_update();
+		$response = $roster->get_job_details();
+
+		// Update client
+		if ( ! $roster->pending_changes() ) $response['complete'] = 1;
+		$response['check'] = wp_create_nonce( $_POST['origin'] . get_current_user_id() . 'WPAN worker' );
+		$response['typecheck'] = hash( 'md5', Users::TEACHER . $response['check'] . $_POST['origin'] );
+		exit( json_encode( $response ) );
 	}
 }

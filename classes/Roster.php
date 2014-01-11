@@ -20,7 +20,7 @@ class Roster
 	 * Number of roster updates/new entries to process in a single batch (default value, it can be overridden using
 	 * a filter).
 	 */
-	const BATCH_SIZE = 20;
+	const BATCH_SIZE = 8;
 
 	/**
 	 * One of the user roles as defined in the Users class.
@@ -138,7 +138,8 @@ class Roster
 	 * @return bool
 	 */
 	public function pending_changes() {
-		return ( self::PENDING_CHANGES === $this->status );
+		$this->check_status();
+		return ( self::PENDING_CHANGES === (int) $this->status );
 	}
 
 	/**
@@ -146,7 +147,7 @@ class Roster
 	 *
 	 * @return array
 	 */
-	public function update_job_details() {
+	public function get_job_details() {
 		return $this->source_meta;
 	}
 
@@ -167,10 +168,22 @@ class Roster
 	 */
 	public function update_roster( array $data ) {
 		if ( ! isset($this->source_meta['initiated']) ) $this->source_meta['initiated'] = date( 'Y-m-d H:i:s' );
-		if ( ! isset($this->source_meta['updated']) ) $this->source_meta['updated'] = date( 'Y-m-d H:i:s' );
+		if ( ! isset($this->source_meta['total_rows']) ) $this->source_meta['total_rows'] = count( $data );
+		$this->source_meta['remaining_rows'] = count( $data );
+		$this->source_meta['updated'] = date( 'Y-m-d H:i:s' );
 
-		update_site_option( 'wpan_' . $this->type . '_roster_update_data', $data );
-		update_site_option( 'wpan_' . $this->type . '_roster_update_meta', $this->source_meta );
+		if ( count($data) > 0 ) {
+			update_site_option( 'wpan_' . $this->type . '_roster_update_data', $data );
+			update_site_option( 'wpan_' . $this->type . '_roster_update_meta', $this->source_meta );
+			Log::action( sprintf( __( 'Roster update: %d rows pending further processing.', 'wpan' ), count( $data ) ) );
+			$this->set_status( self::PENDING_CHANGES );
+		}
+		else {
+			delete_site_option( 'wpan_' . $this->type . '_roster_update_data' );
+			update_site_option( 'wpan_' . $this->type . '_roster_update_meta', $this->source_meta );
+			Log::action( __( 'All roster updates have been processed.', 'wpan' )  );
+			$this->set_status( self::READY );
+		}
 	}
 
 	/**
@@ -188,6 +201,8 @@ class Roster
 			$record = array_shift( $this->source );
 			$this->update_record( $record );
 		}
+
+		$this->update_roster( $this->source );
 	}
 
 	/**
@@ -199,6 +214,36 @@ class Roster
 	protected function update_record( $record ) {
 		if ( ! $this->is_valid_record( $record ) ) return;
 
+		$user_id = $this->users->who_is( $record['uaid'] );
+		if ( false === $user_id ) $this->create_user( $record );
+	}
+
+	/**
+	 * Attempts to create a new user record using the information provided in the $record array.
+	 *
+	 * @param array $record
+	 * @return mixed
+	 */
+	protected function create_user( array $record ) {
+		$record = wp_parse_args( $record, array( 'uaid' => '', 'username' => '', 'password' => '', 'email' => '') );
+
+		// Email is not required nor used for student users
+		if ( Users::STUDENT === $this->type ) unset( $record['email'] );
+
+		// Ensure none of the fields are empty
+		foreach ( $record as $property => $field ) {
+			if ( empty( $field ) ) {
+				Log::warning( sprintf( __('The %s property was not provided in the roster update. User creation skipped.', 'wpan' ), $property ) );
+				return false;
+			}
+		}
+
+		if ( Users::STUDENT === $this->type ) {
+			$this->users->create_student( $record['username'], $record['password'], $record['uaid'] );
+		}
+		elseif ( Users::TEACHER === $this->type ) {
+			$this->users->create_teacher( $record['username'], $record['password'], $record['email'], $record['uaid'] );
+		}
 	}
 
 	/**

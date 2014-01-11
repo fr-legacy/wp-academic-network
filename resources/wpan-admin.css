@@ -3,11 +3,13 @@
 .section_wrapper {
 	border: 1px solid #bbb;
 	display: table;
-	padding: 0.4em 0.65em;
+	padding: 0.4em 1.65em;
 }
 
 .section_wrapper.warning {
-	background: #ffc167;
+	background: #ffe197;
+	margin-bottom: 1em;
+	margin-top: 1em;
 }
 
 /* Roster updates: CSV definition list */
@@ -21,4 +23,64 @@ table.csv_headers_list th {
 
 table.csv_headers_list td  {
 	padding: 0.48em 0;
+}
+
+/* Tabular controls */
+
+table.controls td {
+	vertical-align: top;
+}
+
+table.controls.centred td {
+	vertical-align: middle;
+}
+
+table.controls th[scope=row] {
+	padding-right: 1em;
+}
+
+/* Meterbox graph */
+
+.meterbox {
+	background: #fff;
+	border: 1px solid #bbb;
+	display: inline-block;
+	float: left;
+	height: 2em;
+	width: 16em;
+}
+
+.meterbox .bar {
+	background: #0074a2;
+	height: 100%;
+}
+
+.meter_percent {
+	color: #888;
+	display: inline-block;
+	margin-left: 1em;
+	padding-top: 0.3em;
+}
+
+/* Worker dots */
+
+.workdots .dot {
+	background: #e2e2e2;
+	border-radius: 0.5em;
+	display: inline-block;
+	height: 0.75em;
+	margin-right: 0.1em;
+	width: 0.75em;
+}
+
+.workdots .dot.active {
+	background: #b8b8bc;
+}
+
+.workdots .dot.alt {
+	background: #c5c5ce;
+}
+
+.workdots .dot.active.alt {
+	background: #d0d0df;
 }

@@ -155,16 +155,14 @@ class WPAN_Loader
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Attempts to load any classes that exist within registered namespaces and/or any associated
 	 * vendor or supporting library classes.
 	 *
 	 * Currently only accepts root namespaces (ie, we don't support having "vendor" in one dir
 	 * and "vendor\lib_a", "vendor\lib_b" in completely unrelated directories).
-=======
+	 *
 	 * Attempts to load any classes that exist within registered (top level) namespaces and/or
 	 * any associated vendor or supporting library classes.
->>>>>>> Change of tack: emphasis on User and Network suite
 	 *
 	 * @param $class
 	 */

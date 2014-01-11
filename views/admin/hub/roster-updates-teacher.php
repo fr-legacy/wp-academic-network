@@ -4,7 +4,8 @@
  * @var $job_details
  */
 ?>
-<h4> <?php _e( 'Upload a roster update file', 'wpan' ) ?> </h4>
+
+<p> <?php _e( 'Your file should be CSV format (comma separated values). There must be a row of column headers and there should be no blank lines before this. As a guide, expected column headers are listed below.', 'wpan' ) ?> </p>
 
 <?php if ( $work_in_progress) : ?>
 	<div class="section_wrapper warning"> <p>
@@ -26,11 +27,21 @@ $nonce = wp_create_nonce( get_current_user_id() . $unique_id . 'Updated roster' 
 ?>
 <form method="post" enctype="multipart/form-data">
 
-	<input type="file" name="teacher_roster" /> <br/>
-	<input type="submit" name="<?php esc_attr_e( $unique_id ) ?>" value="<?php _e( 'Upload', 'wpan' ) ?>" class="button primary" />
-	<input type="hidden" name="origin" value="<?php esc_attr_e( $nonce ) ?>" />
+<table class="controls"> <tr>
+	<td>
+		<input type="file" name="teacher_roster" />
+	</td>
+	<td>
+		<input type="submit" name="send" value="<?php _e( 'Upload', 'wpan' ) ?>" class="button button-primary" /> <br />
+		<input type="checkbox" name="process_instantly" id="process_instantly" value="1" />
+		<label for="process_instantly"> <?php _e( 'Start processing immediately after upload', 'wpan' ) ?> </label>
+	</td>
+</tr> </table>
 
-<p> <?php _e( 'Your file should be CSV format (comma separated values). There must be a row of column headers and there should be no blank lines before this. As a guide, expected column headers are listed below.', 'wpan' ) ?> </p>
+<input type="hidden" name="origin" value="<?php esc_attr_e( $unique_id ) ?>" />
+<input type="hidden" name="check" value="<?php esc_attr_e( $nonce ) ?>" />
+
+<br />
 
 <div class="section_wrapper">
 	<table class="csv_headers_list">
