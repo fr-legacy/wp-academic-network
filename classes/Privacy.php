@@ -1,7 +1,8 @@
 <?php
 namespace WPAN;
 
-use WPAN\Helpers\WordPress,
+use WPAN\Helpers\View,
+	WPAN\Helpers\WordPress,
 	WPAN\Network,
 	WPAN\Users;
 
@@ -64,6 +65,9 @@ class Privacy
 		add_action( 'wp', array( $this, 'assess' ), 5 );
 		add_action( 'wp', array( $this, 'determine' ), 10 );
 
+		add_action( 'add_meta_boxes', array( $this, 'teacher_metabox' ) );
+		add_action( 'save_post', array( $this, 'public_marker_changes' ) );
+
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_student_blogs' ), 10, 2 );
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_teacher_blogs' ), 10, 2 );
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'promote_hub_access' ), 10, 2 );
@@ -96,7 +100,7 @@ class Privacy
 	protected function is_post_marked_open() {
 		global $post;
 
-		if ( ! is_singular() ) return false;
+		if ( ! is_admin() && ! is_singular() ) return false;
 		$marker = get_post_meta( $post->ID, self::PUBLIC_ACCESS_MARKER, true );
 		return ( 'public' === $marker );
 	}
@@ -116,7 +120,7 @@ class Privacy
 	 */
 	public function protect_teacher_blogs( array $analysis, Privacy $privacy ) {
 		if ( ! $analysis['teacher_blog'] ) return;
-		if ( ! $analysis['marked_open'] ) $privacy->recommend_denial();
+		if ( ! $analysis['authenticated'] && ! $analysis['marked_open'] ) $privacy->recommend_denial();
 		else $privacy->recommend_access();
 	}
 
@@ -188,5 +192,39 @@ class Privacy
 		$redirect_to = apply_filters( 'wpan_no_access_redirect_url', $hub_url );
 		header( 'Location: ' . $redirect_to );
 		exit();
+	}
+
+	/**
+	 * Sets up a meta box within the post editor for teacher blogs to allow them to mark certain
+	 * posts as publicly accessible.
+	 */
+	public function teacher_metabox() {
+		$post_type_editors = apply_filters( 'wpan_privacy_public_marker_meta_box_screens', array( 'post', 'page' ) );
+
+		foreach ( $post_type_editors as $target )
+			add_meta_box( 'wpan_markpublic_metabox', __( 'Public Access Control', 'wpan' ),
+				array( $this, 'do_metabox' ), $target, 'side', 'high' );
+	}
+
+	/**
+	 * Controller for the public accessiblity meta box.
+	 */
+	public function do_metabox() {
+		echo View::admin( 'public_access_metabox', array( 'checked' => $this->is_post_marked_open() ) );
+	}
+
+	/**
+	 * Listens for post saves and updates the public accessibility marker if appropriate.
+	 */
+	public function public_marker_changes() {
+		global $post;
+
+		if ( ! isset( $_POST['wpan_confirm_public_accessiblity'] ) ) return;
+		if ( ! wp_verify_nonce( $_POST['wpan_confirm_public_accessiblity'], 'WPAN public marker' . get_current_user_id() ) ) return;
+
+		if ( isset( $_POST['wpan_public_item'] ) && '1' === $_POST['wpan_public_item'] )
+			update_post_meta( $post->ID, self::PUBLIC_ACCESS_MARKER, 'public' );
+
+		else delete_post_meta( $post->ID, self::PUBLIC_ACCESS_MARKER );
 	}
 }
