@@ -4,12 +4,13 @@ namespace WPAN;
 /**
  * @var $work_in_progress
  * @var $job_details
+ * @var $type
  */
 
 // Security
 $origin = uniqid();
 $check = wp_create_nonce( $origin . get_current_user_id() . 'WPAN worker' );
-$typecheck = hash( 'md5', Users::TEACHER . $check . $origin );
+$typecheck = hash( 'md5', $type . $check . $origin );
 
 // Calculate num rows left
 $total_rows = isset( $job_details['total_rows'] ) ? $job_details['total_rows'] : 1;
@@ -68,7 +69,7 @@ $progress = absint( $progress ) . '%';
 			action: "wpan_roster_update",
 			origin: "<?php esc_html_e( $origin ) ?>",
 			check: "<?php esc_html_e( $check ) ?>",
-			type: "<?php esc_html_e( Users::TEACHER ) ?>",
+			type: "<?php esc_html_e( $type ) ?>",
 			typecheck: "<?php esc_html_e( $typecheck ) ?>",
 			completion_msg: "<?php _e( '<strong>The update task has now completed.</strong> Please view the <em>current roster</em> to confirm everything is in order.', 'wpan' ) ?>"
 		};

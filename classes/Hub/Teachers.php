@@ -270,7 +270,8 @@ class Teachers
 	protected function process_view() {
 		return View::admin( 'hub/roster-processor', array(
 			'work_in_progress' => $this->roster->pending_changes(),
-			'job_details' => $this->roster->get_job_details()
+			'job_details' => $this->roster->get_job_details(),
+			'type' => Users::TEACHER
 		) );
 	}
 

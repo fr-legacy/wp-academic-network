@@ -203,7 +203,7 @@ class Users
 		}
 
 		// Give them their network-wide designation as a teacher
-		$this->set_academic_role( $user_id, Users::TEACHER );
+		$this->set_academic_role( $user_id, Users::STUDENT );
 
 		// Optionally assign a UAID
 		if ( null !== $uaid ) $this->set_uaid( $user_id, $uaid );

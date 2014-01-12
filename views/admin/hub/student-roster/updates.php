@@ -32,7 +32,7 @@ $nonce = wp_create_nonce( get_current_user_id() . $unique_id . 'Updated roster' 
 
 <table class="controls"> <tr>
 	<td>
-		<input type="file" name="teacher_roster" />
+		<input type="file" name="student_roster" />
 	</td>
 	<td>
 		<input type="submit" name="send" value="<?php _e( 'Upload', 'wpan' ) ?>" class="button button-primary" /> <br />
