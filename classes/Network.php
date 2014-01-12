@@ -124,24 +124,40 @@ class Network
 	 * @return mixed int | bool
 	 */
 	public function create_blog( $domain, $path, $title, $user ) {
-		// Try to create the blog
+		// Try to find a blog path/slug that is available for use
 		while ( true ) {
-			$blog_id = wpmu_create_blog( $domain, $path, $title, $user );
-
-			// Blog path taken - add an incrementer and try again
-			if ( is_wp_error( $blog_id ) && 'blog_taken' === $blog_id->get_error_code() ) {
-				$path = WordPress::slug_incrementer( $path );
-			}
-			// Other error creating the blog ... bail out
-			elseif ( is_wp_error( $blog_id ) ) {
-				Log::error( sprintf( __( 'Failed to create new blog at %s on %s.', 'wpan' ), $path, $domain ) );
-				return false;
-			}
-			// Success! Exit the loop
+			if ( $this->blog_path_exists( $domain, $path ) ) $path = WordPress::slug_incrementer( $path );
 			else break;
 		}
 
+		// Try to create the blog
+		$blog_id = wpmu_create_blog( $domain, $path, $title, $user );
+
+		// Catch failures
+		if ( is_wp_error( $blog_id ) ) {
+			Log::error( sprintf( __( 'Failed to create new blog at %s on %s.', 'wpan' ), $path, $domain ) );
+			return false;
+		}
+
 		return $blog_id;
+	}
+
+	/**
+	 * Checks if the domain and slug is already in use by a blog on the network.
+	 *
+	 * Th slug ordinarily requires trailing and leading slashes and these are applied automatically
+	 * (which WP's own domain_exists() function does not do). This method returns a boolean value:
+	 * to obtain the blog ID you should use domain_exists() directly.
+	 *
+	 * @param $domain
+	 * @param $slug
+	 * @param int $site
+	 * @return bool
+	 */
+	public function blog_path_exists( $domain, $slug, $site = 1 ) {
+		$slug = trailingslashit( $slug );
+		if ( 0 !== strpos( $slug, '/' ) ) $slug = '/' . $slug;
+		return ( domain_exists( $domain, $slug, $site ) > 0 );
 	}
 
 	/**
