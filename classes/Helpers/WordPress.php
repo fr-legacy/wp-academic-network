@@ -127,4 +127,26 @@ class WordPress {
 		$domain = isset( $site->domain ) ? $site->domain : '';
 		return apply_filters( 'wpan_wordpress_new_site_domain', $domain );
 	}
+
+	/**
+	 * Adds an incrementer to the end of a string, or increments an existing incrementer. For example,
+	 * "string" will become "string-1", "string-4" will become "string-5", etc.
+	 *
+	 * @param string $string
+	 * @return string
+	 */
+	public static function slug_incrementer( $string ) {
+		if ( false === strrpos( $string, '-' ) )
+			return $string . '-1';
+
+		$hyphen_pos = strrpos( $string, '-' );
+		$post_hyphen = substr( $string, $hyphen_pos + 1);
+
+		$int_version = (int) $post_hyphen;
+
+		if ( is_numeric( $post_hyphen ) && $int_version == $post_hyphen )
+			return substr( $string, 0, $hyphen_pos ) . '-' . ++$int_version;
+
+		return $string . '-1';
+	}
 }
