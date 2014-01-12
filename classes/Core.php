@@ -29,6 +29,11 @@ class Core
 	protected $hub;
 
 	/**
+	 * @var Privacy
+	 */
+	protected $privacy;
+
+	/**
 	 * Indicates if initial setup is complete. Internal flag.
 	 *
 	 * @var bool
@@ -58,6 +63,7 @@ class Core
 		$this->users = new Users;
 		$this->network = new Network;
 		$this->hub = new HubManager;
+		$this->privacy = new Privacy;
 	}
 
 	/**

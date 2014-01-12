@@ -58,7 +58,18 @@ class Network
 		return (int) apply_filters( 'wpan_hub_id', $current_site->blog_id );
 	}
 
-
+	/**
+	 * Returns the URL for the hub site.
+	 *
+	 * @return string
+	 */
+	public function get_hub_url() {
+		$hub_id = $this->get_hub_id();
+		switch_to_blog( $hub_id );
+		$url = get_bloginfo( 'url' );
+		restore_current_blog();
+		return esc_url( $url );
+	}
 
 	/**
 	 * Generates a new blog on the network belonging to a teacher.
@@ -110,6 +121,7 @@ class Network
 		if ( null !== $supervising_teacher && $this->users->is_teacher( $supervising_teacher ) )
 			$this->assign_teacher_supervisor( $blog_id, $supervising_teacher );
 
+		update_user_meta( $student_id, 'primary_blog', $blog_id );
 		Log::action( sprintf( __( 'New student blog %d has been built at %s for student user %d.', 'wpan' ), $blog_id, $path, $student_id ) );
 		return true;
 	}
