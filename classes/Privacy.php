@@ -64,8 +64,10 @@ class Privacy
 		add_action( 'wp', array( $this, 'assess' ), 5 );
 		add_action( 'wp', array( $this, 'determine' ), 10 );
 
-		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_student_blogs' ) );
-		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_teacher_blogs' ) );
+		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_student_blogs' ), 10, 2 );
+		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_teacher_blogs' ), 10, 2 );
+		add_action( 'wpan_assess_privacy_needs', array( $this, 'promote_hub_access' ), 10, 2 );
+
 		add_action( 'wpan_disallow_request', array( $this, 'disallow' ) );
 	}
 
@@ -102,16 +104,42 @@ class Privacy
 	/**
 	 * Protected student blogs from access by unauthenticated users.
 	 */
-	public function protect_student_blogs() {
-
+	public function protect_student_blogs( array $analysis, Privacy $privacy ) {
+		if ( ! $analysis['student_blog'] ) return;
+		if ( ! $analysis['authenticated'] ) $privacy->recommend_denial();
+		else $privacy->recommend_access();
 	}
 
 	/**
 	 * Protected teacher blogs from access by unauthenticated users except where a singular
 	 * post has been requested and that post has been marked as publicly accessible.
 	 */
-	public function protect_teacher_blogs() {
+	public function protect_teacher_blogs( array $analysis, Privacy $privacy ) {
+		if ( ! $analysis['teacher_blog'] ) return;
+		if ( ! $analysis['marked_open'] ) $privacy->recommend_denial();
+		else $privacy->recommend_access();
+	}
 
+	/**
+	 * Recommend access be allowed to the hub site.
+	 */
+	public function promote_hub_access( array $analysis, Privacy $privacy ) {
+		if ( ! $analysis['is_hub'] ) return;
+		else $privacy->recommend_access();
+	}
+
+	/**
+	 * Convenience method to recommend access be denied.
+	 */
+	public function recommend_denial() {
+		$this->recommend( self::RECOMMEND_DENIAL );
+	}
+
+	/**
+	 * Convenience method to recommend access be allowed.
+	 */
+	public function recommend_access() {
+		$this->recommend( self::RECOMMEND_ACCESS );
 	}
 
 	/**
@@ -141,8 +169,8 @@ class Privacy
 	 * for denying access was specifically made.
 	 */
 	public function determine() {
-		$should_allow = self::RECOMMEND_ACCESS === ( $this->recommendations | self::RECOMMEND_ACCESS );
-		$should_deny = self::RECOMMEND_DENIAL === ( $this->recommendations | self::RECOMMEND_DENIAL );
+		$should_allow = self::RECOMMEND_ACCESS === ( $this->recommendations & self::RECOMMEND_ACCESS );
+		$should_deny = self::RECOMMEND_DENIAL === ( $this->recommendations & self::RECOMMEND_DENIAL );
 		$strict_mode = apply_filters( 'wpan_privacy_strict_mode', true );
 
 		// If we are in strict mode
