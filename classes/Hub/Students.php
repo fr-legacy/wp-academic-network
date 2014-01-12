@@ -268,7 +268,7 @@ class Students
 			$source = array_map( 'trim', $source );
 			$record = $map;
 
-			foreach ( $record as $key => &$value ) {
+			foreach ( $record as &$value ) {
 				$index = (int) $value;
 				if ( isset( $source[$index] ) ) $value = $source[$index];
 				else $value = '';

@@ -182,7 +182,7 @@ class Users
 	 * @param $username
 	 * @param $password
 	 * @param $uaid
-	 * @return bool
+	 * @return mixed bool | int
 	 */
 	public function create_student( $username, $password, $uaid ) {
 		// Ensure UAID is not already in use
@@ -258,6 +258,7 @@ class Users
 	 */
 	public function who_is( $uaid ) {
 		$query = new WP_User_Query( array(
+			'blog_id' => 0,
 			'meta_key' => self::UAID,
 			'meta_value' => $uaid
 		) );
@@ -484,6 +485,10 @@ class Users
 	 * @return bool
 	 */
 	public function set_student_params( $student_id, array $data = null ) {
+		// Automatically remove various fields fields from $data
+		foreach ( array( 'uaid', 'username', 'password', 'blogtitle', 'blogpath' ) as $unwanted )
+			if ( isset( $data[$unwanted] ) ) unset( $data[$unwanted] );
+
 		if ( false === $this->is_student( $student_id ) ) {
 			Log::error( sprintf( __( 'Attempt made to update student params for non student %d.', 'wpan' ), $student_id ) );
 			return false;
@@ -596,6 +601,10 @@ class Users
 	 * @return bool
 	 */
 	public function set_teacher_params( $teacher_id, array $data = null ) {
+		// Automatically remove uaid, username and password fields from $data
+		foreach ( array( 'uaid', 'username', 'password', 'blogtitle', 'blogpath' ) as $unwanted )
+			if ( isset( $data[$unwanted] ) ) unset( $data[$unwanted] );
+
 		if ( false === $this->is_teacher( $teacher_id ) ) {
 			Log::error( sprintf( __( 'Attempt made to update teacher params for non teacher %d.', 'wpan' ), $teacher_id ) );
 			return false;
