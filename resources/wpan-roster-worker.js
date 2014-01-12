@@ -149,7 +149,7 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		 */
 		function prompt() {
 			if ( in_progress ) return;
-			working = true;
+			working = in_progress = true;
 			$.post( ajaxurl, wpan_worker, response, 'json' );
 		}
 
