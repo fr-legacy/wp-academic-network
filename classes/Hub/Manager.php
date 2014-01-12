@@ -183,7 +183,7 @@ class Manager {
 		// Update client
 		if ( ! $roster->pending_changes() ) $response['complete'] = 1;
 		$response['check'] = wp_create_nonce( $_POST['origin'] . get_current_user_id() . 'WPAN worker' );
-		$response['typecheck'] = hash( 'md5', Users::TEACHER . $response['check'] . $_POST['origin'] );
+		$response['typecheck'] = hash( 'md5', $_POST['type'] . $response['check'] . $_POST['origin'] );
 		exit( json_encode( $response ) );
 	}
 }

@@ -257,10 +257,8 @@ class Roster
 
 		// Ensure none of the fields are empty
 		foreach ( $record as $property => $field ) {
-			if ( empty( $field ) ) {
-				Log::warning( sprintf( __('The %s property was not provided in the roster update. User creation skipped.', 'wpan' ), $property ) );
-				return false;
-			}
+			if ( empty( $field ) )
+				Log::warning( sprintf( __('The %s property was not provided in the roster update.', 'wpan' ), $property ) );
 		}
 
 		if ( Users::STUDENT === $this->type ) {
@@ -272,6 +270,7 @@ class Roster
 			return $this->users->create_teacher( $record['username'], $record['password'], $record['email'], $record['uaid'] );
 		}
 
+		Log::warning( sprintf( __( 'Unable to build new user record (UAID: %s)', 'wpan' ), $record['uaid'] ) );
 		return false;
 	}
 
