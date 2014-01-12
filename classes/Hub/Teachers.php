@@ -284,7 +284,7 @@ class Teachers
 		if ( ! wp_verify_nonce( $_REQUEST['check'], 'teacher_actions' . get_current_user_id() ) ) return;
 
 		// Sanity checks
-		if ( isset( $_REQUEST['action_request'] ) ) $action = $_REQUEST['action'];
+		if ( isset( $_REQUEST['action'] ) ) $action = $_REQUEST['action'];
 		if ( isset( $_REQUEST['action_request_2'] ) ) $action = $_REQUEST['action_2'];
 		if ( ! isset( $action ) ) return;
 

@@ -59,6 +59,7 @@ class Users
 		'wpan_access_hub_tools' => true,
 		'wpan_create_site' => true,
 		'wpan_delete_site' => true,
+		'wpan_manage_users' => true,
 		'wpan_create_user' => true,
 		'wpan_delete_user' => true,
 		'wpan_handle_requests' => true

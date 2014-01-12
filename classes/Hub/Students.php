@@ -7,6 +7,7 @@ use WP_User,
 	WPAN\Helpers\Log,
 	WPAN\Helpers\View,
 	WPAN\Helpers\WordPress,
+	WPAN\Network,
 	WPAN\Roster,
 	WPAN\Users;
 
@@ -24,6 +25,16 @@ class Students
 	protected $roster;
 
 	/**
+	 * @var Network
+	 */
+	protected $network;
+
+	/**
+	 * @var Users
+	 */
+	protected $users;
+
+	/**
 	 * Records any errors, notices etc that need to be relayed to the user.
 	 *
 	 * @var array
@@ -36,6 +47,7 @@ class Students
 	 */
 	public function __construct() {
 		$this->network = Core::object()->network();
+		$this->users = Core::object()->users();
 		$this->roster = new Roster( Users::STUDENT );
 		$this->listeners();
 	}
@@ -121,6 +133,7 @@ class Students
 	protected function setup_table() {
 		$bulk_actions = array(
 			'unselected' => __( 'Bulk actions', 'wpan' ),
+			'validate' => __( 'Validate', 'wpan' ),
 			'purge' => __( 'Purge completely', 'wpan' )
 		);
 
@@ -128,6 +141,7 @@ class Students
 		$this->table = AdminTable::build( 'student_roster' )->use_checkbox( true )
 			->set_bulk_actions( $bulk_actions )
 			->add_column( 'user', __( 'User', 'wpan' ) )
+			->add_column( 'validated', __( 'Validated', 'wpan' ) )
 			->add_column( 'blog', __( 'Primary blog', 'wpan' ) );
 
 		// Pagination
@@ -170,6 +184,7 @@ class Students
 		return array(
 			'row_id' => $student->ID,
 			'user' => View::admin( 'hub/student-roster/user-details', array( 'student' => $student ) ),
+			'validated' => View::admin( 'hub/student-roster/last-validated', array( 'days' => $this->users->num_days_since_student_validated( $student->ID ) ) ),
 			'primary_blog' => View::admin( 'hub/student-roster/blog-details', array( 'blog_id' => $this->network->get_primary_blog( $student->ID ) ) )
 		);
 	}
@@ -284,17 +299,18 @@ class Students
 		if ( ! wp_verify_nonce( $_REQUEST['check'], 'student_actions' . get_current_user_id() ) ) return;
 
 		// Sanity checks
-		if ( isset( $_REQUEST['action_request'] ) ) $action = $_REQUEST['action'];
+		if ( isset( $_REQUEST['action'] ) ) $action = $_REQUEST['action'];
 		if ( isset( $_REQUEST['action_request_2'] ) ) $action = $_REQUEST['action_2'];
 		if ( ! isset( $action ) ) return;
 
 		switch ( $action ) {
 			case 'purge': $this->purge_requests(); break;
+			case 'validate': $this->validate_requests(); break;
 		}
 	}
 
 	/**
-	 * Processes teacher purge requests.
+	 * Processes student purge requests.
 	 */
 	protected function purge_requests() {
 		if ( ! current_user_can( 'wpan_delete_user' ) || ! current_user_can( 'wpan_delete_site' ) ) {
@@ -310,6 +326,26 @@ class Students
 
 		// Purge!
 		foreach ( (array) $_REQUEST['item'] as $user )
-			if ( $this->roster->purge( $user ) );
+			$this->roster->purge( $user );
+	}
+
+	/**
+	 * Processes student validation requests.
+	 */
+	protected function validate_requests() {
+		if ( ! current_user_can( 'wpan_manage_users' ) ) {
+			Log::warning( sprintf( __( 'Attempt made to (re-)validate student account by unauthorized user %d.', 'wpan' ), get_current_user_id() ) );
+			return;
+		}
+
+		// Do we have items to action?
+		if ( ! isset($_REQUEST['item']) ) {
+			Log::warning( __( 'Unable to do validation, no items specified.', 'wpan' ) );
+			return;
+		}
+
+		// Validate!
+		foreach ( (array) $_REQUEST['item'] as $user )
+			$this->users->validate_student( $user );
 	}
 }

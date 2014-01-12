@@ -13,7 +13,7 @@
 
 <div class="row-actions">
 	<span class="purge danger_action">
-		<?php $action = wp_nonce_url( add_query_arg( array( 'item' => $teacher->ID, 'action_request' => 'purge' ) ), 'teacher_actions' . get_current_user_id(), 'check' ) ?>
+		<?php $action = wp_nonce_url( add_query_arg( array( 'item' => $teacher->ID, 'request' => 'purge' ) ), 'teacher_actions' . get_current_user_id(), 'check' ) ?>
 		<a class="purge" title="<?php esc_attr_e( 'Purge this user account and any associated blogs', 'wpan' ) ?>" href="<?php echo esc_url( $action ) ?>"><?php _e( 'Purge completely', 'wpan' ) ?></a>
 	</span>
 </div>
