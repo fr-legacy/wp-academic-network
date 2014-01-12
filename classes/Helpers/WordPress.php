@@ -141,7 +141,6 @@ class WordPress {
 
 		$hyphen_pos = strrpos( $string, '-' );
 		$post_hyphen = substr( $string, $hyphen_pos + 1);
-
 		$int_version = (int) $post_hyphen;
 
 		if ( is_numeric( $post_hyphen ) && $int_version == $post_hyphen )

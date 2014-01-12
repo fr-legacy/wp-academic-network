@@ -2,6 +2,7 @@
 namespace WPAN;
 
 use WPAN\Helpers\Log,
+	WPAN\Helpers\WordPress,
 	WP_User_Query;
 
 
@@ -66,12 +67,10 @@ class Network
 		// Attempt to create the new blog
 		$path = apply_filters( 'wpan_new_teacher_blog_path', get_current_site()->path . $path, $teacher_id );
 		$domain = apply_filters( 'wpan_new_teacher_blog_domain', get_current_site()->domain, $teacher_id );
-		$blog_id = wpmu_create_blog( $domain, $path, $title, $teacher_id );
 
-		if ( is_wp_error( $blog_id ) ) {
-			Log::error( sprintf( __( 'Failed to create new teacher blog at %s on %s.', 'wpan' ), $path, $domain ) );
-			return false;
-		}
+		// Create the blog
+		$blog_id = $this->create_blog( $domain, $path, $title, $teacher_id );
+		if ( false === $blog_id ) return false;
 
 		// The new teacher account will have been created as a regular administrator - make them a 'teacher'
 		$this->users->change_blog_role( $blog_id, $teacher_id, Users::TEACHER );
@@ -89,14 +88,12 @@ class Network
 	 */
 	public function create_student_blog( $path, $title, $student_id, $supervising_teacher = null ) {
 		// Attempt to create the new blog
-		$path = apply_filters( 'wpan_new_student_blog_path', get_current_site()->path . $path, $supervising_teacher );
-		$domain = apply_filters( 'wpan_new_student_blog_domain', get_current_site()->domain, $supervising_teacher );
-		$blog_id = wpmu_create_blog( $domain, $path, $title, $supervising_teacher );
+		$path = apply_filters( 'wpan_new_student_blog_path', get_current_site()->path . $path, $student_id, $supervising_teacher );
+		$domain = apply_filters( 'wpan_new_student_blog_domain', get_current_site()->domain, $student_id, $supervising_teacher );
 
-		if ( is_wp_error( $blog_id ) ) {
-			Log::error( sprintf( __( 'Failed to create new student blog at %s on %s.', 'wpan' ), $path, $domain ) );
-			return false;
-		}
+		// Create the blog
+		$blog_id = $this->create_blog( $domain, $path, $title, $supervising_teacher );
+		if ( false === $blog_id ) return false;
 
 		// Assign the student
 		if ( false === $this->users->is_student( $student_id ) ) {
@@ -115,6 +112,36 @@ class Network
 
 		Log::action( sprintf( __( 'New student blog %d has been built at %s for student user %d.', 'wpan' ), $blog_id, $path, $student_id ) );
 		return true;
+	}
+
+	/**
+	 * Handles the basic process of creating a new blog.
+	 *
+	 * @param $domain
+	 * @param $path
+	 * @param $title
+	 * @param $user
+	 * @return mixed int | bool
+	 */
+	public function create_blog( $domain, $path, $title, $user ) {
+		// Try to create the blog
+		while ( true ) {
+			$blog_id = wpmu_create_blog( $domain, $path, $title, $user );
+
+			// Blog path taken - add an incrementer and try again
+			if ( is_wp_error( $blog_id ) && 'blog_taken' === $blog_id->get_error_code() ) {
+				$path = WordPress::slug_incrementer( $path );
+			}
+			// Other error creating the blog ... bail out
+			elseif ( is_wp_error( $blog_id ) ) {
+				Log::error( sprintf( __( 'Failed to create new blog at %s on %s.', 'wpan' ), $path, $domain ) );
+				return false;
+			}
+			// Success! Exit the loop
+			else break;
+		}
+
+		return $blog_id;
 	}
 
 	/**
