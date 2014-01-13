@@ -162,21 +162,28 @@ class Relationships
 		$is_student = $this->users->is_student( $user_id );
 		$is_teacher = $this->users->is_teacher( $user_id );
 
-		if ( 'connect' === $operation && $is_teacher ) {
+		if ( $is_student ) {
+			$student_blog = $this->network->get_primary_blog( $user_id );
+			$teacher_id = $this->network->get_teacher_for( $blog_id );
+		}
+
+		if ( 'connect' === $operation && $is_teacher )
 			$this->network->assign_teacher_supervisor( $blog_id, $user_id );
-		}
-		if ( 'disconnect' === $operation && $is_teacher ) {
+
+		if ( 'disconnect' === $operation && $is_teacher )
 			$this->network->unassign_teacher_supervisor( $blog_id, $user_id );
-		}
-		if ( 'connect' === $operation && $is_student ) {
-			$student_blog = $this->network->get_primary_blog( $user_id );
-			$teacher_id = $this->network->get_teacher_for( $blog_id );
+
+		if ( 'connect' === $operation && $is_student )
 			$this->network->assign_teacher_supervisor( $student_blog, $teacher_id );
-		}
-		if ( 'disconnect' === $operation && $is_student ) {
-			$student_blog = $this->network->get_primary_blog( $user_id );
-			$teacher_id = $this->network->get_teacher_for( $blog_id );
+
+		if ( 'disconnect' === $operation && $is_student )
 			$this->network->unassign_teacher_supervisor( $student_blog, $teacher_id );
+
+		// If a teacher disconnects in the student blog admin environment they will no longer have
+		// privileges and will see the WP "cheating" message - try to catch this and redirect them
+		if ( $is_teacher && 'disconnect' === $operation && is_admin() ) {
+			wp_safe_redirect( home_url() );
+			exit();
 		}
 	}
 }
