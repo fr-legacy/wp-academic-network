@@ -34,6 +34,11 @@ class Core
 	protected $privacy;
 
 	/**
+	 * @var Relationships
+	 */
+	protected $relationships;
+
+	/**
 	 * Indicates if initial setup is complete. Internal flag.
 	 *
 	 * @var bool
@@ -64,6 +69,7 @@ class Core
 		$this->network = new Network;
 		$this->hub = new HubManager;
 		$this->privacy = new Privacy;
+		$this->relationships = new Relationships;
 	}
 
 	/**

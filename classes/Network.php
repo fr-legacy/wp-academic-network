@@ -211,6 +211,30 @@ class Network
 	}
 
 	/**
+	 * Indicates if the teacher is a supervisor for the student blog.
+	 *
+	 * @param $student_blog
+	 * @param $teacher_id
+	 * @return bool
+	 */
+	public function is_teacher_supervisor( $student_blog, $teacher_id ) {
+		// Ensure the teacher ID does indeed represent a teacher-role user
+		if ( false === $this->users->is_teacher( $teacher_id ) ) {
+			Log::warning( sprintf( __( 'User %d is not a teacher and cannot be act as a supervisor for blog %d.', 'wpan' ), $teacher_id, $student_blog ) );
+			return false;
+		}
+
+		// Is the student blog really a student blog?
+		if ( false === $this->is_student_blog( $student_blog ) ) {
+			Log::warning( sprintf( __( 'Blog %d is not the primary blog of any student users.' ), $student_blog ) );
+			return false;
+		}
+
+		$assigned_blogs = get_blogs_of_user( $teacher_id );
+		return ( isset( $assigned_blogs[$student_blog] ) );
+	}
+
+	/**
 	 * Unassigns a teacher from a student blog.
 	 *
 	 * @param $student_blog
@@ -258,6 +282,21 @@ class Network
 		}
 
 		return absint( $primary_blog );
+	}
+
+	/**
+	 * Gets the ID of the teacher assigned to the specified blog.
+	 *
+	 * @param $blog_id
+	 * @return int | bool
+	 */
+	public function get_teacher_for( $blog_id ) {
+		$users = get_users( array( 'blog_id' => $blog_id ) );
+
+		foreach ( $users as $user )
+			if ( $this->users->is_teacher( $user->ID ) ) return (int) $user->ID;
+
+		return false;
 	}
 
 	/**
