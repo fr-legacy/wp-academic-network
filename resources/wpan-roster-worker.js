@@ -81,6 +81,13 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		 */
 		var completed = false;
 
+		/**
+		 * Keeps track of bad responses being returned from the server.
+		 *
+		 * @type {number}
+		 */
+		var bad_responses = 0;
+
 
 		/**
 		 * Displays a "job complete" message.
@@ -123,6 +130,22 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		}
 
 		/**
+		 * Assesses the response object to see if it contains the expected fields and that they
+		 * are of the expected type.
+		 *
+		 * @param response_object
+		 */
+		function valid_response( response_object ) {
+			if ( undefined === response_object.total_rows )
+				return false;
+
+			if ( undefined === response_object.remaining_rows )
+				return false;
+
+			return true;
+		}
+
+		/**
 		 * Checks the response to determine if the job is complete or should continue running.
 		 */
 		function response( data ) {
@@ -134,9 +157,24 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 				do_work = false;
 			}
 
+			// Valid response?
+			if ( valid_response( data ) && bad_responses > 0 ) {
+				bad_responses--;
+			}
+			// Invalid response and too many fails?
+			if ( ! valid_response( data ) && bad_responses > 5 ) {
+				do_work = false;
+				return;
+			}
+			// Invalid response - opportunity to try again
+			else if ( ! valid_response( data ) ) {
+				bad_responses++;
+				return;
+			}
+
 			// Update progress stats
-			var total = data.total_rows;
-			var remaining = data.remaining_rows;
+			var total = parseInt( data.total_rows );
+			var remaining = parseInt( data.remaining_rows );
 			var processed = total - remaining;
 
 			progress_bar( processed, total );
