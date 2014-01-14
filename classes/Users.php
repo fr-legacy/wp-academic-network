@@ -494,9 +494,9 @@ class Users
 			return false;
 		}
 
+		// False does not indicate an update failure - it may be the $data is simply equal to the existing record
 		if ( false === update_user_meta( $student_id, self::STUDENT_PARAMS, $data ) ) {
-			Log::error( sprintf( __( 'It was not possible to update the student params for user %d.', 'wpan' ), $student_id ) );
-			return false;
+			Log::notice( sprintf( __( 'Student params for user %d were not updated or may not have changed.', 'wpan' ), $student_id ) );
 		}
 
 		return $this->validate_student( $student_id );
