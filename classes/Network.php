@@ -312,6 +312,7 @@ class Network
 
 		// Look for user meta records relating to this blog
 		$users = new WP_User_Query( array(
+			'blog_id' => 0,
 			'meta_key' => 'primary_blog',
 			'meta_value' => $blog_id
 		) );

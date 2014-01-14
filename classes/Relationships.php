@@ -72,19 +72,22 @@ class Relationships
 	 * Adds connect/disconnect links for students on teacher blogs.
 	 */
 	protected function add_connect_options_for_student() {
-		$this->admin_bar->add_menu( array(
-			'id' => 'wpan_toolbar_relationships_connect_me',
-			'parent' => 'wpan_toolbar_relationships',
-			'title' => __( 'Connect with this student', 'wpan' ),
-			'href' => $this->network->get_hub_url()
-		) );
+		if ( $this->network->is_teacher_supervisor( get_current_blog_id(), get_current_user_id() ) ) {
+			$state = 'connected';
+			$status = __( 'You have already connected with this teacher:', 'wpan' );
+		}
+		else {
+			$state = 'unconnected';
+			$status = __( 'You are not connected to this teacher:', 'wpan' );
+		}
 
 		$this->admin_bar->add_menu( array(
-			'id' => 'wpan_toolbar_relationships_disconnect_me',
+			'id' => 'wpan_toolbar_relationships_state',
 			'parent' => 'wpan_toolbar_relationships',
-			'title' => __( 'Disconnect from this blog', 'wpan' ),
-			'href' => $this->network->get_hub_url()
+			'title' => $status
 		) );
+
+		$this->add_connector_menu_items( $state );
 	}
 
 	/**
