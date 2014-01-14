@@ -21,6 +21,15 @@ class Log {
 
 
 	/**
+	 * Reports a general, non-specific issue (this is simply an alias for ::general()).
+	 *
+	 * @param $issue
+	 */
+	public static function notice( $issue ) {
+		self::general( $issue );
+	}
+
+	/**
 	 * Reports a general, non-specific issue.
 	 *
 	 * @param $issue
