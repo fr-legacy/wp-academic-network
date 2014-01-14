@@ -72,7 +72,10 @@ class Relationships
 	 * Adds connect/disconnect links for students on teacher blogs.
 	 */
 	protected function add_connect_options_for_student() {
-		if ( $this->network->is_teacher_supervisor( get_current_blog_id(), get_current_user_id() ) ) {
+		$teacher_id = $this->network->get_teacher_for( get_current_blog_id() );
+		$student_blog = $this->network->get_primary_blog( get_current_user_id() );
+
+		if ( $this->network->is_teacher_supervisor( $student_blog, $teacher_id ) ) {
 			$state = 'connected';
 			$status = __( 'You have already connected with this teacher:', 'wpan' );
 		}
