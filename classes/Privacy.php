@@ -70,6 +70,7 @@ class Privacy
 
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_student_blogs' ), 10, 2 );
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_teacher_blogs' ), 10, 2 );
+		add_action( 'wpan_assess_privacy_needs', array( $this, 'lockdown_unsupervised_student_blogs' ), 10, 2 );
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'promote_hub_access' ), 10, 2 );
 
 		add_action( 'wpan_disallow_request', array( $this, 'disallow' ) );
