@@ -300,6 +300,21 @@ class Network
 	}
 
 	/**
+	 * Gets the ID of the student assigned to the specific blog.
+	 *
+	 * @param $blog_id
+	 * @return int | bool
+	 */
+	public function get_student_for( $blog_id ) {
+		$users = get_users( array( 'blog_id' => $blog_id ) );
+
+		foreach ( $users as $user )
+			if ( $this->users->is_student( $user->ID ) ) return (int) $user->ID;
+
+		return false;
+	}
+
+	/**
 	 * Determines if the blog is a student-led blog: that is, it has a student-role user
 	 * assigned to it and it is the primary blog for that same student.
 	 *
