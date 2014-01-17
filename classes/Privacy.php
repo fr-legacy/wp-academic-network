@@ -125,6 +125,32 @@ class Privacy
 	}
 
 	/**
+	 * Protects student blogs, further restricting access if they have no teacher supervisor to
+	 * users (ie teachers, network admins) with appropriate higher level roles/capabilities and the
+	 * blog owner themselves.
+	 *
+	 * @param array $analysis
+	 * @param Privacy $privacy
+	 */
+	public function lockdown_unsupervised_student_blogs( array $analysis, Privacy $privacy ) {
+		// If it is not a student blog, or is a student blog but has a teacher supervisor, bail out
+		if ( ! $analysis['student_blog'] ) return;
+		if ( false !== $this->network->get_teacher_for( get_current_blog_id() ) ) return;
+
+		// Recommend denial if the current user is not the owner
+		$visitor = get_current_user_id();
+		$student = $this->network->get_student_for( get_current_blog_id() );
+
+		// Let the supervisor/admin capability be modified
+		$safety_cap = apply_filters( 'wpan_student_lockdown_approved_user_cap', 'promote_users' );
+
+		// Decide!
+		if ( $visitor === $student ) $privacy->recommend_access();
+		elseif ( current_user_can( $safety_cap ) ) $privacy->recommend_access();
+		else $privacy->recommend_denial();
+	}
+
+	/**
 	 * Recommend access be allowed to the hub site.
 	 */
 	public function promote_hub_access( array $analysis, Privacy $privacy ) {
