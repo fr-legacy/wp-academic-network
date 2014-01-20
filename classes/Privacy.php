@@ -142,12 +142,14 @@ class Privacy
 		$visitor = get_current_user_id();
 		$student = $this->network->get_student_for( get_current_blog_id() );
 
-		// Let the supervisor/admin capability be modified
-		$safety_cap = apply_filters( 'wpan_student_lockdown_approved_user_cap', 'promote_users' );
+		// Users with promote_users capability, or roving teachers, allowed by default
+		$safety_cap = current_user_can( apply_filters( 'wpan_student_lockdown_approved_user_cap', 'promote_users' ) );
+		$is_teacher = $this->users->is_teacher( $visitor );
+		$should_allow = apply_filters( 'wpan_student_lockdown_allow_current_user', ( $safety_cap || $is_teacher ), $visitor );
 
 		// Decide!
 		if ( $visitor === $student ) $privacy->recommend_access();
-		elseif ( current_user_can( $safety_cap ) ) $privacy->recommend_access();
+		elseif ( $should_allow ) $privacy->recommend_access();
 		else $privacy->recommend_denial();
 	}
 
