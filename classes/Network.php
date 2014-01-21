@@ -151,6 +151,12 @@ class Network
 			return false;
 		}
 
+		// Register user roles for new blog
+		switch_to_blog( $blog_id );
+		$this->users->register_types();
+		restore_current_blog();
+
+		Log::action( sprintf( __( 'New blog %d created for user %d.', 'wpan' ), $blog_id, $user ) );
 		return $blog_id;
 	}
 
