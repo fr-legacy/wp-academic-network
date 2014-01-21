@@ -121,6 +121,11 @@ table.controls th[scope=row] {
 	padding: 0.2em 1em;
 }
 
+#worker_log h4,
+#worker_log p {
+	padding: 0.2em 1em;
+}
+
 #worker_log li.zebra {
 	background: #e6e8e6;
 }

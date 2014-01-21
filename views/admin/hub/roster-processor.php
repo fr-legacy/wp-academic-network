@@ -63,6 +63,9 @@ $progress = absint( $progress ) . '%';
 	</table>
 
 	<div id="worker_log" class="hidden">
+		<h4> <?php _e( 'Debug log', 'wpan' ) ?> </h4>
+		<p> <?php _e( 'Feedback about the update/import operation will be added here.', 'wpan' ) ?> </p>
+		<p> <?php _e ( 'This can be useful if errors have occurred or you are having problems during import. The presence of warning messages does not necessarily indicate that there have been failures, however.', 'wpan' ) ?> </p>
 		<ul></ul>
 	</div>
 
