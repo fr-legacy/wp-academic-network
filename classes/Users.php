@@ -615,7 +615,6 @@ class Users
 			Log::notice( sprintf( __( 'Teacher params for user %d were not updated (they may not have changed).', 'wpan' ), $teacher_id ) );
 		}
 
-
 		return true;
 	}
 
