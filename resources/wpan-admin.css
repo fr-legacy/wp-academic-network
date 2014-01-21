@@ -103,3 +103,46 @@ table.controls th[scope=row] {
 .workdots .dot.active.alt {
 	background: #d0d0df;
 }
+
+/* Worker log */
+
+#worker_log {
+	background: #f0f0f0;
+	border: 1px solid #999;
+	display: block;
+	font-family: monospace;
+	height: 15em;
+	overflow: scroll;
+	width: 50%;
+}
+
+#worker_log li {
+	width: 100%;
+	padding: 0.2em 1em;
+}
+
+#worker_log li.zebra {
+	background: #e6e8e6;
+}
+
+/* Security issues and errors */
+#worker_log li.type_16,
+#worker_log li.type_32 {
+	color: #ef1000;
+}
+
+/* Warnings */
+#worker_log li.type_8 {
+	color: #ef7000;
+}
+
+#worker_log li .source {
+	color: #222;
+	font-family: sans-serif;
+	font-size: 0.9em;
+	opacity: 0.5;
+}
+
+#worker_log li .source:hover {
+	opacity: 1;
+}

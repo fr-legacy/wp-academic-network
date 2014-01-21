@@ -2,6 +2,7 @@
 namespace WPAN\Hub;
 
 use WPAN\Core,
+	WPAN\Helpers\Log,
 	WPAN\Helpers\View,
 	WPAN\Helpers\WordPress,
 	WPAN\Network,
@@ -164,14 +165,8 @@ class Manager {
 	 *
 	 */
 	public function roster_worker() {
-		// Security check failed? Gracefully shutdown the cycle
-		if ( ! wp_verify_nonce( $_POST['check'], $_POST['origin'] . get_current_user_id() . 'WPAN worker' ) )
-			exit( json_encode( array( 'complete' => 1 ) ) );
-
-		// Valid type? ... if not, gracefully shutdown the cycle
-		$typecheck = hash( 'md5', $_POST['type'] . $_POST['check'] . $_POST['origin'] );
-		if ( $typecheck !== $_POST['typecheck'] )
-			exit( json_encode( array( 'complete' => 1 ) ) );
+		$this->worker_sanity_checks();
+		$response = array();
 
 		// Get the roster object
 		$roster = new Roster( $_POST['type'] );
@@ -184,6 +179,21 @@ class Manager {
 		if ( ! $roster->pending_changes() ) $response['complete'] = 1;
 		$response['check'] = wp_create_nonce( $_POST['origin'] . get_current_user_id() . 'WPAN worker' );
 		$response['typecheck'] = hash( 'md5', $_POST['type'] . $response['check'] . $_POST['origin'] );
+		$response['log'] = Log::get_request_log();
 		exit( json_encode( $response ) );
+	}
+
+	/**
+	 * Performs a number of security/sanity checks, killing execution if they aren't satisfied.
+	 */
+	protected function worker_sanity_checks() {
+		// Security check failed? Gracefully shutdown the cycle
+		if ( ! wp_verify_nonce( $_POST['check'], $_POST['origin'] . get_current_user_id() . 'WPAN worker' ) )
+			exit( json_encode( array( 'complete' => 1 ) ) );
+
+		// Valid type? ... if not, gracefully shutdown the cycle
+		$typecheck = hash( 'md5', $_POST['type'] . $_POST['check'] . $_POST['origin'] );
+		if ( $typecheck !== $_POST['typecheck'] )
+			exit( json_encode( array( 'complete' => 1 ) ) );
 	}
 }

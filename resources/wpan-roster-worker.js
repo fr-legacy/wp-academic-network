@@ -6,6 +6,9 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 	var worker_advice = $( "#worker_advice_js" );
 	var worker_progress = $( "#worker_progress" );
 	var worker_progress_text = $( "#worker_progress_text" );
+	var worker_log = $( "#worker_log" );
+	var worker_log_entries = worker_log.find( "ul" );
+	var worker_log_zebra = false;
 	var do_work = false;
 	var working = false;
 
@@ -94,7 +97,7 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		 */
 		function show_completion_msg() {
 			if ( completed ) return;
-			var completed = true;
+			completed = true;
 
 			var controls = $( "#worker_controls" );
 			var msg = '<div class="section_wrapper warning"> <p> ' + wpan_worker.completion_msg + ' </p> </div>';
@@ -127,6 +130,36 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		function update_check_vars( check, typecheck ) {
 			wpan_worker.check = check;
 			wpan_worker.typecheck = typecheck;
+		}
+
+		/**
+		 * Updates the log display. Each entry is expected to consist of 5 elements, indexed as follows:
+		 *
+		 *     0: date/time
+		 *     1: type of issue
+		 *     2: log entry
+		 *     3: source code origin
+		 *     4: source code reference
+		 *
+		 * @param log_entries
+		 */
+		function update_log( log_entries ) {
+			for ( var log_entry in log_entries ) {
+				entry = log_entries[log_entry];
+				if ( entry.length !== 5 ) continue;
+
+				var entry_class = "type_" + entry[1];
+				if ( worker_log_zebra ) entry_class += " zebra";
+				worker_log_zebra = ! worker_log_zebra;
+
+				var body = entry[0] + ": " + entry[2];
+				var source = " <div class='source'> " + entry[4] + " </div> ";
+				worker_log_entries.append( "<li class='" + entry_class + "'>" + body + source + "</li>" );
+			}
+
+			worker_log.stop().animate( {
+				scrollTop: worker_log[0].scrollHeight
+			}, 800);
 		}
 
 		/**
@@ -177,6 +210,10 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 			var remaining = parseInt( data.remaining_rows );
 			var processed = total - remaining;
 
+			// Update log
+			if ( "undefined" !== typeof( data.log ) && data.log.length > 0 )
+				update_log( data.log );
+
 			progress_bar( processed, total );
 			update_check_vars( data.check, data.typecheck );
 		}
@@ -188,7 +225,7 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		function prompt() {
 			if ( in_progress ) return;
 			working = in_progress = true;
-			$.post( ajaxurl, wpan_worker, response, 'json' );
+			$.post( ajaxurl, wpan_worker, response, "json" );
 		}
 
 		/**
@@ -214,6 +251,7 @@ if ( undefined !== typeof jQuery ) jQuery( document ).ready( function( $ ) {
 
 			run_worker.removeClass( "button-primary").addClass( "button-secondary" );
 			stop_worker.addClass( "button-primary" ).removeClass( "button-secondary" );
+			worker_log.removeClass( "hidden" ); // We won't re-hide it though
 
 			return false;
 		} );

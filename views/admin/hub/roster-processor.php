@@ -62,6 +62,10 @@ $progress = absint( $progress ) . '%';
 		</tr>
 	</table>
 
+	<div id="worker_log" class="hidden">
+		<ul></ul>
+	</div>
+
 	<script type="text/javascript" src="<?php echo esc_url( WPAN_URL . 'resources/wpan-roster-worker.js' ) ?>"></script>
 	<script type="text/javascript">
 		var wpan_worker = {
