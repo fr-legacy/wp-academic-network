@@ -612,7 +612,7 @@ class Users
 
 		// False does not indicate an update failure - it may be the $data is simply equal to the existing record
 		if ( false === update_user_meta( $teacher_id, self::TEACHER_PARAMS, $data ) ) {
-			Log::notice( sprintf( __( 'Teacher params for user %d were not updated (they may not have changed).', 'wpan' ), $student_id ) );
+			Log::notice( sprintf( __( 'Teacher params for user %d were not updated (they may not have changed).', 'wpan' ), $teacher_id ) );
 		}
 
 
