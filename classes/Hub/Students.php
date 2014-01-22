@@ -177,7 +177,7 @@ class Students
 	/**
 	 * Returns a data row representing the provided teacher user object.
 	 *
-	 * @param WP_User $teacher
+	 * @param WP_User $student
 	 * @return array
 	 */
 	protected function form_student_row( WP_User $student ) {
