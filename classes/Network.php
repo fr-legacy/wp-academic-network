@@ -210,8 +210,10 @@ class Network
 
 		$success = add_user_to_blog( $student_blog, $teacher_id, Users::TEACHER );
 
-		if ( $success )
+		if ( $success ) {
 			Log::action( sprintf( __( 'Teacher %d assigned as a supervisor of blog %d.', 'wpan' ), $teacher_id, $student_blog ) );
+			do_action( 'wpan_teacher_assigned', $teacher_id, $student_blog );
+		}
 
 		return $success;
 	}
@@ -262,6 +264,7 @@ class Network
 		}
 
 		Log::action( sprintf( __( 'Teacher %d removed as a supervisor of blog %d.', 'wpan' ), $teacher_id, $student_blog ) );
+		do_action( 'wpan_teacher_unassigned', $teacher_id, $student_blog );
 		return true;
 	}
 
