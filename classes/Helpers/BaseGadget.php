@@ -1,7 +1,7 @@
 <?php
-namespace WPAN\Gadgets;
+namespace WPAN\Helpers;
 
-use WPAN\View,
+use WPAN\Helpers\View,
 	WP_Widget;
 
 
