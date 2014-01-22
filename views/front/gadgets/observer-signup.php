@@ -16,18 +16,18 @@ if ( ! empty( $title ) ) echo $before_title . esc_html( $title ) . $after_title;
 
 // Show the following section if the form has not yet been submitted / has been submitted but contains errors ...
 if ( ! isset( $processing ) || ( isset( $processing ) && ! empty( $errors ) ) ):
-?>
+	?>
 	<p class="preamble">
-		<?php _e( 'Teachers wishing to request a new user account and site on the network can do so here. Please complete the following fields.', 'wpan' ) ?>
+		<?php _e( 'To gain access to the network please supply your desired username and a valid email address.', 'wpan' ) ?>
 	</p>
 
 	<?php if ( isset( $errors ) && is_array( $errors ) ): ?>
-		<div class="errors"> <ul>
-		<?php foreach ( $errors as $error ): ?>
-			<li> <?php esc_html_e( $error ) ?> </li>
-		<?php endforeach ?>
+	<div class="errors"> <ul>
+			<?php foreach ( $errors as $error ): ?>
+				<li> <?php esc_html_e( $error ) ?> </li>
+			<?php endforeach ?>
 		</ul> </div>
-	<?php endif ?>
+<?php endif ?>
 
 	<?php
 	if ( isset( $errors ) ) {
@@ -37,19 +37,21 @@ if ( ! isset( $processing ) || ( isset( $processing ) && ! empty( $errors ) ) ):
 	else {
 		$error_keys = '';
 	}
+
+	$form_action = isset( $form_action ) ? $form_action : '';
 	?>
 
 	<form method="post" action="<?php esc_attr_e( $form_action ) ?>">
 
-		<?php wp_nonce_field( 'wpan_new_teacher_request', 'wpan_service_request' ) ?>
+		<?php
+		$base_token = hash( 'md5', uniqid() . date( 'Y-m-d H:i:s' ) . rand( 1, 16000000 ) );
+		$origin = substr( $base_token, 5, 15 );
+		$nonce_name = 'wpan_service_' . substr( hash( 'md5', $origin . NONCE_SALT ), 5, 15 );
+		?>
+		<input type="hidden" name="origin" value="<?php esc_attr_e( $origin ) ?>" />
+		<?php wp_nonce_field( 'wpan_new_observer_request' . $origin, $nonce_name ) ?>
 
-		<?php do_action( 'wpan_new_teacher_request_start' ) ?>
-
-		<p>
-			<?php $class = ( false !== strpos( $error_keys, 'email' ) ) ? 'warning' : '' ?>
-			<label for="wpan_email"> <?php _e( 'Email address', 'wpan' ) ?> </label>
-			<input type="text" name="email" id="wpan_email" value="<?php esc_attr_e( isset( $_POST['email'] ) ? stripslashes( $_POST['email'] ) : '' ) ?>" class="<?php echo $class ?>" />
-		</p>
+		<?php do_action( 'wpan_new_student_request_start' ) ?>
 
 		<p>
 			<?php $class = ( false !== strpos( $error_keys, 'username' ) ) ? 'warning' : '' ?>
@@ -58,17 +60,17 @@ if ( ! isset( $processing ) || ( isset( $processing ) && ! empty( $errors ) ) ):
 		</p>
 
 		<p>
-			<?php $class = ( false !== strpos( $error_keys, 'password' ) ) ? 'warning' : '' ?>
-			<label for="wpan_password"> <?php _e( 'Password', 'wpan' ) ?> </label>
-			<input type="password" name="password" id="wpan_password" value="<?php esc_attr_e( isset( $_POST['password'] ) ? stripslashes( $_POST['password'] ): '' ) ?>" class="<?php echo $class ?>" />
+			<?php $class = ( false !== strpos( $error_keys, 'email' ) ) ? 'warning' : '' ?>
+			<label for="wpan_email"> <?php _e( 'Email', 'wpan' ) ?> </label>
+			<input type="text" name="email" id="wpan_email" value="<?php esc_attr_e( isset( $_POST['email'] ) ? stripslashes( $_POST['email'] ): '' ) ?>" class="<?php echo $class ?>" />
 		</p>
 
 		<p>
 			<label for="wpan_submit"> <?php _e( 'Submit request', 'wpan' ) ?> </label>
-			<input type="submit" name="wpan_submit" id="wpan_submit" value="<?php esc_attr_e( __( 'Send', 'wpan' ) ) ?>" />
+			<input type="submit" name="wpan_submit" id="wpan_submit" value="<?php esc_attr_e( __( 'Send request', 'wpan' ) ) ?>" />
 		</p>
 
-		<?php do_action( 'wpan_new_teacher_request_end' ) ?>
+		<?php do_action( 'wpan_new_observer_request_end' ) ?>
 
 	</form>
 

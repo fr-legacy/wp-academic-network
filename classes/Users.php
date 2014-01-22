@@ -10,14 +10,19 @@ use DateTime,
 class Users
 {
 	/**
-	 * Academic Network Teacher user role title.
+	 * Academic Network Teacher user role.
 	 */
 	const TEACHER = 'wpan_teacher';
 
 	/**
-	 * Academic Network Student user role title.
+	 * Academic Network Student user role.
 	 */
 	const STUDENT = 'wpan_student';
+
+	/**
+	 * Academic Network Observer user role.
+	 */
+	const OBSERVER = 'wpan_observer';
 
 	/**
 	 * Meta key used for Unique Academic Identifiers.
@@ -72,12 +77,25 @@ class Users
 		'export' => true
 	);
 
+	/**
+	 * Observers may only read content: in concert with the Privacy module the
+	 * expectation is that they will only be allowed access to public content on
+	 * the Hub or to student/teacher blogs they have been expressly granted
+	 * permission for.
+	 *
+	 * @var array
+	 */
+	protected $observer_caps = array(
+		'wpan_read' => true
+	);
+
 
 	/**
 	 * Sets up user management facilities.
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_types' ) );
+		add_action( 'widgets_init', array( $this, 'register_gadgets' ) );
 	}
 
 	/**
@@ -88,6 +106,7 @@ class Users
 		$this->register_admin_role();
 		$this->register_teacher_role();
 		$this->register_student_role();
+		$this->register_observer_role();
 	}
 
 	/**
@@ -126,6 +145,16 @@ class Users
 	}
 
 	/**
+	 * Registers the Academic Network Observer role.
+	 */
+	protected function register_observer_role() {
+		$display_name = __( 'Academic Network Observer', 'wpan' );
+
+		if ( $this->rebuild_roles ) remove_role( self::OBSERVER );
+		add_role( self::OBSERVER, $display_name, $this->observer_caps );
+	}
+
+	/**
 	 * Returns the capabilities of an existing user role. Useful to merge one set into a new role.
 	 *
 	 * @param $existing_role
@@ -135,6 +164,13 @@ class Users
 		$role = get_role( $existing_role );
 		if ( ! is_a( $role, 'WP_Role' ) ) return array();
 		return (array) $role->capabilities;
+	}
+
+	/**
+	 * Registers supporting gadgets (widget/shortcode hybrids).
+	 */
+	public function register_gadgets() {
+		Gadgets\ObserverSignup::register();
 	}
 
 	/**

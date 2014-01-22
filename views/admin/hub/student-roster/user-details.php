@@ -11,7 +11,7 @@ use WPAN\Users;
 	esc_html_e( $student->user_login );
 
 	// Optionally look for useful sundry details to help identify the user
-	$params = $users->get_student_params( $student->ID );
+	$params = $users->get_additional_data( $student->ID );
 	$firstname = isset( $params['firstname'] ) ? $params['firstname'] : '';
 	$lastname = isset( $params['lastname'] ) ? $params['lastname'] : '';
 	$user_identifier = apply_filters( 'wpan_roster_table_user_details_identifier', " $firstname $lastname ", $student );
