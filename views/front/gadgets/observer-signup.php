@@ -7,6 +7,7 @@
  * @var $before_title
  * @var $after_title
  * @var $title
+ * @var $processing
  */
 
 echo $before_widget;
@@ -15,7 +16,7 @@ echo $before_widget;
 if ( ! empty( $title ) ) echo $before_title . esc_html( $title ) . $after_title;
 
 // Show the following section if the form has not yet been submitted / has been submitted but contains errors ...
-if ( ! isset( $processing ) || ( isset( $processing ) && ! empty( $errors ) ) ):
+if ( ! $processing || ! empty( $errors ) ):
 	?>
 	<p class="preamble">
 		<?php _e( 'To gain access to the network please supply your desired username and a valid email address.', 'wpan' ) ?>
@@ -66,7 +67,6 @@ if ( ! isset( $processing ) || ( isset( $processing ) && ! empty( $errors ) ) ):
 		</p>
 
 		<p>
-			<label for="wpan_submit"> <?php _e( 'Submit request', 'wpan' ) ?> </label>
 			<input type="submit" name="wpan_submit" id="wpan_submit" value="<?php esc_attr_e( __( 'Send request', 'wpan' ) ) ?>" />
 		</p>
 
