@@ -621,4 +621,17 @@ class Users
 
 		return $datetime;
 	}
+
+	/**
+	 * Initiates a new observer account signup.
+	 *
+	 * @todo complete observer signup process
+	 * @param $username
+	 * @param $email
+	 * @return bool
+	 */
+	public function new_observer_request( $username, $email ) {
+		# non-functional stub
+		return true;
+	}
 }

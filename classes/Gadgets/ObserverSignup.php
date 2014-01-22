@@ -1,12 +1,120 @@
 <?php
 namespace WPAN\Gadgets;
 
-use WPAN\Helpers\BaseGadget,
-	WPAN\Helpers\View;
+use WPAN\Core,
+	WPAN\Helpers\BaseGadget,
+	WPAN\Helpers\View,
+	WPAN\Helpers\WordPress;
 
 
 class ObserverSignup extends BaseGadget
 {
+	/**
+	 * Flags if a submission is being processed.
+	 *
+	 * @var bool
+	 */
+	protected $processing = false;
+
+	/**
+	 * Contains any errors that may have been caught during processing.
+	 *
+	 * @var array
+	 */
+	protected $errors = array();
+
+	/**
+	 * Username submission (when validated).
+	 *
+	 * @var string
+	 */
+	protected $username = '';
+
+	/**
+	 * Email submission (when validated).
+	 *
+	 * @var string
+	 */
+	protected $email = '';
+
+
+	/**
+	 *Runs at the tailend of the parent class constructor: sets up listeners to check for submissions etc.
+	 */
+	protected function setup() {
+		add_action( 'init', array( $this, 'listen' ) );
+	}
+
+	/**
+	 * Listens for form submissions.
+	 */
+	public function listen() {
+		if ( ! $this->submission_check() ) return;
+		if ( ! $this->validate() ) return;
+		$this->do_submission();
+	}
+
+	/**
+	 * Confirms if a submission was made with a valid nonce.
+	 *
+	 * @return bool
+	 */
+	protected function submission_check() {
+		if ( ! isset( $_POST['origin'] ) ) return false;
+
+		$expected_field = 'wpan_service_' . substr( hash( 'md5', $_POST['origin'] . NONCE_SALT ), 5, 15 );
+		if ( ! isset( $_POST[$expected_field] ) ) return false;
+
+		return wp_verify_nonce( $_POST[$expected_field], 'wpan_new_observer_request' . $_POST['origin'] );
+	}
+
+	/**
+	 * Validates the submission. If there are any failures it will return boolean false, in addition to
+	 * adding the failures to the errors array.
+	 *
+	 * @return bool
+	 */
+	protected function validate() {
+		$this->processing = true;
+
+		$fields = wp_parse_args( $_POST, array( 'username' => '', 'email' => '' ) );
+		$fields = array_map( 'trim', $fields );
+
+		if ( empty($fields['email'] ) )
+			$this->errors['email'] = __( 'You did not supply an email address.', 'wpan' );
+
+		elseif ( ! filter_var( $fields['email' ], FILTER_VALIDATE_EMAIL ) )
+			$this->errors['email'] = __( 'The email address you supplied does not appear to be valid.', 'wpan' );
+
+		$fields['username'] = sanitize_user( $fields['username'] );
+
+		if ( empty( $fields['username'] ) )
+			$this->errors['username'] = __( 'You did not provide a username (or it contained mostly illegal characters).', 'wpan' );
+
+		elseif ( username_exists( $fields['username'] ) ) {
+			// Try to offer up an alternative username possibility
+			$alternative = WordPress::slug_incrementer( $fields['username'] );
+			while ( username_exists( $alternative ) )
+				$alternative = WordPress::slug_incrementer( $alternative );
+
+			$this->errors['username'] = sprintf( __( 'The username you provided is not available, but "%s" is (or you can try something new).', 'wpan' ), $alternative );
+			$_POST['username'] = $alternative; // Let the sticky form field pick up the alternative
+		}
+
+		$this->email = $fields['email'];
+		$this->username = $fields['username'];
+
+		return ( 0 === count( $this->errors ) );
+	}
+
+	/**
+	 * Pass the submission up to the Users object for further processing.
+	 */
+	protected function do_submission() {
+		if ( ! Core::object()->users()->new_observer_request( $this->username, $this->email ) )
+			$this->errors['system'] = __( 'Your request could not be processed. Please try again later or contact us for help.', 'wpan' );
+	}
+
 	/**
 	 * Friendly name for the gadget when used within the widgets admin screen.
 	 *
@@ -70,7 +178,11 @@ class ObserverSignup extends BaseGadget
 	 * @param array $instance
 	 */
 	public function widget( $args, $instance ) {
-		$params = array_merge( $args, $instance );
+		$params = array_merge( $args, $instance, array(
+			'processing' => $this->processing,
+			'errors' => $this->errors
+		) );
+
 		echo $this->public_view( 'observer-signup', $params );
 	}
 }

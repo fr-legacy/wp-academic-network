@@ -32,6 +32,8 @@ abstract class BaseGadget extends WP_Widget {
 		parent::__construct( $id_base, $name, array(
 			'description' => $this->widget_description()
 		) );
+
+		if ( method_exists( $this, 'setup' ) ) $this->setup();
 	}
 
 	/**
