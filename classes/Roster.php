@@ -240,7 +240,7 @@ class Roster
 		if ( false === $blog_id ) $this->create_blog( $user_id, $record );
 
 		// Update params
-		$this->update_user_params( $user_id, $record );
+		$this->update_additional_data( $user_id, $record );
 	}
 
 	/**
@@ -263,7 +263,7 @@ class Roster
 
 		if ( Users::STUDENT === $this->type ) {
 			$success =  $this->users->create_student( $record['username'], $record['password'], $record['uaid'] );
-			if ( $success ) $this->users->set_student_params( $success, $record );
+			if ( $success ) $this->users->set_additional_data( $success, $record );
 			return $success;
 		}
 		elseif ( Users::TEACHER === $this->type ) {
@@ -293,14 +293,14 @@ class Roster
 	}
 
 	/**
-	 * Updates user params.
+	 * Updates additional data for user.
 	 *
 	 * @param $user_id
 	 * @param $record
 	 */
-	protected function update_user_params( $user_id, $record ) {
-		if ( $this->users->is_student( $user_id ) ) $this->users->set_student_params( $user_id, $record );
-		if ( $this->users->is_teacher( $user_id ) ) $this->users->set_teacher_params( $user_id, $record );
+	protected function update_additional_data( $user_id, $record ) {
+		if ( $this->users->is_student( $user_id ) || $this->users->is_teacher( $user_id ) )
+			$this->users->set_additional_data( $user_id, $record );
 	}
 
 	/**

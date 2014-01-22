@@ -25,21 +25,16 @@ class Users
 	const UAID = 'wpan_uaid';
 
 	/**
-	 * Meta key used to hold teacher params (additional freeform data about the student).
+	 * Meta key used to reference user params (arbitrary additional data).
 	 */
-	const TEACHER_PARAMS = 'wpan_teacher_params';
-
-	/**
-	 * Meta key used to hold student params (additional freeform data about the student).
-	 */
-	const STUDENT_PARAMS = 'wpan_student_params';
+	const ADDITIONAL_DATA = 'wpan_user_additional_data';
 
 	/**
 	 * Student validation date/time is a piece of meta data used to determine the last time
 	 * the student record was updated. Useful during housekeeping to determine which student
 	 * user accounts might be dormant.
 	 */
-	const STUDENT_VALIDATED = 'wpan_student_validated';
+	const VALIDATION = 'wpan_user_validated';
 
 	/**
 	 * Indicates if user roles should be wiped and rebuilt (to clear any changes made
@@ -373,7 +368,7 @@ class Users
 	 * @param int $offset
 	 * @param string $order_by
 	 * @param string $order
-	 * @param int blog
+	 * @param int $blog
 	 * @return array
 	 */
 	public function get_teachers( $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0 ) {
@@ -471,79 +466,81 @@ class Users
 	}
 
 	/**
-	 * Updates various bits of academic data pertaining to the student. This is freeform and might
-	 * contain their grade, time at a school, club attendance etc.
+	 * Updates various bits of academic data pertaining to the user. This is freeform and might
+	 * contain a student's grade, time at a school, club attendance etc or comparable data for
+	 * a teacher such as subjects taught, extra-curricular clubs managed etc.
 	 *
-	 * The student params should be provided as an array of key:value pairs.
+	 * The additional data should be provided as an array of key:value pairs.
 	 *
 	 * Whenever this method is used a note is kept of the date and time at which the update took
-	 * place (equivalent to calling validate_student() directly), this can be useful to determine
-	 * which student accounts have been dormant at a later point in time for housekeeping purposes.
+	 * place (equivalent to calling validate_user() directly), this can be useful to determine
+	 * which user accounts are active and which have been dormant at a later point in time for
+	 * housekeeping purposes.
 	 *
-	 * @param $student_id
+	 * @param $user_id
 	 * @param array $data
 	 * @return bool
 	 */
-	public function set_student_params( $student_id, array $data = null ) {
+	public function set_additional_data( $user_id, array $data = null ) {
 		// Automatically remove various fields fields from $data
 		foreach ( array( 'uaid', 'username', 'password', 'blogtitle', 'blogpath' ) as $unwanted )
 			if ( isset( $data[$unwanted] ) ) unset( $data[$unwanted] );
 
-		if ( false === $this->is_student( $student_id ) ) {
-			Log::error( sprintf( __( 'Attempt made to update student params for non student %d.', 'wpan' ), $student_id ) );
+		if ( false === get_user_by( 'id', $user_id ) ) {
+			Log::error( sprintf( __( 'Attempt made to update user params for non user %d.', 'wpan' ), $user_id ) );
 			return false;
 		}
 
-		// False does not indicate an update failure - it may be the $data is simply equal to the existing record
-		if ( false === update_user_meta( $student_id, self::STUDENT_PARAMS, $data ) ) {
-			Log::notice( sprintf( __( 'Student params for user %d were not updated (they may not have changed).', 'wpan' ), $student_id ) );
+		// A bool false result may simply mean the data was unchanged
+		if ( false === update_user_meta( $user_id, self::ADDITIONAL_DATA, $data ) ) {
+			Log::notice( sprintf( __( 'Additional user data for user %d was not updated (there may not have been any changes).', 'wpan' ), $user_id ) );
 		}
 
-		return $this->validate_student( $student_id );
+		return $this->validate_user( $user_id );
 	}
 
 	/**
-	 * Returns a student's params data (as an array) for this student. May be empty.
+	 * Confirms the user account is still alive and valid.
 	 *
-	 * @param $student_id
-	 * @return array
-	 */
-	public function get_student_params( $student_id ) {
-		if ( false === $this->is_student( $student_id ) ) {
-			Log::error( sprintf( __( 'Attempt made to retrieve student params for non student %d.', 'wpan' ), $student_id ) );
-			return false;
-		}
-
-		return (array) get_user_meta( $student_id, self::STUDENT_PARAMS, true );
-	}
-
-	/**
-	 * Confirms the student user account is still alive and valid.
-	 *
-	 * @param $student_id
+	 * @param $user_id
 	 * @return bool
 	 */
-	public function validate_student( $student_id ) {
-		if ( false === $this->is_student( $student_id ) ) {
-			Log::error( sprintf( __( 'Attempt made to validate student %d failed: not a student.', 'wpan' ), $student_id ) );
+	public function validate_user( $user_id ) {
+		if ( false === get_user_by( 'id', $user_id ) ) {
+			Log::error( sprintf( __( 'Attempt made to validate user %d failed: user not found.', 'wpan' ), $user_id ) );
 			return false;
 		}
 
-		return update_user_meta( $student_id, self::STUDENT_VALIDATED, date('Y-m-d H:i:s') );
+		return update_user_meta( $user_id, self::VALIDATION, date('Y-m-d H:i:s') );
 	}
 
 	/**
-	 * Returns the number of days since the student user account was validated or returns false if that
-	 * could not be determined.
+	 * Returns additonal data (as an array) for this user. May be empty.
 	 *
-	 * In the unusual circumstances of a user record being validated in the future (perhaps due to an update
-	 * having taken place but server date/time settings being awry) this will return 0.
+	 * @param $user_id
+	 * @return array
+	 */
+	public function get_additional_data( $user_id ) {
+		if ( false === get_user_by( 'id', $user_id ) ) {
+			Log::error( sprintf( __( 'Attempt made to retrieve additional data for non user %d.', 'wpan' ), $user_id ) );
+			return false;
+		}
+
+		return (array) get_user_meta( $user_id, self::ADDITIONAL_DATA, true );
+	}
+
+	/**
+	 * Returns the number of days since the user account was validated or returns false if that could
+	 * not be determined.
 	 *
-	 * @param $student_id
+	 * In the unusual circumstances of a user record being validated in the future (perhaps due to an
+	 * update having taken place but server date/time settings being awry) this will return 0.
+	 *
+	 * @param $user_id
 	 * @return mixed int | bool
 	 */
-	public function num_days_since_student_validated( $student_id ) {
-		$date = $this->student_validation_datestamp( $student_id );
+	public function num_days_since_validated( $user_id ) {
+		$date = $this->validation_datestamp( $user_id );
 		if ( ! is_a( $date, 'DateTime' ) ) return false;
 
 		// Calculate the number of seconds between the validation date and now
@@ -553,7 +550,7 @@ class Users
 
 		// It should be positive or zero: but issue a warning and return 0
 		if ( 0 > $diff ) {
-			Log::warning( sprintf( __( 'Record for student %d seems to have been validated in the future.', 'wpan' ), $student_id ) );
+			Log::warning( sprintf( __( 'Record for user %d seems to have been validated in the future.', 'wpan' ), $user_id ) );
 			return 0;
 		}
 
@@ -562,19 +559,19 @@ class Users
 	}
 
 	/**
-	 * @param $student_id
+	 * @param $user_id
 	 * @return mixed DateTime | false
 	 */
-	public function student_validation_datestamp( $student_id ) {
-		if ( false === $this->is_student( $student_id ) ) {
-			Log::error( sprintf( __( 'Attempt made to find record validatation date for student %d failed: not a student.', 'wpan' ), $student_id ) );
+	public function validation_datestamp( $user_id ) {
+		if ( false === $this->is_student( $user_id ) ) {
+			Log::error( sprintf( __( 'Attempt made to find record validatation date for student %d failed: not a student.', 'wpan' ), $user_id ) );
 			return false;
 		}
 
-		$validation_stamp = get_user_meta( $student_id, self::STUDENT_VALIDATED, true );
+		$validation_stamp = get_user_meta( $user_id, self::VALIDATION, true );
 
 		if ( empty( $validation_stamp ) ) {
-			Log::warning( sprintf( __( 'Record for student %d has never been validated.', 'wpan' ), $student_id ) );
+			Log::warning( sprintf( __( 'Record for user %d has never been validated.', 'wpan' ), $user_id ) );
 			return false;
 		}
 
@@ -582,54 +579,10 @@ class Users
 			$datetime = new DateTime( $validation_stamp );
 		}
 		catch ( Exception $e ) {
-			Log::error( sprintf( __( 'Validation data for student %d is invalid and may have been corrupted.', 'wpan' ), $student_id ) );
+			Log::error( sprintf( __( 'Validation data for user %d is invalid and may have been corrupted.', 'wpan' ), $user_id ) );
 			return false;
 		}
 
 		return $datetime;
-	}
-
-	/**
-	 * Updates various bits of academic data pertaining to the teacher. This is freeform and might
-	 * contain the grade they typically lead, subjects they instruct in, student-friendly ways of
-	 * identifying them, etc.
-	 *
-	 * The teacher params should be provided as an array of key:value pairs.
-	 *
-	 * @param $teacher_id
-	 * @param array $data
-	 * @return bool
-	 */
-	public function set_teacher_params( $teacher_id, array $data = null ) {
-		// Automatically remove uaid, username and password fields from $data
-		foreach ( array( 'uaid', 'username', 'password', 'blogtitle', 'blogpath' ) as $unwanted )
-			if ( isset( $data[$unwanted] ) ) unset( $data[$unwanted] );
-
-		if ( false === $this->is_teacher( $teacher_id ) ) {
-			Log::error( sprintf( __( 'Attempt made to update teacher params for non teacher %d.', 'wpan' ), $teacher_id ) );
-			return false;
-		}
-
-		// False does not indicate an update failure - it may be the $data is simply equal to the existing record
-		if ( false === update_user_meta( $teacher_id, self::TEACHER_PARAMS, $data ) ) {
-			Log::notice( sprintf( __( 'Teacher params for user %d were not updated (they may not have changed).', 'wpan' ), $teacher_id ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Returns a teacher's params data (as an array) for this student. May be empty.
-	 *
-	 * @param $teacher_id
-	 * @return array
-	 */
-	public function get_teacher_params( $teacher_id ) {
-		if ( false === $this->is_teacher( $teacher_id ) ) {
-			Log::error( sprintf( __( 'Attempt made to retrieve teacher params for non teacher %d.', 'wpan' ), $teacher_id ) );
-			return false;
-		}
-
-		return (array) get_user_meta( $teacher_id, self::STUDENT_PARAMS, true );
 	}
 }

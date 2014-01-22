@@ -184,7 +184,7 @@ class Students
 		return array(
 			'row_id' => $student->ID,
 			'user' => View::admin( 'hub/student-roster/user-details', array( 'student' => $student, 'users' => $this->users ) ),
-			'validated' => View::admin( 'hub/student-roster/last-validated', array( 'days' => $this->users->num_days_since_student_validated( $student->ID ) ) ),
+			'validated' => View::admin( 'hub/student-roster/last-validated', array( 'days' => $this->users->num_days_since_validated( $student->ID ) ) ),
 			'primary_blog' => View::admin( 'hub/student-roster/blog-details', array( 'blog_id' => $this->network->get_primary_blog( $student->ID ) ) )
 		);
 	}
@@ -346,6 +346,6 @@ class Students
 
 		// Validate!
 		foreach ( (array) $_REQUEST['item'] as $user )
-			$this->users->validate_student( $user );
+			$this->users->validate_user( $user );
 	}
 }
