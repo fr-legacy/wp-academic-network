@@ -460,14 +460,21 @@ class Users
 	}
 
 	/**
-	 * Confirms that the user is a real Teacher-roled user.
+	 * Confirms that the user is a real Teacher-roled user. If no user ID is provided the currently logged in
+	 * user is assumed.
 	 *
 	 * @param $user_id
 	 * @return bool
 	 */
-	public function is_teacher( $user_id ) {
-		$user = get_user_by( 'id', $user_id );
+	public function is_teacher( $user_id = null ) {
+		if ( null !== $user_id) $user = get_user_by( 'id', $user_id );
+		else {
+			$user = wp_get_current_user();
+			$user = ( isset( $user->ID ) && $user->ID > 0 ) ? $user : false;
+		}
+
 		if ( false === $user ) return false;
+		if ( null === $user_id ) $user_id = $user->ID;
 
 		$role = $this->get_academic_role( $user_id );
 		return ( self::TEACHER === $role );

@@ -228,6 +228,7 @@ class Privacy
 	 * posts as publicly accessible.
 	 */
 	public function teacher_metabox() {
+		if ( ! apply_filters( 'wpan_privacy_show_public_marker_meta_box', $this->users->is_teacher() ) ) return;
 		$post_type_editors = apply_filters( 'wpan_privacy_public_marker_meta_box_screens', array( 'post', 'page' ) );
 
 		foreach ( $post_type_editors as $target )
