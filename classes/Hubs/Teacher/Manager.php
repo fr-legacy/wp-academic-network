@@ -74,8 +74,8 @@ class Manager {
 	 */
 	protected function hub_page_tabs() {
 		$menu_pages = apply_filters( 'wpan_hub_admin_tabs', array(
-			'connections' => __( 'Connections', 'wpan' ),
-			'requests' => __( 'Requests', 'wpan' ),
+			'students' => __( 'Students', 'wpan' ),
+			'observers' => __( 'Observers (parents)', 'wpan' ),
 		) );
 
 		$admin_url = get_admin_url( get_current_blog_id(), 'admin.php?page=wpan_teacher_hub' );
@@ -90,13 +90,13 @@ class Manager {
 	 * @return View
 	 */
 	protected function current_hub_tab() {
-		$tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'teachers';
+		$tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'students';
 		$html = '';
 
-		/*switch ( $tab ) {
-			case 'students': $controller = new Students; break;
-			case 'teachers': $controller = new Teachers; break;
-		}*/
+		switch ( $tab ) {
+			case 'students': $controller = new StudentConnections; break;
+			case 'observers': $controller = new ObserverConnections; break;
+		}
 
 		if ( isset($controller) && method_exists( $controller, 'get_page' ) )
 			$html = $controller->get_page();
