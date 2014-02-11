@@ -1,5 +1,5 @@
 <?php
-namespace WPAN\Hub;
+namespace WPAN\Hubs\Network;
 
 use WPAN\Core,
 	WPAN\Helpers\Log,
@@ -12,11 +12,6 @@ use WPAN\Core,
 
 class Manager {
 	/**
-	 * @var Network
-	 */
-	protected $network;
-
-	/**
 	 * @var Roster
 	 */
 	protected $teacher_roster;
@@ -27,32 +22,12 @@ class Manager {
 	protected $student_roster;
 
 
+
+
 	/**
-	 * Sets up any hub-level facilities, admin screens and functionality that is required.
+	 * Sets up network admin hub.
 	 */
 	public function __construct() {
-		$this->network = Core::object()->network();
-		if ( ! $this->hub_environment() ) return;
-		$this->admin_facilities();
-	}
-
-	/**
-	 * Checks if the current admin environment is the main site and the current user has
-	 * at least the wpan_access_hub_tools capability.
-	 *
-	 * @return bool
-	 */
-	protected function hub_environment() {
-		if ( ! is_admin() ) return false;
-		if ( ! $this->network->is_hub() ) return false;
-		if ( ! wp_get_current_user()->has_cap( 'wpan_access_hub_tools' ) ) return false;
-		return true;
-	}
-
-	/**
-	 * Admin-only elements.
-	 */
-	protected function admin_facilities() {
 		if ( ! is_admin() ) return;
 		add_action( 'admin_menu', array( $this, 'setup_hub_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_assets' ) );
@@ -98,10 +73,8 @@ class Manager {
 	 */
 	protected function hub_page_tabs() {
 		$menu_pages = apply_filters( 'wpan_hub_admin_tabs', array(
-			/*'dashboard' => __( 'Dashboard', 'wpan' ),*/
 			'teachers' => __( 'Teachers', 'wpan' ),
 			'students' => __( 'Students', 'wpan' ),
-			/*'maintenance' => __( 'Maintenance', 'wpan' )*/
 		) );
 
 		$admin_url = get_admin_url( get_current_blog_id(), 'admin.php?page=wpan_hub' );

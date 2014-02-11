@@ -1,5 +1,5 @@
 <?php
-namespace WPAN\Hub;
+namespace WPAN\Hubs\Network;
 
 use WP_User,
 	WPAN\Core,

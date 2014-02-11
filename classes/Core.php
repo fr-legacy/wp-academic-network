@@ -1,7 +1,7 @@
 <?php
 namespace WPAN;
 
-use WPAN\Hub\Manager as HubManager;
+use WPAN\Hubs\Loader as HubLoader;
 
 
 class Core
@@ -67,7 +67,7 @@ class Core
 
 		$this->users = new Users;
 		$this->network = new Network;
-		$this->hub = new HubManager;
+		$this->hub = new HubLoader;
 		$this->privacy = new Privacy;
 		$this->relationships = new Relationships;
 	}

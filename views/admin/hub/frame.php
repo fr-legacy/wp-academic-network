@@ -1,5 +1,5 @@
 <div class="wrap wpan">
-	<h2> <?php _e( 'WP Academic Network', 'wpan' ) ?> </h2>
+	<h2> <?php _e( 'WP Academic Network', 'wpan' ) ?> <?php echo isset($subtitle) ? '&ndash; ' . esc_html($subtitle) : '' ?> </h2>
 
 	<?php echo isset( $menu_pages ) ? $menu_pages : '' ?>
 
