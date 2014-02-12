@@ -135,7 +135,8 @@ class Requests {
 		$args = array(
 			'post_type' => self::REQUEST_OBJECT,
 			'meta_key' => $key,
-			'meta_value' => $user
+			'meta_value' => $user,
+			'post_status' => 'any' // This is a moot point for us, but WP assumes published/private
 		);
 
 		if ( null !== $type ) $args['post_title'] = $type;
@@ -195,16 +196,21 @@ class Requests {
 	 * @param $id
 	 */
 	public function close( $id ) {
+		switch_to_blog( $this->network->get_hub_id() );
 		$request = get_post( $id );
 
 		if ( null === $request ) {
 			Log::warning( sprintf( __( 'Attempted to close non-existent request %d.', 'wpan' ), $id ) );
+			restore_current_blog();
 			return;
 		}
 
 		wp_delete_post( $id );
+
 		$type = $request->post_title;
 		do_action( 'wpan_' . $type . '_request_closed', $id, $type );
 		Log::action( sprintf( __( 'Closed request %d.', 'wpan' ), $id ) );
+
+		restore_current_blog();
 	}
 }
