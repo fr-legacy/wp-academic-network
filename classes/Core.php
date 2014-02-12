@@ -24,7 +24,7 @@ class Core
 	protected $network;
 
 	/**
-	 * @var HubManager
+	 * Hub manager object.
 	 */
 	protected $hub;
 
@@ -37,6 +37,11 @@ class Core
 	 * @var Relationships
 	 */
 	protected $relationships;
+
+	/**
+	 * @var Requests
+	 */
+	protected $requests;
 
 	/**
 	 * Indicates if initial setup is complete. Internal flag.
@@ -70,6 +75,7 @@ class Core
 		$this->hub = new HubLoader;
 		$this->privacy = new Privacy;
 		$this->relationships = new Relationships;
+		$this->requests = new Requests;
 	}
 
 	/**
