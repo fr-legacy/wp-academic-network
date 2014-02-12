@@ -76,6 +76,8 @@ class Core
 		$this->privacy = new Privacy;
 		$this->relationships = new Relationships;
 		$this->requests = new Requests;
+
+		do_action( 'wpan_loaded' );
 	}
 
 	/**
@@ -90,5 +92,19 @@ class Core
 	 */
 	public function network() {
 		return $this->network;
+	}
+
+	/**
+	 * @return Requests
+	 */
+	public function requests() {
+		return $this->requests;
+	}
+
+	/**
+	 * @return Relationships
+	 */
+	public function relationships() {
+		return $this->relationships;
 	}
 }

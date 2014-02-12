@@ -143,22 +143,50 @@ class Requests {
 
 		// Clean up *then* return
 		restore_current_blog();
-		return $this->decode_json_in_requests( (array) $query->posts );
+		return $this->requestify( (array) $query->posts );
 	}
 
 	/**
-	 * Decodes the post_content from JSON to a native PHP object.
+	 * Loads and returns the specified request. If a post object is returned it will have "from" and
+	 * "to" properties dynamically attached to indicate the relevant user IDs.
 	 *
-	 * @param array $requests
+	 * @param $request_id
+	 * @return \WP_Post | false
+	 */
+	public function load( $request_id ) {
+		switch_to_blog( $this->network->get_hub_id() );
+		$post = get_post( $request_id );
+		restore_current_blog();
+
+		if ( null === $post ) return false;
+		$this->requestify( $post ); // Operates on object ref
+
+		return $post;
+	}
+
+	/**
+	 * Decodes the post_content from JSON to a native PHP object. Accepts one or more
+	 * posts objects.
+	 *
+	 * @param $request_posts
 	 * @return array
 	 */
-	protected function decode_json_in_requests( array $requests ) {
+	protected function requestify( $request_posts ) {
+		switch_to_blog( $this->network->get_hub_id() );
+		$requests = is_array( $request_posts ) ? $request_posts : array( $request_posts );
+
 		foreach ( $requests as $request_object ) {
 			if ( 'text/json' === $request_object->post_mime_type )
 				$request_object->post_content = json_decode( $request_object->post_content );
+
+
+			$request_object->type = $request_object->post_title;
+			$request_object->from = (int) get_post_meta( $request_object->ID, self::FROM_KEY, true );
+			$request_object->to = (int) get_post_meta( $request_object->ID, self::TO_KEY, true );
 		}
 
-		return $requests;
+		restore_current_blog();
+		return $request_posts;
 	}
 
 	/**

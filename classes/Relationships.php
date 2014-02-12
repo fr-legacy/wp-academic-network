@@ -2,12 +2,18 @@
 namespace WPAN;
 
 use WP_Admin_Bar,
+	WPAN\Helpers\Log,
 	WPAN\Network,
 	WPAN\Users;
 
 
 class Relationships
 {
+	/**
+	 * Identifier for student/teacher link requests.
+	 */
+	const STUDENT_TEACHER_LINK = 'student_teacher_link';
+
 	/**
 	 * @var Users
 	 */
@@ -17,6 +23,11 @@ class Relationships
 	 * @var Network
 	 */
 	protected $network;
+
+	/**
+	 * @var Requests
+	 */
+	protected $requests;
 
 	/**
 	 * @var WP_Admin_Bar
@@ -29,7 +40,12 @@ class Relationships
 	 * blogs.
 	 */
 	public function __construct() {
+		add_action( 'wpan_loaded', array( $this, 'setup' ) );
+	}
+
+	public function setup() {
 		$this->network = Core::object()->network();
+		$this->requests = Core::object()->requests();
 		$this->users = Core::object()->users();
 		$this->actions();
 	}
@@ -38,11 +54,71 @@ class Relationships
 	 * Hooks into WordPress where needed.
 	 */
 	protected function actions() {
-		add_action( 'wpan_toolbar_ready', array( $this, 'add_connect_links' ) );
+		add_action( 'wpan_toolbar_ready', array( $this, 'toolbar_integration' ) );
 		add_action( 'init', array( $this, 'connection_requests' ) );
 	}
 
-	public function add_connect_links( WP_Admin_Bar $wp_admin_bar ) {
+	/**
+	 * Generates a request to link the student and teacher blogs.
+	 *
+	 * @param $student_blog
+	 * @param $teacher_id
+	 */
+	public function request_student_teacher_link( $student_blog, $teacher_id ) {
+		$student_id = $this->network->get_student_for( $student_blog );
+		$this->requests->open( $student_id, $teacher_id, self::STUDENT_TEACHER_LINK, array(
+			'student_blog' => $student_blog
+		) );
+	}
+
+	/**
+	 * Lists currently open student/teacher link requests. The user ID provided can relate to a student
+	 * or a teacher.
+	 *
+	 * @param $user_id
+	 * @return array
+	 */
+	public function list_student_teacher_link_requests( $user_id ) {
+		if ( $this->users->is_teacher( $user_id ) ) return $this->requests->find_for( $user_id, self::STUDENT_TEACHER_LINK );
+		if ( $this->users->is_student( $user_id ) ) return $this->requests->find_from( $user_id, self::STUDENT_TEACHER_LINK );
+		return array();
+	}
+
+	/**
+	 * Approves a student/teacher link request: the teacher will be made a supervisor of the student
+	 * site.
+	 *
+	 * @param $request_id
+	 * @return bool
+	 */
+	public function approve_request( $request_id ) {
+		$request = $this->requests->load( $request_id );
+
+		if ( false === $request ) {
+			Log::warning( sprintf( __( 'Attempt to approve request %d failed - no such request.', 'wpan' ), $request_id ) );
+			return false;
+		}
+
+		if ( self::STUDENT_TEACHER_LINK !== $request->type ) {
+			Log::warning( sprintf( __( 'Attempt to approve request %d failed - type "%s" expected but type "%s" given.', 'wpan' ), $request_id, self::STUDENT_TEACHER_LINK, $request->type ) );
+			return false;
+		}
+
+		$student_blog = $this->network->get_primary_blog( $request->from );
+		$teacher = $request->to;
+		$result = $this->network->assign_teacher_supervisor( $student_blog, $teacher );
+
+		if ( $result ) {
+			do_action( 'wpan_student_teacher_link_approved', $request );
+			Log::action( sprintf( __( 'Request %d from user %d to user %d approved.', 'wpan' ), $request->id, $request->from, $request->to ) );
+			return true;
+		}
+
+		Log::warning( sprintf( __( 'Request %d could not be approved due to a system fault.', 'wpan' ), $request->id ) );
+		return false;
+	}
+
+	public function toolbar_integration( WP_Admin_Bar $wp_admin_bar ) {
 		$this->admin_bar = $wp_admin_bar;
 
 		// Who is visiting the site and what blog are they visiting?

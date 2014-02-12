@@ -26,6 +26,11 @@ class Network
 	protected $users;
 
 	/**
+	 * @var Requests
+	 */
+	protected $requests;
+
+	/**
 	 * @var WP_Admin_Bar
 	 */
 	protected $admin_bar;
@@ -35,6 +40,7 @@ class Network
 	 * Sets up system objects ready for helpers to reference.
 	 */
 	public function __construct() {
+		$this->requests = Core::object()->requests();
 		$this->users = Core::object()->users();
 		add_action( 'admin_bar_menu', array( $this, 'build_toolbar' ), 50 );
 	}
