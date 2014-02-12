@@ -1,7 +1,8 @@
 <?php
 namespace WPAN;
 
-use WP_Query;
+use WP_Query,
+	WPAN\Helpers\Log;
 
 
 class Requests {
@@ -65,7 +66,7 @@ class Requests {
 	 * @param string $type
 	 * @param string $details
 	 */
-	public function make( $from, $to, $type, $details ) {
+	public function open( $from, $to, $type, $details ) {
 		switch_to_blog( $this->network->get_hub_id() );
 
 		$id = wp_insert_post( array(
@@ -78,6 +79,10 @@ class Requests {
 		if ( $id > 0 ) {
 			update_post_meta( $id, 'wpan_request_from', $from );
 			update_post_meta( $id, 'wpan_request_to', $to );
+			Log::action( sprintf( __( 'Request %d created (from user %d to user %d).', 'wpan' ), $id, $from, $to ) );
+		}
+		else {
+			Log::warning( sprintf( __( 'Failed to create request of type %s (from user %d to user %d).', 'wpan' ), $type, $from, $to ) );
 		}
 
 		restore_current_blog();
@@ -114,6 +119,9 @@ class Requests {
 	 * specified user (setting key to FROM_KEY or TO_KEY controls the direction). Request type
 	 * is optional and can be left at null if all types should be returned.
 	 *
+	 * Any details in the returned requests, which would have been stored in JSON format, will
+	 * be converted back to a native PHP object.
+	 *
 	 * @param $user
 	 * @param $key
 	 * @param $type
@@ -133,6 +141,36 @@ class Requests {
 
 		// Clean up *then* return
 		restore_current_blog();
-		return (array) $query->posts;
+		return $this->decode_json_in_requests( (array) $query->posts );
+	}
+
+	/**
+	 * Decodes the post_content from JSON to a native PHP object.
+	 *
+	 * @param array $requests
+	 * @return array
+	 */
+	protected function decode_json_in_requests( array $requests ) {
+		foreach ( $requests as $request_object ) {
+			if ( 'text/json' === $request_object->post_mime_type )
+				$request_object->post_content = json_decode( $request_object->post_content );
+		}
+
+		return $requests;
+	}
+
+	/**
+	 * Completes a request and deletes it.
+	 *
+	 * @param $id
+	 */
+	public function close( $id ) {
+		if ( null === get_post( $id ) ) {
+			Log::warning( sprintf( __( 'Attempted to close non-existent request %d.', 'wpan' ), $id ) );
+			return;
+		}
+
+		wp_delete_post( $id );
+		Log::action( sprintf( __( 'Closed request %d.', 'wpan' ), $id ) );
 	}
 }
