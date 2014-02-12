@@ -79,6 +79,8 @@ class Requests {
 		if ( $id > 0 ) {
 			update_post_meta( $id, 'wpan_request_from', $from );
 			update_post_meta( $id, 'wpan_request_to', $to );
+
+			do_action( 'wpan_' . $type . '_request_opened', $from, $to, $type, $details );
 			Log::action( sprintf( __( 'Request %d created (from user %d to user %d).', 'wpan' ), $id, $from, $to ) );
 		}
 		else {
@@ -165,12 +167,16 @@ class Requests {
 	 * @param $id
 	 */
 	public function close( $id ) {
-		if ( null === get_post( $id ) ) {
+		$request = get_post( $id );
+
+		if ( null === $request ) {
 			Log::warning( sprintf( __( 'Attempted to close non-existent request %d.', 'wpan' ), $id ) );
 			return;
 		}
 
 		wp_delete_post( $id );
+		$type = $request->post_title;
+		do_action( 'wpan_' . $type . '_request_closed', $id, $type );
 		Log::action( sprintf( __( 'Closed request %d.', 'wpan' ), $id ) );
 	}
 }
