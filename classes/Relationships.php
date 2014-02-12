@@ -38,13 +38,10 @@ class Relationships
 	 * Hooks into WordPress where needed.
 	 */
 	protected function actions() {
-		add_action( 'admin_bar_menu', array( $this, 'add_connect_links' ), 50 );
+		add_action( 'wpan_toolbar_ready', array( $this, 'add_connect_links' ) );
 		add_action( 'init', array( $this, 'connection_requests' ) );
 	}
 
-	/**
-	 * Adds "Connect" links to the admin menu bar as needed for teacher and student users.
-	 */
 	public function add_connect_links( WP_Admin_Bar $wp_admin_bar ) {
 		$this->admin_bar = $wp_admin_bar;
 
@@ -57,12 +54,6 @@ class Relationships
 		if ( $this->users->is_student( $user ) && $this->network->is_teacher_blog( $blog ) ) $show = true;
 		if ( $this->users->is_teacher( $user ) && $this->network->is_student_blog( $blog ) ) $show = true;
 		if ( ! $show ) return;
-
-		$this->admin_bar->add_menu( array(
-			'id' => 'wpan_toolbar_relationships',
-			'title' => _x( 'Academic Network', 'admin bar', 'wpan' ),
-			'href' => ''
-		) );
 
 		if ( $this->users->is_student( $user ) ) $this->add_connect_options_for_student();
 		if ( $this->users->is_teacher( $user ) ) $this->add_connect_options_for_teacher();
@@ -86,7 +77,7 @@ class Relationships
 
 		$this->admin_bar->add_menu( array(
 			'id' => 'wpan_toolbar_relationships_state',
-			'parent' => 'wpan_toolbar_relationships',
+			'parent' => 'wpan_toolbar',
 			'title' => $status
 		) );
 
@@ -108,7 +99,7 @@ class Relationships
 
 		$this->admin_bar->add_menu( array(
 			'id' => 'wpan_toolbar_relationships_state',
-			'parent' => 'wpan_toolbar_relationships',
+			'parent' => 'wpan_toolbar',
 			'title' => $status
 		) );
 
@@ -120,7 +111,7 @@ class Relationships
 
 		if ( 'connected' === $state ) $this->admin_bar->add_menu( array(
 			'id' => 'wpan_toolbar_relationships_disconnect_me',
-			'parent' => 'wpan_toolbar_relationships',
+			'parent' => 'wpan_toolbar',
 			'title' => __( '&rarr; Please disconnect', 'wpan' ),
 			'href' => add_query_arg( array(
 				'wpan_relationship_builder' => 'disconnect',
@@ -131,7 +122,7 @@ class Relationships
 
 		if ( 'unconnected' === $state ) $this->admin_bar->add_menu( array(
 			'id' => 'wpan_toolbar_relationships_connect_me',
-			'parent' => 'wpan_toolbar_relationships',
+			'parent' => 'wpan_toolbar',
 			'title' => __( '&rarr; Connect me!', 'wpan' ),
 			'href' => add_query_arg( array(
 				'wpan_relationship_builder' => 'connect',

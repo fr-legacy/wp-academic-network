@@ -1,9 +1,10 @@
 <?php
 namespace WPAN;
 
-use WPAN\Helpers\Log,
-	WPAN\Helpers\WordPress,
-	WP_User_Query;
+use WP_Admin_Bar,
+	WP_User_Query,
+	WPAN\Helpers\Log,
+	WPAN\Helpers\WordPress;
 
 
 /**
@@ -24,12 +25,18 @@ class Network
 	 */
 	protected $users;
 
+	/**
+	 * @var WP_Admin_Bar
+	 */
+	protected $admin_bar;
+
 
 	/**
 	 * Sets up system objects ready for helpers to reference.
 	 */
 	public function __construct() {
 		$this->users = Core::object()->users();
+		add_action( 'admin_bar_menu', array( $this, 'build_toolbar' ), 50 );
 	}
 
 	/**
@@ -376,5 +383,20 @@ class Network
 			if ( $this->users->is_teacher( $user->ID ) ) return true;
 
 		return false;
+	}
+
+	/**
+	 * Puts in place the academic network admin toolbar.
+	 */
+	public function build_toolbar( WP_Admin_Bar $wp_admin_bar ) {
+		$this->admin_bar = $wp_admin_bar;
+
+		$this->admin_bar->add_menu( array(
+			'id' => 'wpan_toolbar',
+			'title' => _x( 'Academic Network', 'admin bar', 'wpan' ),
+			'href' => ''
+		) );
+
+		do_action( 'wpan_toolbar_ready', $this->admin_bar );
 	}
 }
