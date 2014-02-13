@@ -262,7 +262,7 @@ class Network
 			$student = $this->network->get_student_for( $blog->userblog_id );
 			$student = get_user_by( 'id', $student );
 
-			$list[] = array(
+			$list[$blog->userblog_id] = array(
 				'blog_id' => $blog->userblog_id,
 				'blog_name' => $blog->blogname,
 				'blog_url' => $blog->siteurl,
