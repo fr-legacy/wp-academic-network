@@ -138,31 +138,39 @@ class Relationships
 	 */
 	public function approve_request( $request_id ) {
 		$request = $this->requests->load( $request_id );
+		$success = false;
 
 		if ( false === $request ) {
 			Log::warning( sprintf( __( 'Attempt to approve request %d failed - no such request.', 'wpan' ), $request_id ) );
 			return false;
 		}
 
-		if ( self::STUDENT_TEACHER_LINK !== $request->type ) {
-			Log::warning( sprintf( __( 'Attempt to approve request %d failed - type "%s" expected but type "%s" given.', 'wpan' ), $request_id, self::STUDENT_TEACHER_LINK, $request->type ) );
-			return false;
-		}
-
 		$student_blog = $this->network->get_primary_blog( $request->from );
 		$teacher = $request->to;
-		$result = $this->network->assign_teacher_supervisor( $student_blog, $teacher );
 
-		if ( $result ) {
-			do_action( 'wpan_student_teacher_link_approved', $request );
-			Log::action( sprintf( __( 'Request %d from user %d to user %d approved.', 'wpan' ), $request->id, $request->from, $request->to ) );
+		if ( self::STUDENT_TEACHER_LINK === $request->type )
+			$success = $this->network->assign_teacher_supervisor( $student_blog, $teacher );
+
+		elseif ( self::STUDENT_TEACHER_UNLINK === $request->type )
+			$success = $this->network->unassign_teacher_supervisor( $student_blog, $teacher );
+
+		if ( $success ) {
+			do_action( 'wpan_request_' . $request->type . '_approved', $request );
+			Log::action( sprintf( __( 'Request %d (unlink student/teacher) from user %d to user %d approved.', 'wpan' ), $request->id, $request->from, $request->to ) );
+
+			$this->close_student_teacher_requests( $student_blog, $teacher );
 			return true;
 		}
 
-		Log::warning( sprintf( __( 'Request %d could not be approved due to a system fault.', 'wpan' ), $request->id ) );
+		Log::warning( sprintf( __( 'Request %d could not be approved due to a system fault (or request type was unknown.', 'wpan' ), $request->id ) );
 		return false;
 	}
 
+	/**
+	 * Add relationship builder menu items.
+	 *
+	 * @param WP_Admin_Bar $wp_admin_bar
+	 */
 	public function toolbar_integration( WP_Admin_Bar $wp_admin_bar ) {
 		$this->admin_bar = $wp_admin_bar;
 
