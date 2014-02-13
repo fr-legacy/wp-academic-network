@@ -31,6 +31,11 @@ class Network
 	protected $requests;
 
 	/**
+	 * @var Network
+	 */
+	protected $network;
+
+	/**
 	 * @var WP_Admin_Bar
 	 */
 	protected $admin_bar;
@@ -40,9 +45,14 @@ class Network
 	 * Sets up system objects ready for helpers to reference.
 	 */
 	public function __construct() {
+		add_action( 'init', array( $this, 'setup' ) );
+		add_action( 'admin_bar_menu', array( $this, 'build_toolbar' ), 50 );
+	}
+
+	public function setup() {
+		$this->network = Core::object()->network();
 		$this->requests = Core::object()->requests();
 		$this->users = Core::object()->users();
-		add_action( 'admin_bar_menu', array( $this, 'build_toolbar' ), 50 );
 	}
 
 	/**
@@ -229,6 +239,39 @@ class Network
 		}
 
 		return $success;
+	}
+
+	/**
+	 * Returns a list of (student) blogs for which the specified teacher is a supervisor.
+	 *
+	 * @param $teacher_id
+	 * @return array
+	 */
+	public function get_supervised_blogs( $teacher_id ) {
+		$list = array();
+
+		// Ensure the teacher ID does indeed represent a teacher-role user
+		if ( false === $this->users->is_teacher( $teacher_id ) ) {
+			Log::error( sprintf( __( 'User %d is not a teacher and cannot be assigned as a supervisor for blog %d.', 'wpan' ), $teacher_id, $student_blog ) );
+			return array();
+		}
+
+		foreach ( get_blogs_of_user( $teacher_id ) as $blog ) {
+			if ( ! $this->network->is_student_blog( $blog->userblog_id ) ) continue;
+
+			$student = $this->network->get_student_for( $blog->userblog_id );
+			$student = get_user_by( 'id', $student );
+
+			$list[] = array(
+				'blog_id' => $blog->userblog_id,
+				'blog_name' => $blog->blogname,
+				'blog_url' => $blog->siteurl,
+				'student_id' => $student->ID,
+				'student_name' => $student->display_name
+			);
+		}
+
+		return $list;
 	}
 
 	/**

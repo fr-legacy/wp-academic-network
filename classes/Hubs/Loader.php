@@ -29,6 +29,10 @@ class Loader {
 	 * Sets up any hub-level facilities, admin screens and functionality that is required.
 	 */
 	public function __construct() {
+		add_action( 'init', array( $this, 'setup' ) );
+	}
+
+	public function setup() {
 		$this->network = Core::object()->network();
 		$this->users = Core::object()->users();
 
