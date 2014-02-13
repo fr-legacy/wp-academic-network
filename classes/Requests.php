@@ -180,7 +180,7 @@ class Requests {
 			if ( 'text/json' === $request_object->post_mime_type )
 				$request_object->post_content = json_decode( $request_object->post_content );
 
-
+			$request_object->data = $request_object->post_content;
 			$request_object->type = $request_object->post_title;
 			$request_object->from = (int) get_post_meta( $request_object->ID, self::FROM_KEY, true );
 			$request_object->to = (int) get_post_meta( $request_object->ID, self::TO_KEY, true );
