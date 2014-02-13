@@ -75,7 +75,7 @@ class Manager {
 	protected function hub_page_tabs() {
 		$menu_pages = apply_filters( 'wpan_hub_admin_tabs', array(
 			'students' => __( 'Students', 'wpan' ),
-			'observers' => __( 'Observers (parents)', 'wpan' ),
+			/*'observers' => __( 'Observers (parents)', 'wpan' ),*/
 		) );
 
 		$admin_url = get_admin_url( get_current_blog_id(), 'admin.php?page=wpan_teacher_hub' );

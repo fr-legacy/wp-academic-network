@@ -334,6 +334,7 @@ class StudentConnections
 		foreach ( (array) $_REQUEST['item'] as $user_id ) {
 			$student_blog = $this->network->get_primary_blog( $user_id );
 			$this->network->unassign_teacher_supervisor( $student_blog, $teacher_id );
+			$this->relationships->close_student_teacher_requests( $student_blog, $teacher_id );
 		}
 	}
 }
