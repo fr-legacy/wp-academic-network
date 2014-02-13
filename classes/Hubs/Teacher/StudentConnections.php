@@ -147,7 +147,7 @@ class StudentConnections
 	protected function requests_data( $requests ) {
 		if ( empty( $requests ) ) return;
 
-		foreach ( $requests as $request )
+		foreach ( $requests as $request ) {
 			$user = get_user_by( 'id', $request->from );
 			$blog = get_blog_details( $request->data->student_blog );
 
@@ -157,6 +157,7 @@ class StudentConnections
 				'type' => View::admin( 'hub/student-requests/request-type', array( 'request' => $request ) ),
 				'data' => View::admin( 'hub/student-requests/blog-details', array( 'blog' => $blog ) )
 			) );
+		}
 	}
 
 	/**

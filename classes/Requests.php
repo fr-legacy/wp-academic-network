@@ -22,6 +22,11 @@ class Requests {
 	const TO_KEY = 'wpan_request_to';
 
 	/**
+	 * Meta key used to record the request type.
+	 */
+	const TYPE_KEY = 'wpan_request_type';
+
+	/**
 	 * Flags if the setup processes have completed.
 	 *
 	 * @var bool
@@ -71,14 +76,14 @@ class Requests {
 
 		$id = wp_insert_post( array(
 			'post_content' => json_encode( $details ),
-			'post_title' => $type,
 			'post_type' => self::REQUEST_OBJECT,
 			'post_mime_type' => 'text/json'
 		) );
 
 		if ( $id > 0 ) {
-			update_post_meta( $id, 'wpan_request_from', $from );
-			update_post_meta( $id, 'wpan_request_to', $to );
+			update_post_meta( $id, self::FROM_KEY, $from );
+			update_post_meta( $id, self::TO_KEY, $to );
+			update_post_meta( $id, self::TYPE_KEY, $type );
 
 			do_action( 'wpan_' . $type . '_request_opened', $from, $to, $type, $details );
 			Log::action( sprintf( __( 'Request %d created (from user %d to user %d).', 'wpan' ), $id, $from, $to ) );
@@ -134,12 +139,21 @@ class Requests {
 
 		$args = array(
 			'post_type' => self::REQUEST_OBJECT,
-			'meta_key' => $key,
-			'meta_value' => $user,
+			'meta_query' => array(
+				'relation' => 'AND',
+				array(
+					'key' => $key,
+					'value' => $user
+				) ),
 			'post_status' => 'any' // This is a moot point for us, but WP assumes published/private
 		);
 
-		if ( null !== $type ) $args['post_title'] = $type;
+		// Are we interested in a specific type of request?
+		if ( null !== $type ) $args['meta_query'][] = array(
+			'key' => self::TYPE_KEY,
+			'value' => $type
+		);
+
 		$query = new WP_Query( $args );
 
 		// Clean up *then* return
@@ -181,7 +195,7 @@ class Requests {
 				$request_object->post_content = json_decode( $request_object->post_content );
 
 			$request_object->data = $request_object->post_content;
-			$request_object->type = $request_object->post_title;
+			$request_object->type = get_post_meta( $request_object->ID, self::TYPE_KEY, true );
 			$request_object->from = (int) get_post_meta( $request_object->ID, self::FROM_KEY, true );
 			$request_object->to = (int) get_post_meta( $request_object->ID, self::TO_KEY, true );
 		}
@@ -207,7 +221,7 @@ class Requests {
 
 		wp_delete_post( $id );
 
-		$type = $request->post_title;
+		$type = get_post_meta( $request->ID, self::FROM_KEY, true );;
 		do_action( 'wpan_' . $type . '_request_closed', $id, $type );
 		Log::action( sprintf( __( 'Closed request %d.', 'wpan' ), $id ) );
 
