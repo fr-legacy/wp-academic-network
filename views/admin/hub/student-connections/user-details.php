@@ -22,7 +22,7 @@ use WPAN\Users;
 
 <div class="row-actions">
 	<span class="validate">
-		<?php $action = wp_nonce_url( add_query_arg( array( 'item' => $data['student_id'], 'action' => 'disconnect' ) ), 'student_actions' . get_current_user_id(), 'check' ) ?>
+		<?php $action = wp_nonce_url( add_query_arg( array( 'item' => $data['student_id'], 'action' => 'disconnect' ) ), 'connection_actions' . get_current_user_id(), 'check' ) ?>
 		<a title="<?php esc_attr_e( 'Disconnect from this student/their blog', 'wpan' ) ?>" href="<?php echo esc_url( $action ) ?>"><?php _e( 'Disconnect', 'wpan' ) ?></a>
 	</span>
 </div>

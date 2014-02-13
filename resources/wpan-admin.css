@@ -17,6 +17,11 @@
 	border-bottom: 1px dotted #fd300a;
 }
 
+.wpan table.widefat img.type_icon {
+	float: left;
+	margin-right: 0.8em;
+}
+
 /* Section wrapper divs */
 
 .section_wrapper {
