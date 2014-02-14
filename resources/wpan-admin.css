@@ -1,5 +1,15 @@
 /* Admin tables */
 
+.wpan div.notices {
+	background: #fefcad;
+	border: 1px solid #cb5;
+	padding: 0 1em;
+}
+
+.wpan div.notices pre {
+	display: inline-block;
+}
+
 .wpan table.widefat td h4 {
 	margin: 0;
 }

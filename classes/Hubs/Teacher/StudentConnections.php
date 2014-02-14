@@ -1,8 +1,7 @@
 <?php
 namespace WPAN\Hubs\Teacher;
 
-use WP_User,
-	WPAN\Core,
+use WPAN\Core,
 	WPAN\Helpers\AdminTable,
 	WPAN\Helpers\Log,
 	WPAN\Helpers\View,
@@ -103,11 +102,25 @@ class StudentConnections
 	 */
 	protected function page() {
 		$subtab = isset( $_GET['subtab'] ) ? $_GET['subtab'] : '';
+		$notices = apply_filters( 'wpan_notices', $this->notices() );
 
 		switch ( $subtab ) {
-			case 'requested': return $this->requests_view(); break;
-			default: return $this->connections_view(); break;
+			case 'requested': return $notices . $this->requests_view(); break;
+			default: return $notices . $this->connections_view(); break;
 		}
+	}
+
+	/**
+	 * Returns a 'package' of notices to display, if any are set (else an empty string).
+	 *
+	 * @return string
+	 */
+	protected function notices() {
+		if ( empty( $this->notices ) ) return '';
+		$package = '<div class="notices">';
+
+		foreach ( $this->notices as $notice ) $package .= '<p>' . $notice . '</p>';
+		return $package . '</div>';
 	}
 
 	/**
@@ -278,16 +291,17 @@ class StudentConnections
 		if ( ! isset( $action ) ) return;
 
 		switch ( $action ) {
-			case 'disconnect': $this->disconnect_requests(); break;
-			case 'approve': $this->approve_requests(); break;
-			case 'decline': $this->decline_requests(); break;
+			case 'disconnect': $this->action_disconnect(); break;
+			case 'approve': $this->action_approve(); break;
+			case 'decline': $this->action_decline(); break;
+			case 'password_reset': $this->action_password_reset();
 		}
 	}
 
 	/**
 	 * Handles single/bulk approval of requests.
 	 */
-	protected function approve_requests() {
+	protected function action_approve() {
 		$teacher_id = get_current_user_id();
 
 		if ( ! $this->users->is_teacher( $teacher_id ) ) {
@@ -304,7 +318,7 @@ class StudentConnections
 	/**
 	 * Handles single/bulk declining of requests.
 	 */
-	protected function decline_requests() {
+	protected function action_decline() {
 		$teacher_id = get_current_user_id();
 
 		if ( ! $this->users->is_teacher( $teacher_id ) ) {
@@ -323,7 +337,7 @@ class StudentConnections
 	/**
 	 * Handles single/bulk requests to disconnect student users/blogs.
 	 */
-	protected function disconnect_requests() {
+	protected function action_disconnect() {
 		$teacher_id = get_current_user_id();
 
 		if ( ! $this->users->is_teacher( $teacher_id ) ) {
@@ -332,10 +346,28 @@ class StudentConnections
 		}
 
 		// Disconnect!
+		foreach ( (array) $_REQUEST['item'] as $blog_id ) {
+			$this->network->unassign_teacher_supervisor( $blog_id, $teacher_id );
+			$this->relationships->close_student_teacher_requests( $blog_id, $teacher_id );
+		}
+	}
+
+	/**
+	 * Handles password reset requests for students.
+	 */
+	protected function action_password_reset() {
+		$teacher_id = get_current_user_id();
+
+		if ( ! $this->users->is_teacher( $teacher_id ) ) {
+			Log::warning( sprintf( __( 'Attempt to reset student password via teacher hub made by non-teacher %d.', 'wpan' ), $teacher_id ) );
+			return;
+		}
+
+		// Reset
 		foreach ( (array) $_REQUEST['item'] as $user_id ) {
-			$student_blog = $this->network->get_primary_blog( $user_id );
-			$this->network->unassign_teacher_supervisor( $student_blog, $teacher_id );
-			$this->relationships->close_student_teacher_requests( $student_blog, $teacher_id );
+			$user = get_user_by( 'id', $user_id );
+			$password = WordPress::reset_password( $user_id );
+			$this->notices[] = sprintf( __( 'Password for user <em>%s</em> (#%d) changed to <code>%s</code> &hellip;please make them aware of this change.', 'wpan' ), $user->display_name, $user_id, $password );
 		}
 	}
 }

@@ -23,9 +23,9 @@ $progress = absint( $progress ) . '%';
 
 <?php if ( ! $work_in_progress ): ?>
 	<div class="section_wrapper warning"> <p>
-			<strong> <?php _e( 'No roster updates are currently in progress.', 'wpan') ?> </strong>
-			<?php _e( 'To upload a new roster file please use the <em>update/import</em> screen.', 'wpan' ) ?>
-		</p> </div>
+		<strong> <?php _e( 'No roster updates are currently in progress.', 'wpan') ?> </strong>
+		<?php _e( 'To upload a new roster file please use the <em>update/import</em> screen.', 'wpan' ) ?>
+	</p> </div>
 <?php else: ?>
 
 	<p> <?php _e( 'Please note if you navigate away from this page while the realtime processor is running it will automatically stop shortly thereafter. If you need it to run until the current update completes, please keep the page open in your browser.', 'wpan' ) ?> </p>

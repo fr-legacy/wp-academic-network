@@ -148,4 +148,25 @@ class WordPress {
 
 		return $string . '-1';
 	}
+
+	/**
+	 * Resets the specified user's password, changing it to something quasi-random (and returning
+	 * the new password as a string, so it can be relayed to the affected user).
+	 *
+	 * Useful for student password resets, as students ordinarily will not be required to have
+	 * an email address with which to accomplish this via ordinary channels.
+	 *
+	 * @param $user_id
+	 * @return string
+	 */
+	public static function reset_password( $user_id ) {
+		$password = apply_filters( 'wpan_random_password', RandomString::generate() );
+
+		wp_update_user( array(
+			'ID' => $user_id,
+			'user_pass' => $password
+		) );
+
+		return $password;
+	}
 }
