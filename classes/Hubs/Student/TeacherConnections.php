@@ -40,6 +40,11 @@ class TeacherConnections
 	protected $users;
 
 	/**
+	 * @var array
+	 */
+	protected $teachers = array();
+
+	/**
 	 * Records any errors, notices etc that need to be relayed to the user.
 	 *
 	 * @var array
@@ -105,7 +110,7 @@ class TeacherConnections
 		$notices = apply_filters( 'wpan_notices', $this->notices() );
 
 		switch ( $subtab ) {
-			/*case 'requested': return $notices . $this->requests_view(); break;*/
+			case 'allteachers': return $notices . $this->teachers_view(); break;
 			default: return $notices . $this->connections_view(); break;
 		}
 	}
@@ -126,87 +131,53 @@ class TeacherConnections
 	/**
 	 * Provide a view of all incoming link/unlink requests.
 	 */
-	protected function requests_view() {
-		$requests = $this->requests_list();
-
-		$this->bulk_actions = ( array(
-			'unselected' => __( 'Bulk actions', 'wpan' ),
-			'approve' => __( 'Approve', 'wpan' ),
-			'decline' => __( 'Decline', 'wpan' )
-		) );
-
-		$this->requests_table( $requests );
-		$this->requests_data( $requests );
-		$this->requests_pagination( $requests );
-
+	protected function teachers_view() {
+		$this->teachers_table();
+		$this->teachers_paginate();
+		$this->teachers_data();
 		return $this->table->as_string();
 	}
 
-	/**
-	 * Builds a list of requests, ordered with unlink requests first followed by link requests.
-	 *
-	 * @return array
-	 */
-	protected function requests_list() {
-		$teacher_id = get_current_user_id();
-		$unlinks = $this->relationships->list_requests( $teacher_id, Relationships::STUDENT_TEACHER_UNLINK );
-		$links = $this->relationships->list_requests( $teacher_id, Relationships::STUDENT_TEACHER_LINK );
-		return array_merge( $unlinks, $links );
-	}
-
-	/**
-	 * Populates the table with incoming connection requests.
-	 */
-	protected function requests_data( $requests ) {
-		if ( empty( $requests ) ) return;
-
-		foreach ( $requests as $request ) {
-			$user = get_user_by( 'id', $request->from );
-			$blog = get_blog_details( $request->data->student_blog );
-
-			$this->table->add_row( array(
-				'row_id' => $request->ID,
-				'user' => View::admin( 'hub/student-requests/user-details', array( 'request' => $request, 'users' => $this->users, 'student' => $user ) ),
-				'type' => View::admin( 'hub/student-requests/request-type', array( 'request' => $request ) ),
-				'data' => View::admin( 'hub/student-requests/blog-details', array( 'blog' => $blog ) )
-			) );
-		}
-	}
-
-	/**
-	 * Sets up the basic table view structure.
-	 */
-	protected function requests_table( array $requests ) {
-		// Set up basic structure
-		$this->table = AdminTable::build( 'incoming_student_requests' )->use_checkbox( true )
+	protected function teachers_table() {
+		$this->table = AdminTable::build( 'teacher_connections' )->use_checkbox( true )
 			->set_bulk_actions( $this->bulk_actions )
-			->add_column( 'user', __( 'Student', 'wpan' ) )
-			->add_column( 'type', __( 'Type', 'wpan' ) )
+			->add_column( 'user', __( 'Teacher', 'wpan' ) )
 			->add_column( 'blog', __( 'Blog', 'wpan' ) );
 
-		// Pagination
-		list( $per_page ) = $this->requests_pagination( $requests );
-		$pages = (int) ceil( count( $requests ) / $per_page );
-		if ( 1 > $pages ) $pages = 1;
+		$this->bulk_actions = ( array(
+			'unselected' => __( 'No actions available', 'wpan' )
+		) );
 
+		$this->table->set_bulk_actions( $this->bulk_actions );
+	}
+
+	protected function teachers_paginate() {
+		$per_page = apply_filters( 'wpan_available_teachers_per_page', 12 );
+		$current_page = $this->table->get_page_num();
+		$this->teachers = $this->users->get_teachers( $per_page, ($current_page - 1) * $per_page );
+
+		$total = $this->users->get_total_count();
+		$pages = ceil ( $total / $per_page );
 		$this->table->set_total_pages( $pages )->auto_set_page();
 	}
 
 	/**
-	 * Used to paginate the results of connections and determine how many results should be
-	 * returned per page.
+	 * Build a list of teachers on the network.
 	 *
-	 * @param $requests
 	 * @return array
 	 */
-	public function requests_pagination( array &$requests ) {
-		$per_page = apply_filters( 'wpan_student_requests_per_page', 12 );
-		$current_page = $this->table->get_page_num();
+	protected function teachers_data() {
+		if ( empty( $this->teachers ) ) return;
 
-		$offset = ( $per_page * $current_page ) - $per_page;
-		$requests = array_slice( $requests, $offset, $per_page );
+		foreach ( $this->teachers as $teacher ) {
+			$blog = get_blog_details( $this->network->get_primary_blog( $teacher->ID ) );
 
-		return array( $per_page, $current_page );
+			$this->table->add_row( array(
+				'row_id' => $teacher->ID,
+				'user' => View::admin( 'hub/teacher-connections/user-details', array( 'teacher' => $teacher, 'users' => $this->users ) ),
+				'blog' => View::admin( 'hub/teacher-connections/blog-details', array( 'blog' => $blog ) )
+			) );
+		}
 	}
 
 	/**
@@ -216,7 +187,7 @@ class TeacherConnections
 		$connections = $this->network->get_teachers_for( get_current_blog_id() );
 
 		$this->bulk_actions = ( array(
-			'unselected' => __( 'Bulk actions', 'wpan' )
+			'unselected' => __( 'No actions available', 'wpan' )
 		) );
 
 		$this->connections_table( $connections );
@@ -249,7 +220,7 @@ class TeacherConnections
 	protected function connections_data( $connections ) {
 		if ( empty( $connections ) ) return;
 
-		foreach ( $connections as $connection )
+		foreach ( $connections as $connection ) {
 			$teacher = get_user_by( 'id', $connection );
 			$blog = get_blog_details( $this->network->get_primary_blog( $connection ) );
 
@@ -258,6 +229,7 @@ class TeacherConnections
 				'user' => View::admin( 'hub/teacher-connections/user-details', array( 'teacher' => $teacher, 'users' => $this->users ) ),
 				'blog' => View::admin( 'hub/teacher-connections/blog-details', array( 'blog' => $blog ) )
 			) );
+		}
 	}
 
 	/**
