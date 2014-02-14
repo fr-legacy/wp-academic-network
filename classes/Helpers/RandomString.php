@@ -30,7 +30,8 @@ class RandomString
 		'singer', 'songwriter', 'traindriver', 'brilliance', 'short', 'tall', 'crown', 'imperial', 'surely', 'red',
 		'green', 'blue', 'yellow', 'purple', 'mauve', 'violet', 'grey', 'orange', 'gorilla', 'manitee', 'seahorse',
 		'ninja', 'druid', 'vortex', 'vacuum', 'batfish', 'echo', 'dungeon', 'nightly', 'build', 'crimson', 'eggchop',
-		'horse', 'creature', 'pin', 'rolling', 'smart', 'clever', 'elephant', 'memory'
+		'horse', 'creature', 'pin', 'rolling', 'smart', 'clever', 'elephant', 'memory', 'book', 'chalk', 'pencil',
+		'crayon', 'stencil', 'art', 'paint', 'draw', 'write', 'read'
 	);
 
 	protected static $symbols = '!@#$%^&*()-=_+[]{};\':",.<>/?';
