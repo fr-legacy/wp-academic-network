@@ -28,9 +28,9 @@ class Manager
 	public function setup_hub_menu() {
 		$menu_params = apply_filters( 'wpan_hub_menu', array(
 			__( 'Hub Dashboard', 'wpan' ),
-			__( 'Teacher Hub', 'wpan' ),
-			'promote_users',
-			'wpan_teacher_hub',
+			__( 'Student Hub', 'wpan' ),
+			'edit_pages',
+			'wpan_student_hub',
 			array( $this, 'hub_screen' ),
 			'',
 			WordPress::safe_menu_position( 2 )
@@ -46,7 +46,7 @@ class Manager
 		$view = array(
 			'menu_pages' => $this->hub_page_tabs(),
 			'view' => $this->current_hub_tab(),
-			'subtitle' => __( 'Teacher Hub', 'wpan' )
+			'subtitle' => __( 'Student Hub', 'wpan' )
 		);
 
 		echo View::admin( 'hub/frame', $view );
@@ -62,11 +62,11 @@ class Manager
 	 */
 	protected function hub_page_tabs() {
 		$menu_pages = apply_filters( 'wpan_hub_admin_tabs', array(
-			'students' => __( 'Students', 'wpan' ),
+			'teachers' => __( 'Teachers', 'wpan' ),
 			/*'observers' => __( 'Observers (parents)', 'wpan' ),*/
 		) );
 
-		$admin_url = get_admin_url( get_current_blog_id(), 'admin.php?page=wpan_teacher_hub' );
+		$admin_url = get_admin_url( get_current_blog_id(), 'admin.php?page=wpan_student_hub' );
 		$tab_menu = WordPress::tab_menu( $menu_pages, $admin_url );
 
 		return apply_filters( 'wpan_hub_page_tab_menu', $tab_menu );
@@ -78,12 +78,11 @@ class Manager
 	 * @return View
 	 */
 	protected function current_hub_tab() {
-		$tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'students';
+		$tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'teachers';
 		$html = '';
 
 		switch ( $tab ) {
-			case 'students': $controller = new StudentConnections; break;
-			case 'observers': $controller = new ObserverConnections; break;
+			case 'teachers': $controller = new TeacherConnections; break;
 		}
 
 		if ( isset($controller) && method_exists( $controller, 'get_page' ) )

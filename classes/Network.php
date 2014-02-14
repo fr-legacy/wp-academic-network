@@ -365,6 +365,23 @@ class Network
 	}
 
 	/**
+	 * Provides a list of all teacher user IDs where they are assigned to the specified blog.
+	 * List may be empty.
+	 *
+	 * @param $blog_id
+	 * @return array
+	 */
+	public function get_teachers_for( $blog_id ) {
+		$users = get_users( array( 'blog_id' => $blog_id ) );
+		$teachers = array();
+
+		foreach ( $users as $user )
+			if ( $this->users->is_teacher( $user->ID ) ) $teachers[] = $user->ID;
+
+		return $teachers;
+	}
+
+	/**
 	 * Gets the ID of the student assigned to the specific blog.
 	 *
 	 * @param $blog_id
