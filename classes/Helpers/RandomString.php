@@ -34,7 +34,7 @@ class RandomString
 		'crayon', 'stencil', 'art', 'paint', 'draw', 'write', 'read'
 	);
 
-	protected static $symbols = '!@#$%^&*()-=_+[]{};\':",.<>/?';
+	protected static $symbols = '!@#$%^&*-=_+[]{};\':",.<>/?';
 
 	public static function generate() {
 		$suitable = false;
@@ -70,11 +70,11 @@ class RandomString
 
 	public static function symbol() {
 		$symbol = '';
-		$number = rand( 1, 2 );
+		$number = rand( 0, 2 );
 		$max = strlen( self::$symbols ) - 1;
 
 		for ( $i = 0; $i <= $number; $i++ )
-			$symbol .= self::$symbols[$i];
+			$symbol .= self::$symbols[ rand( 0, $max ) ];
 
 		return $symbol;
 	}
@@ -87,7 +87,7 @@ class RandomString
 		$length = strlen( $string );
 
 		for ( $i = 0; $i < $length; $i++ ) {
-			if ( 0 === rand( 0, 6 ) ) continue;
+			if ( 7 <= rand( 0, 8 ) ) continue;
 			if ( 'l' === $string[$i] ) $string[$i] = '1';
 			if ( 'I' === $string[$i] ) $string[$i] = '1';
 			if ( 'o' === $string[$i] ) $string[$i] = '0';
@@ -100,8 +100,6 @@ class RandomString
 			if ( 'Z' === $string[$i] ) $string[$i] = '2';
 			if ( 'G' === $string[$i] ) $string[$i] = '6';
 			if ( 'B' === $string[$i] ) $string[$i] = '8';
-			if ( 'b' === $string[$i] ) $string[$i] = '8';
-			if ( 'a' === $string[$i] ) $string[$i] = '@';
 			if ( 'h' === $string[$i] ) $string[$i] = '4';
 		}
 
