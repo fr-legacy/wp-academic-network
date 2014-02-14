@@ -89,6 +89,13 @@ class Users
 		'wpan_read' => true
 	);
 
+	/**
+	 * Used to store the total number of matches available when querying for users.
+	 *
+	 * @var int
+	 */
+	protected $query_count = 0;
+
 
 	/**
 	 * Sets up user management facilities.
@@ -442,7 +449,18 @@ class Users
 		if ( -1 === $limit ) unset( $args['number'], $args['offset'] );
 
 		$users = new WP_User_Query( $args );
+		$this->query_count = $users->get_total();
 		return (array) $users->get_results();
+	}
+
+	/**
+	 * Returns the total number of matches calculated when performing a search with get_where()
+	 * or a related method.
+	 *
+	 * @return int
+	 */
+	public function get_total_count() {
+		return absint( $this->query_count );
 	}
 
 	/**
