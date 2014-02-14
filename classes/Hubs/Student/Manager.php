@@ -1,5 +1,5 @@
 <?php
-namespace WPAN\Hubs\Teacher;
+namespace WPAN\Hubs\Student;
 
 use WPAN\Core,
 	WPAN\Helpers\Log,
