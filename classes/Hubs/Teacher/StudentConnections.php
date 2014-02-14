@@ -367,7 +367,7 @@ class StudentConnections
 		foreach ( (array) $_REQUEST['item'] as $user_id ) {
 			$user = get_user_by( 'id', $user_id );
 			$password = WordPress::reset_password( $user_id );
-			$this->notices[] = sprintf( __( 'Password for user <em>%s</em> (#%d) changed to <code>%s</code> &hellip;please make them aware of this change.', 'wpan' ), $user->display_name, $user_id, $password );
+			$this->notices[] = sprintf( __( 'Password for user <em>%s</em> (#%d) changed to <code>%s</code> &hellip;please make them aware of this change (or regenerate it if you are unhappy with the result).', 'wpan' ), $user->display_name, $user_id, $password );
 		}
 	}
 }
