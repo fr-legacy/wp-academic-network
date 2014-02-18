@@ -19,9 +19,9 @@ class Privacy
 	const RECOMMEND_ACCESS = 2;
 
 	/**
-	 * Post meta key used to indicate if a post should be publicly accessible.
+	 * Post meta key used to indicate post visibility.
 	 */
-	const PUBLIC_ACCESS_MARKER = 'wpan_publicly_accessible';
+	const ACCESS_MARKER = 'wpan_visibility';
 
 	/**
 	 * @var Users
@@ -88,7 +88,7 @@ class Privacy
 			'is_hub' => $this->network->is_hub(),
 			'headers_sent' => headers_sent(),
 			'is_singular' => is_singular(),
-			'marked_open' => $this->is_post_marked_open()
+			'marked_open' => $this->is_post_publicly_accessible()
 		);
 
 		do_action( 'wpan_assess_privacy_needs', $this->analysis, $this );
@@ -98,12 +98,24 @@ class Privacy
 	 * Returns true if the current query is singular and the post is marked open (publicly
 	 * accessible).
 	 */
-	protected function is_post_marked_open() {
+	protected function is_post_publicly_accessible() {
 		global $post;
 
 		if ( ! is_admin() && ! is_singular() ) return false;
-		$marker = get_post_meta( $post->ID, self::PUBLIC_ACCESS_MARKER, true );
+		$marker = get_post_meta( $post->ID, self::ACCESS_MARKER, true );
 		return ( 'public' === $marker );
+	}
+
+	/**
+	 * Returns true if the current query is singular and the post is marked as accessible
+	 * to authenticated observers (for further granular control via the privacy filters).
+	 */
+	protected function is_post_observer_accessible() {
+		global $post;
+
+		if ( ! is_admin() && ! is_singular() ) return false;
+		$marker = get_post_meta( $post->ID, self::ACCESS_MARKER, true );
+		return ( 'observer' === $marker );
 	}
 
 	/**
@@ -240,7 +252,10 @@ class Privacy
 	 * Controller for the public accessiblity meta box.
 	 */
 	public function do_metabox() {
-		echo View::admin( 'public_access_metabox', array( 'checked' => $this->is_post_marked_open() ) );
+		echo View::admin( 'public_access_metabox', array(
+			'publicly_accessible' => $this->is_post_publicly_accessible(),
+			'observer_accessible' => $this->is_post_observer_accessible()
+		) );
 	}
 
 	/**
@@ -252,9 +267,7 @@ class Privacy
 		if ( ! isset( $_POST['wpan_confirm_public_accessiblity'] ) ) return;
 		if ( ! wp_verify_nonce( $_POST['wpan_confirm_public_accessiblity'], 'WPAN public marker' . get_current_user_id() ) ) return;
 
-		if ( isset( $_POST['wpan_public_item'] ) && '1' === $_POST['wpan_public_item'] )
-			update_post_meta( $post->ID, self::PUBLIC_ACCESS_MARKER, 'public' );
-
-		else delete_post_meta( $post->ID, self::PUBLIC_ACCESS_MARKER );
+		if ( isset( $_POST['wpan_public_item'] ) )
+			update_post_meta( $post->ID, self::ACCESS_MARKER, $_POST['wpan_public_item'] );
 	}
 }
