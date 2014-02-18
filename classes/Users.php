@@ -103,6 +103,7 @@ class Users
 	public function __construct() {
 		add_action( 'init', array( $this, 'register_types' ) );
 		add_action( 'widgets_init', array( $this, 'register_gadgets' ) );
+		add_action( 'wpmu_activate_user', array( $this, 'new_observer_signed_up' ), 10, 3 );
 	}
 
 	/**
@@ -650,13 +651,26 @@ class Users
 	/**
 	 * Initiates a new observer account signup.
 	 *
-	 * @todo complete observer signup process
 	 * @param $username
 	 * @param $email
 	 * @return bool
 	 */
 	public function new_observer_request( $username, $email ) {
-		# non-functional stub
+		wpmu_signup_user( $username, $email, array( 'wpan_observer_request' => true ) );
 		return true;
+	}
+
+	/**
+	 * Once the observer account requestee completes the signup process, this callback will ensure they
+	 * are properly registered on the system as observers (so privacy controls etc can limit their further
+	 * access to the network).
+	 *
+	 * @param $user_id
+	 * @param $password
+	 * @param $meta
+	 */
+	public function new_observer_signed_up( $user_id, $password, $meta ) {
+		if ( ! isset( $meta['wpan_observer_request'] ) ) return;
+		$this->set_academic_role( $user_id, self::OBSERVER );
 	}
 }
