@@ -465,17 +465,14 @@ class Users
 	}
 
 	/**
-	 * Confirms that the user is a real Student-roled user.
+	 * Confirms that the user is a real Student-roled user. If no user ID is provided the currently logged in
+	 * user is assumed.
 	 *
 	 * @param $user_id
 	 * @return bool
 	 */
-	public function is_student( $user_id ) {
-		$user = get_user_by( 'id', $user_id );
-		if ( false === $user ) return false;
-
-		$role = $this->get_academic_role( $user_id );
-		return ( self::STUDENT === $role );
+	public function is_student( $user_id = null ) {
+		$this->has_role( self::STUDENT, $user_id );
 	}
 
 	/**
@@ -486,17 +483,43 @@ class Users
 	 * @return bool
 	 */
 	public function is_teacher( $user_id = null ) {
+		return $this->has_role( self::TEACHER, $user_id );
+	}
+
+	/**
+	 * Confirms that the user holds the Observer academic role (ie, is an authenticated parent). If no user
+	 * ID is provided the currently logged in user is assumed.
+	 *
+	 * @param $user_id
+	 * @return bool
+	 */
+	public function is_observer( $user_id = null ) {
+		return $this->has_role( self::OBSERVER, $user_id );
+	}
+
+	/**
+	 * Confirms if the specified user (or currently authenticated user if an ID is not provided) holds the
+	 * specified academic role.
+	 *
+	 * @param $role
+	 * @param null $user_id
+	 * @return bool
+	 */
+	public function has_role( $role, $user_id = null ) {
+		// Use the provided user ID or default to the current authenticated user
 		if ( null !== $user_id) $user = get_user_by( 'id', $user_id );
 		else {
 			$user = wp_get_current_user();
 			$user = ( isset( $user->ID ) && $user->ID > 0 ) ? $user : false;
 		}
 
+		// Bail out if the user ID is invalid
 		if ( false === $user ) return false;
 		if ( null === $user_id ) $user_id = $user->ID;
 
-		$role = $this->get_academic_role( $user_id );
-		return ( self::TEACHER === $role );
+		// Compare the assigned and test roles
+		$assigned_role = $this->get_academic_role( $user_id );
+		return ( $role === $assigned_role );
 	}
 
 	/**

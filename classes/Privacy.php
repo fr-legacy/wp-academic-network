@@ -62,18 +62,40 @@ class Privacy
 	 * Sets up actions.
 	 */
 	protected function actions() {
+		$this->enforcement();
+		$this->ui();
+		$this->privacy_filters();
+	}
+
+	/**
+	 * Setup actions to trigger privacy filters and assess the outcome.
+	 */
+	protected function enforcement() {
+		// No need to interfere with admin requests
+		if ( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) return;
+
 		add_action( 'wp', array( $this, 'assess' ), 5 );
 		add_action( 'wp', array( $this, 'determine' ), 10 );
+		add_action( 'wpan_disallow_request', array( $this, 'disallow' ) );
+	}
 
+	/**
+	 * Provide a metabox to mark the visibility level of posts.
+	 */
+	protected function ui() {
 		add_action( 'add_meta_boxes', array( $this, 'teacher_metabox' ) );
 		add_action( 'save_post', array( $this, 'public_marker_changes' ) );
+	}
 
+	/**
+	 * Sets up the default privacy filters.
+	 */
+	protected function privacy_filters() {
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_student_blogs' ), 10, 2 );
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'protect_teacher_blogs' ), 10, 2 );
+		add_action( 'wpan_assess_privacy_needs', array( $this, 'chaperone_observers' ), 10, 2 );
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'lockdown_unsupervised_student_blogs' ), 10, 2 );
 		add_action( 'wpan_assess_privacy_needs', array( $this, 'promote_hub_access' ), 10, 2 );
-
-		add_action( 'wpan_disallow_request', array( $this, 'disallow' ) );
 	}
 
 	/**
@@ -85,10 +107,12 @@ class Privacy
 			'authenticated' => is_user_logged_in(),
 			'student_blog' => $this->network->is_student_blog( get_current_blog_id() ),
 			'teacher_blog' => $this->network->is_teacher_blog( get_current_blog_id() ),
+			'is_observer' => $this->users->is_observer( get_current_user_id() ),
 			'is_hub' => $this->network->is_hub(),
 			'headers_sent' => headers_sent(),
 			'is_singular' => is_singular(),
-			'marked_open' => $this->is_post_publicly_accessible()
+			'open_public' => $this->is_post_publicly_accessible(),
+			'open_observers' => $this->is_post_observer_accessible()
 		);
 
 		do_action( 'wpan_assess_privacy_needs', $this->analysis, $this );
@@ -133,8 +157,22 @@ class Privacy
 	 */
 	public function protect_teacher_blogs( array $analysis, Privacy $privacy ) {
 		if ( ! $analysis['teacher_blog'] ) return;
-		if ( ! $analysis['authenticated'] && ! $analysis['marked_open'] ) $privacy->recommend_denial();
+		if ( ! $analysis['authenticated'] && ! $analysis['open_public'] ) $privacy->recommend_denial();
 		else $privacy->recommend_access();
+	}
+
+	/**
+	 * This privacy filter is interested in observer users (parents) and attempts to limit their
+	 * access to sites on the network.
+	 *
+	 * @param array $analysis
+	 * @param Privacy $privacy
+	 */
+	public function chaperone_observers( array $analysis, Privacy $privacy ) {
+		$content_visible = $analysis['open_public'] || $analysis['open_observers'];
+		if ( ! $analysis['is_observer'] ) return;
+		if ( $analysis['teacher_blog'] && $content_visible ) $privacy->recommend_access();
+		else $privacy->recommend_denial();
 	}
 
 	/**
@@ -231,8 +269,10 @@ class Privacy
 	public function disallow() {
 		$hub_url = $this->network->get_hub_url();
 		$redirect_to = apply_filters( 'wpan_no_access_redirect_url', $hub_url );
-		header( 'Location: ' . $redirect_to );
-		exit();
+		if ( ! WordPress::already_at_url( $redirect_to ) ) {
+			header( 'Location: ' . $redirect_to );
+			exit();
+		}
 	}
 
 	/**
