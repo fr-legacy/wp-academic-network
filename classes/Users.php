@@ -472,7 +472,7 @@ class Users
 	 * @return bool
 	 */
 	public function is_student( $user_id = null ) {
-		$this->has_role( self::STUDENT, $user_id );
+		return $this->has_role( self::STUDENT, $user_id );
 	}
 
 	/**
