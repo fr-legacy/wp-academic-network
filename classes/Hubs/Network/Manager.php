@@ -75,6 +75,7 @@ class Manager {
 		$menu_pages = apply_filters( 'wpan_hub_admin_tabs', array(
 			'teachers' => __( 'Teachers', 'wpan' ),
 			'students' => __( 'Students', 'wpan' ),
+			'observers' => __( 'Observers (parents)', 'wpan' )
 		) );
 
 		$admin_url = get_admin_url( get_current_blog_id(), 'admin.php?page=wpan_hub' );
@@ -95,6 +96,7 @@ class Manager {
 		switch ( $tab ) {
 			case 'students': $controller = new Students; break;
 			case 'teachers': $controller = new Teachers; break;
+			case 'observers': $controller = new Observers; break;
 		}
 
 		if ( isset($controller) && method_exists( $controller, 'get_page' ) )
