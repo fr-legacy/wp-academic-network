@@ -121,7 +121,7 @@ class ObserverSignup extends BaseGadget
 	 * @return string
 	 */
 	protected function widget_name() {
-		return _x( 'Academic Observer Accounts', 'wpan' );
+		return _x( 'Academic Network: Observer Accounts', 'wpan' );
 	}
 
 	/**
