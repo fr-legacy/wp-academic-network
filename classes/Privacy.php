@@ -147,7 +147,7 @@ class Privacy
 	 */
 	public function protect_student_blogs( array $analysis, Privacy $privacy ) {
 		if ( ! $analysis['student_blog'] ) return;
-		if ( ! $analysis['authenticated'] ) $privacy->recommend_denial();
+		if ( ! $analysis['authenticated'] && ! $analysis['open_public']) $privacy->recommend_denial();
 		else $privacy->recommend_access();
 	}
 
