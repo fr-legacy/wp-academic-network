@@ -4,7 +4,7 @@
 	Description: Provides a framework and set of utilities to help teachers and students interact, blog and learn together.
 	Network: true
 	Author: Forthrobot Software
-	Version: 0.6.1
+	Version: 0.6.2
 	Author URI: http://forthrobot.com
 	License: GPL3
 
@@ -26,7 +26,7 @@
 */
 
 
-define( 'WPAN_VERSION', '0.6.1' );
+define( 'WPAN_VERSION', '0.6.2' );
 define( 'WPAN_DIR', __DIR__ );
 define( 'WPAN_URL', plugin_dir_url( __FILE__ ) );
 
