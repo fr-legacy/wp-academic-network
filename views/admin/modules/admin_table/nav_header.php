@@ -8,6 +8,7 @@
  * @var $current_page
  * @var $num_pages
  * @var $has_search
+ * @var $current_search
  */
 use WPAN\Helpers\Form;
 ?>
@@ -42,8 +43,8 @@ use WPAN\Helpers\Form;
 
 	<?php if ( isset( $has_search ) && $has_search ): ?>
 		<div class="alignright search">
-			<input name="s" type="search" class="search" value="" />
-			<input name="do_search" type="submit" class="button-secondary" value="<?php _e( 'Search', 'wpan' ) ?>" />
+			<input name="s" type="search" class="search" value="<?php esc_attr_e( $current_search ) ?>" />
+			<input name="<?php echo $current_search ? 'do_search' : 'new_search' ?>" type="submit" class="button-secondary" value="<?php _e( 'Search', 'wpan' ) ?>" />
 		</div>
 	<?php endif ?>
 </div>

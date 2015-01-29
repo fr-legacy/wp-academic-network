@@ -59,6 +59,7 @@ class Students
 		$this->roster_uploads();
 		$this->action_requests();
 		add_filter( 'wpan_roster_pagination', array( $this, 'pagination' ) );
+		add_filter( 'wpan_roster_search',     array( $this, 'search' ) );
 	}
 
 	/**
@@ -143,15 +144,8 @@ class Students
 			->add_column( 'user', __( 'User', 'wpan' ) )
 			->add_column( 'validated', __( 'Validated', 'wpan' ) )
 			->add_column( 'blog', __( 'Primary blog', 'wpan' ) )
-			->has_search( true );
-
-		// Pagination
-		list( $per_page ) = $this->pagination();
-		$num_students = $this->roster->how_many_users();
-		$pages = (int) ceil( $num_students / $per_page );
-		if ( 1 > $pages ) $pages = 1;
-
-		$this->table->set_total_pages( $pages )->auto_set_page();
+			->has_search( true )
+			->set_search_terms( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ? $_REQUEST['s'] : '' );
 	}
 
 	/**
@@ -162,6 +156,18 @@ class Students
 
 		foreach ( $this->roster->get_users() as $student )
 			$this->table->add_row( $this->form_student_row( $student ) );
+
+		// Now the roster has run its user query we can determine pagination
+		$this->set_pagination();
+	}
+
+	protected function set_pagination() {
+		list( $per_page ) = $this->pagination();
+		$num_students = $this->roster->how_many_users();
+		$pages = (int) ceil( $num_students / $per_page );
+		if ( 1 > $pages ) $pages = 1;
+
+		$this->table->set_total_pages( $pages )->auto_set_page();
 	}
 
 	/**
@@ -173,6 +179,15 @@ class Students
 	public function pagination() {
 		$per_page = apply_filters( 'wpan_roster_students_per_page', 12 );
 		return array( $per_page, $this->table->get_page_num() );
+	}
+
+	/**
+	 * Ensures any current search term is applied to the roster query.
+	 */
+	public function search() {
+		$search = isset( $_REQUEST['s'] ) ? trim( (string) $_REQUEST['s'] ) : '';
+		if ( ! empty( $search ) && false === strpos( $search, '*' ) ) $search .= '*';
+		return $search;
 	}
 
 	/**

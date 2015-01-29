@@ -360,13 +360,20 @@ class Roster
 	 * @return array
 	 */
 	public function get_users() {
+		// Pagination
 		list( $limit, $page ) = apply_filters( 'wpan_roster_pagination', array( -1, 1 ) );
-		$offset = ( $page * $limit ) - $limit;
+		$offset   = ( $page * $limit ) - $limit;
 
-		$order = apply_filters( 'wpan_roster_order', 'ASC' );
+		// Ordering
+		$order    = apply_filters( 'wpan_roster_order', 'ASC' );
 		$order_by = apply_filters( 'wpan_roster_order_by', 'login' );
 
-		return $this->users->get_where( $this->type, $limit, $offset, $order, $order_by );
+		// User search
+		$search   = apply_filters( 'wpan_roster_search', '' );
+
+		$results = $this->users->get_where( $this->type, $limit, $offset, $order, $order_by, 0, $search );
+		$this->total_users = $this->users->get_total_count();
+		return $results;
 	}
 
 	/**

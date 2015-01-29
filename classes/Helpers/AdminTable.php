@@ -60,6 +60,13 @@ class AdminTable {
 	protected $has_search = false;
 
 	/**
+	 * The current search keyword(s) - maybe empty.
+	 *
+	 * @var string
+	 */
+	protected $current_search = '';
+
+	/**
 	 * Used to provide an initial setting for pagination controls.
 	 *
 	 * @var int
@@ -111,6 +118,7 @@ class AdminTable {
 		$id = trim( (string) $id );
 		if ( ! empty( $id ) ) $this->id = $id;
 		$this->base = 'wpan_admin_table_' . $this->id . '_';
+		wp_enqueue_script( 'wpan-tables', WPAN_URL . 'resources/admin-table.js', array( 'jquery' ), false, true );
 	}
 
 	/**
@@ -155,6 +163,17 @@ class AdminTable {
 	 */
 	public function has_search( $on_off = false ) {
 		$this->has_search = (bool) $on_off;
+		return $this;
+	}
+
+	/**
+	 * Sets the current search keyword(s).
+	 *
+	 * @param  string $string
+	 * @return $this
+	 */
+	public function set_search_terms( $string ) {
+		$this->current_search = $string;
 		return $this;
 	}
 
@@ -280,7 +299,8 @@ class AdminTable {
 			'filter_default' => $this->filter_defaults,
 			'current_page'   => $this->current_page,
 			'num_pages'      => $this->num_pages,
-			'has_search'     => true
+			'has_search'     => true,
+			'current_search' => $this->current_search
 		);
 
 		echo View::admin( 'modules/admin_table/table', array(
@@ -315,7 +335,10 @@ class AdminTable {
 	 * @return int
 	 */
 	public function get_page_num() {
-		if ( isset( $_REQUEST['view_page_2'] ) && isset( $_REQUEST['results_page_2'] ) )
+		if ( isset( $_REQUEST['new_search'] ) )
+			$page = 1;
+
+		elseif ( isset( $_REQUEST['view_page_2'] ) && isset( $_REQUEST['results_page_2'] ) )
 			$page = absint( $_REQUEST['results_page_2'] );
 
 		else if ( isset( $_REQUEST['results_page'] ) )
