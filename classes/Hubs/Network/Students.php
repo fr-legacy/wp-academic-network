@@ -142,7 +142,8 @@ class Students
 			->set_bulk_actions( $bulk_actions )
 			->add_column( 'user', __( 'User', 'wpan' ) )
 			->add_column( 'validated', __( 'Validated', 'wpan' ) )
-			->add_column( 'blog', __( 'Primary blog', 'wpan' ) );
+			->add_column( 'blog', __( 'Primary blog', 'wpan' ) )
+			->has_search( true );
 
 		// Pagination
 		list( $per_page ) = $this->pagination();

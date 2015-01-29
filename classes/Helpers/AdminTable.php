@@ -53,6 +53,13 @@ class AdminTable {
 	protected $filter_defaults = array();
 
 	/**
+	 * If a search field should be added.
+	 *
+	 * @var bool
+	 */
+	protected $has_search = false;
+
+	/**
 	 * Used to provide an initial setting for pagination controls.
 	 *
 	 * @var int
@@ -137,6 +144,17 @@ class AdminTable {
 	 */
 	public function use_checkbox( $on_or_off ) {
 		$this->checkbox_column = (bool) $on_or_off;
+		return $this;
+	}
+
+	/**
+	 * Allows a basic search field to be added (or removed).
+	 *
+	 * @param  bool $on_off (defaults to false)
+	 * @return $this
+	 */
+	public function has_search( $on_off = false ) {
+		$this->has_search = (bool) $on_off;
 		return $this;
 	}
 
@@ -257,11 +275,12 @@ class AdminTable {
 		$this->prerender();
 
 		$nav_params = array(
-			'bulk_actions' => $this->bulk_actions,
+			'bulk_actions'   => $this->bulk_actions,
 			'filter_actions' => $this->filter_actions,
 			'filter_default' => $this->filter_defaults,
-			'current_page' => $this->current_page,
-			'num_pages' => $this->num_pages
+			'current_page'   => $this->current_page,
+			'num_pages'      => $this->num_pages,
+			'has_search'     => true
 		);
 
 		echo View::admin( 'modules/admin_table/table', array(
@@ -281,10 +300,12 @@ class AdminTable {
 	 */
 	protected function prerender() {
 		$this->checkbox_column = (bool) apply_filters( $this->base . 'checkbox_column', $this->checkbox_column );
-		$this->bulk_actions = (array) apply_filters( $this->base . 'bulk_actions', $this->bulk_actions );
-		$this->filter_actions = (array) apply_filters( $this->base . 'filter_actions', $this->filter_actions );
-		$this->columns = (array) apply_filters( $this->base . 'columns', $this->columns );
-		$this->rows = (array) apply_filters( $this->base . 'rows', $this->rows );
+		$this->bulk_actions    = (array) apply_filters( $this->base . 'bulk_actions', $this->bulk_actions );
+		$this->filter_actions  = (array) apply_filters( $this->base . 'filter_actions', $this->filter_actions );
+		$this->columns         = (array) apply_filters( $this->base . 'columns', $this->columns );
+		$this->rows            = (array) apply_filters( $this->base . 'rows', $this->rows );
+		$this->has_search      = (bool) apply_filters( $this->base . 'has_search', $this->has_search );
+
 		list( $this->current_page, $this->num_pages ) = (array) apply_filters( $this->base . 'pagination', array( $this->current_page, $this->num_pages ) );
 	}
 

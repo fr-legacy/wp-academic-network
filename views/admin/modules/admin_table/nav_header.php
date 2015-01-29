@@ -7,6 +7,7 @@
  * @var $filter_default
  * @var $current_page
  * @var $num_pages
+ * @var $has_search
  */
 use WPAN\Helpers\Form;
 ?>
@@ -36,6 +37,13 @@ use WPAN\Helpers\Form;
 			echo Form::select( 'results_page', 'wpan_results_page', $pages, $current_page );
 			?>
 			<input type="submit" name="view_page" value="<?php esc_attr_e( 'Jump', 'wpan' ) ?>" class="button action" />
+		</div>
+	<?php endif ?>
+
+	<?php if ( isset( $has_search ) && $has_search ): ?>
+		<div class="alignright search">
+			<input name="s" type="search" class="search" value="" />
+			<input name="do_search" type="submit" class="button-secondary" value="<?php _e( 'Search', 'wpan' ) ?>" />
 		</div>
 	<?php endif ?>
 </div>

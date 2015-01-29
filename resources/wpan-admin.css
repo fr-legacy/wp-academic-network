@@ -32,6 +32,18 @@
 	margin-right: 0.8em;
 }
 
+.wpan .tablenav .alignright {
+	margin-left: 1rem;
+}
+
+.wpan .tablenav .search {
+	background: inherit;
+}
+
+.wpan .tablenav .search input[type="search"] {
+	background: white;
+}
+
 /* Section wrapper divs */
 
 .section_wrapper {
