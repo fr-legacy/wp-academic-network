@@ -299,7 +299,7 @@ class AdminTable {
 			'filter_default' => $this->filter_defaults,
 			'current_page'   => $this->current_page,
 			'num_pages'      => $this->num_pages,
-			'has_search'     => true,
+			'has_search'     => $this->has_search,
 			'current_search' => $this->current_search
 		);
 
