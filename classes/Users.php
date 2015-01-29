@@ -428,15 +428,16 @@ class Users
 	 *
 	 * Assumes we want results from across the entire network, however this can be locked down to a specific blog.
 	 *
-	 * @param $academic_role
-	 * @param int $limit
-	 * @param int $offset
-	 * @param string $order_by
-	 * @param string $order
-	 * @param int $blog
+	 * @param  string  $academic_role
+	 * @param  int     $limit
+	 * @param  int     $offset
+	 * @param  string  $order_by
+	 * @param  string  $order
+	 * @param  int     $blog
+	 * @param  string  $search
 	 * @return array
 	 */
-	public function get_where( $academic_role, $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0 ) {
+	public function get_where( $academic_role, $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0, $search = '' ) {
 		$args = array(
 			'meta_key' => 'wpan_academic_role',
 			'meta_value' => $academic_role,
@@ -449,6 +450,9 @@ class Users
 
 		// Unlimited users?
 		if ( -1 === $limit ) unset( $args['number'], $args['offset'] );
+
+		// User search?
+		if ( ! empty( $search ) ) $args['search'] = $search;
 
 		$users = new WP_User_Query( $args );
 		$this->query_count = $users->get_total();
