@@ -416,8 +416,8 @@ class Users
 	 * @param int $blog
 	 * @return array
 	 */
-	public function get_teachers( $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0 ) {
-		return $this->get_where( self::TEACHER, $limit, $offset, $order_by, $order, $blog );
+	public function get_teachers( $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0, $search = '' ) {
+		return $this->get_where( self::TEACHER, $limit, $offset, $order_by, $order, $blog, $search );
 	}
 
 	/**

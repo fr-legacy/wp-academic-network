@@ -142,7 +142,9 @@ class TeacherConnections
 		$this->table = AdminTable::build( 'teacher_connections' )->use_checkbox( true )
 			->set_bulk_actions( $this->bulk_actions )
 			->add_column( 'user', __( 'Teacher', 'wpan' ) )
-			->add_column( 'blog', __( 'Blog', 'wpan' ) );
+			->add_column( 'blog', __( 'Blog', 'wpan' ) )
+			->has_search( true )
+			->set_search_terms( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ? $_REQUEST['s'] : '' );
 
 		$this->bulk_actions = ( array(
 			'unselected' => __( 'No actions available', 'wpan' )
@@ -152,9 +154,12 @@ class TeacherConnections
 	}
 
 	protected function teachers_paginate() {
+		$search = isset( $_REQUEST['s'] ) ? trim( (string) $_REQUEST['s'] ) : '';
+		if ( ! empty( $search ) && false === strpos( $search, '*' ) ) $search .= '*';
+
 		$per_page = apply_filters( 'wpan_available_teachers_per_page', 12 );
 		$current_page = $this->table->get_page_num();
-		$this->teachers = $this->users->get_teachers( $per_page, ($current_page - 1) * $per_page );
+		$this->teachers = $this->users->get_teachers( $per_page, ($current_page - 1) * $per_page, 'login', 'ASC', 0, $search );
 
 		$total = $this->users->get_total_count();
 		$pages = ceil ( $total / $per_page );
@@ -185,6 +190,7 @@ class TeacherConnections
 	 */
 	protected function connections_view() {
 		$connections = $this->network->get_teachers_for( get_current_blog_id() );
+		$connections = $this->connections_search_filter( $connections );
 
 		$this->bulk_actions = ( array(
 			'unselected' => __( 'No actions available', 'wpan' )
@@ -197,6 +203,36 @@ class TeacherConnections
 	}
 
 	/**
+	 * Filters connections according to any search keywords that have been set.
+	 *
+	 * Since the connection list isn't obtained via a WP_Query/WP_User_Query-like
+	 * mechanism we do some filtering of our own to achieve this.
+	 *
+	 * @param  array  $connections
+	 * @return array
+	 */
+	protected function connections_search_filter( $connections ) {
+		$search = isset( $_REQUEST['s'] ) ? trim( (string) $_REQUEST['s'] ) : '';
+		if ( empty( $search ) ) return $connections;
+
+		$new_list = array();
+
+		foreach ( $connections as $connection ) {
+			$teacher      = get_user_by( 'id', $connection );
+			$teacher_blog = get_blog_details( $this->network->get_primary_blog( $teacher->ID ) );
+
+			$login_match = ( false !== stripos( $teacher->user_login,    $search ) );
+			$name_match  = ( false !== stripos( $teacher->display_name,  $search ) );
+			$blog_match  = ( false !== stripos( $teacher_blog->blogname, $search ) );
+
+			if ( $login_match || $name_match || $blog_match )
+				$new_list[] = $connection;
+		}
+
+		return $new_list;
+	}
+
+	/**
 	 * Sets up the basic table view structure.
 	 */
 	protected function connections_table( $connections ) {
@@ -204,7 +240,9 @@ class TeacherConnections
 		$this->table = AdminTable::build( 'teacher_connections' )->use_checkbox( true )
 			->set_bulk_actions( $this->bulk_actions )
 			->add_column( 'user', __( 'Teacher', 'wpan' ) )
-			->add_column( 'blog', __( 'Blog', 'wpan' ) );
+			->add_column( 'blog', __( 'Blog', 'wpan' ) )
+			->has_search( true )
+			->set_search_terms( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ? $_REQUEST['s'] : '' );
 
 		// Pagination
 		list( $per_page ) = $this->connections_pagination( $connections );
@@ -248,8 +286,6 @@ class TeacherConnections
 
 		return array( $per_page, $current_page );
 	}
-
-
 
 	/**
 	 * Listens for and handles bulk/single item actions.
