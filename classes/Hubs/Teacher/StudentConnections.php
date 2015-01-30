@@ -214,6 +214,7 @@ class StudentConnections
 	 */
 	protected function connections_view() {
 		$connections = $this->network->get_supervised_blogs( get_current_user_id() );
+		$connections = $this->connections_search_filter( $connections );
 
 		$this->bulk_actions = ( array(
 			'unselected' => __( 'Bulk actions', 'wpan' ),
@@ -227,6 +228,32 @@ class StudentConnections
 	}
 
 	/**
+	 * Filters connections according to any search keywords that have been set.
+	 *
+	 * Since the connection list isn't obtained via a WP_Query/WP_User_Query-like
+	 * mechanism we do some filtering of our own to achieve this.
+	 *
+	 * @param $connections
+	 */
+	protected function connections_search_filter( $connections ) {
+		$search = isset( $_REQUEST['s'] ) ? trim( (string) $_REQUEST['s'] ) : '';
+		if ( empty( $search ) ) return $connections;
+
+		$new_list = array();
+
+		foreach ( $connections as $connection ) {
+			$blog_match    = ( false !== stripos( $connection['blog_name'], $search ) );
+			$student_match = ( false !== stripos( $connection['student_name'], $search ) );
+			$url_match     = ( false !== stripos( $connection['blog_url'], $search ) );
+
+			if ( $blog_match || $student_match || $url_match )
+				$new_list[] = $connection;
+		}
+
+		return $new_list;
+	}
+
+	/**
 	 * Sets up the basic table view structure.
 	 */
 	protected function connections_table( $connections ) {
@@ -234,7 +261,9 @@ class StudentConnections
 		$this->table = AdminTable::build( 'student_connections' )->use_checkbox( true )
 			->set_bulk_actions( $this->bulk_actions )
 			->add_column( 'user', __( 'Student', 'wpan' ) )
-			->add_column( 'blog', __( 'Blog', 'wpan' ) );
+			->add_column( 'blog', __( 'Blog', 'wpan' ) )
+			->has_search( true )
+			->set_search_terms( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ? $_REQUEST['s'] : '' );
 
 		// Pagination
 		list( $per_page ) = $this->connections_pagination( $connections );
