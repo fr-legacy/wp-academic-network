@@ -32,3 +32,7 @@
 .wpan_tabbed_student_list_gadget > div {
 	margin-top: 0.8rem;
 }
+
+.wpan_tabbed_student_list_gadget span.unapproved {
+	color: #fe5810;
+}

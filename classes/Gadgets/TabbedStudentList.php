@@ -206,7 +206,13 @@ class TabbedStudentList extends BaseGadget
 			$user = $entity;
 		}
 
-		return $this->public_view( 'tabbed-student-list-panel', array( 'students' => $students ) );
+		$current_user = get_current_user_id();
+		$is_admin     = $this->users->is_teacher( $current_user ) || user_can( $current_user, 'manage_options' );
+
+		return $this->public_view( 'tabbed-student-list-panel', array(
+			'students'   => $students,
+			'admin_user' => $is_admin
+		) );
 	}
 
 	/**
