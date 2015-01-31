@@ -170,7 +170,7 @@ class TabbedStudentList extends BaseGadget
 
 		exit( json_encode( array(
 			'status' => 'success',
-			'html'   => (string) $this->get_panel( @$_POST['tab'] )
+			'html'   => (string) $this->get_panel( $_POST['tab'] )
 		) ) );
 	}
 
