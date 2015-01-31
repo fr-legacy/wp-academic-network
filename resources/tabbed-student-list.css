@@ -1,0 +1,34 @@
+.wpan_tabbed_student_list_gadget > ul {
+	display: block;
+	list-style: none;
+	margin: 0;
+}
+
+.wpan_tabbed_student_list_gadget > ul li {
+	border-bottom: 1px solid #707080;
+	display: inline-block;
+	margin-top: 0.2rem;
+	padding: 0.1rem 1rem;
+}
+
+.wpan_tabbed_student_list_gadget > ul li a {
+	opacity: 0.46;
+	outline: none;
+	text-decoration: none;
+}
+
+.wpan_tabbed_student_list_gadget > ul li.ui-state-active {
+	border: 1px solid #707080;
+	border-bottom: none;
+	border-top-left-radius: 0.15rem;
+	border-top-right-radius: 0.15rem;
+}
+
+.wpan_tabbed_student_list_gadget > ul li.ui-state-active a {
+	font-weight: bold;
+	opacity: 1;
+}
+
+.wpan_tabbed_student_list_gadget > div {
+	margin-top: 0.8rem;
+}

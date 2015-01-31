@@ -180,6 +180,7 @@ class Users
 	public function register_gadgets() {
 		Gadgets\ObserverSignup::register();
 		Gadgets\StudentList::register();
+		Gadgets\TabbedStudentList::register();
 	}
 
 	/**
