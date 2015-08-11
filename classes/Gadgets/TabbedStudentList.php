@@ -293,7 +293,10 @@ class TabbedStudentList extends BaseGadget
 	protected function get_connected_student_ids() {
 		$result = array();
 
-		foreach( $this->network->get_supervised_blogs( get_current_user_id() ) as $student ) {
+		$teacher = $this->network->get_teacher_for( get_current_blog_id() );
+		if ( ! $teacher ) return $result;
+
+		foreach( $this->network->get_supervised_blogs( $teacher ) as $student ) {
 			$result[] = (int) $student['student_id'];
 		}
 
