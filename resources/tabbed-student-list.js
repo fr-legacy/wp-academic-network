@@ -24,7 +24,8 @@
 			var request = {
 				action: "wpan_tabbed_student_list_get_panel",
 				check:  settings.check,
-				tab:    id.substr( id.lastIndexOf( "-" ) + 1 )
+				tab:    id.substr( id.lastIndexOf( "-" ) + 1 ),
+				connected_students: settings.connected_students
 			};
 
 			$.post( settings.ajax_url, request, function( response ) {

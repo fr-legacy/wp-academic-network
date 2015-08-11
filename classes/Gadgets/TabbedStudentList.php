@@ -2,9 +2,10 @@
 namespace WPAN\Gadgets;
 
 use WPAN\Core,
-	WPAN\Helpers\BaseGadget,
-	WPAN\Helpers\View,
-	WPAN\Users;
+    WPAN\Helpers\BaseGadget,
+    WPAN\Helpers\Utilities,
+    WPAN\Helpers\View,
+    WPAN\Users;
 
 
 class TabbedStudentList extends BaseGadget
@@ -18,6 +19,14 @@ class TabbedStudentList extends BaseGadget
 	 * @var \WPAN\Users
 	 */
 	protected $users;
+
+	/**
+	 * Useful on a teacher's site: limits the result set to those students connected with the
+	 * site owner (ie, the teacher).
+	 *
+	 * @var boolean
+	 */
+	protected $connected_students = false;
 
 
 	/**
@@ -100,6 +109,10 @@ class TabbedStudentList extends BaseGadget
 	 */
 	public function widget( $args, $instance ) {
 		$params = array_merge( (array) $args, (array) $instance );
+
+		if ( Utilities::is_true( $params['connected_students' ] ) )
+			$this->connected_students = true;
+
 		$tabs = $this->get_tabs();
 		$first = ! empty( $tabs ) ? $tabs[0]->header : '';
 
@@ -117,6 +130,7 @@ class TabbedStudentList extends BaseGadget
 			'css_url'              => WPAN_URL . 'resources/tabbed-student-list.css',
 			'loading_html'         => '<p>' . __( 'Loading&hellip;', 'wpan' ) . '</p>',
 			'loading_failure_html' => '<p>' . __( 'Failed to load list.', 'wpan' ) . '</p>',
+			'connected_students'   => $this->connected_students,
 			'check'                => wp_create_nonce( 'wpan_panel_data_request' )
 		) );
 	}
@@ -132,6 +146,10 @@ class TabbedStudentList extends BaseGadget
 		/** @var \wpdb */
 		global $wpdb;
 
+		// Generate possible connected students clause
+		$connected_students_clause = $this->get_connected_students_clause();
+		if ( ! empty( $connected_students_clause ) ) $connected_students_clause .= ' AND ';
+
 		$query = "
 			SELECT
 				SUBSTR( display_name, 1, 1 ) AS header,
@@ -141,15 +159,15 @@ class TabbedStudentList extends BaseGadget
 					INNER JOIN
 				$wpdb->usermeta ON ( $wpdb->users.ID = $wpdb->usermeta.user_id )
 			WHERE
+				$connected_students_clause
 				$wpdb->usermeta.meta_key = 'wpan_academic_role'
-					AND CAST( $wpdb->usermeta.meta_value AS CHAR ) = %s
+				AND CAST( $wpdb->usermeta.meta_value AS CHAR ) = %s
 			GROUP BY SUBSTR( display_name, 1, 1 )
 			ORDER BY display_name ASC
 		";
 
 		return (array) $wpdb->get_results( $wpdb->prepare( $query, Users::STUDENT ) );
 	}
-
 
 	protected function panel_requests() {
 		$handler = array( $this, 'panel_request_handler' );
@@ -168,6 +186,8 @@ class TabbedStudentList extends BaseGadget
 				: _x( 'Could not determine tab', 'response failure message', 'wpan' )
 		) ) );
 
+		if ( @$_POST['connected_students'] ) $this->connected_students = true;
+
 		exit( json_encode( array(
 			'status' => 'success',
 			'html'   => (string) $this->get_panel( $_POST['tab'] )
@@ -178,6 +198,10 @@ class TabbedStudentList extends BaseGadget
 		/** @var \wpdb */
 		global $wpdb;
 
+		// Generate possible connected students clause
+		$connected_students_clause = $this->get_connected_students_clause();
+		if ( ! empty( $connected_students_clause ) ) $connected_students_clause .= ' AND ';
+
 		$query = "
 			SELECT
 				ID
@@ -186,6 +210,7 @@ class TabbedStudentList extends BaseGadget
 					INNER JOIN
 				wp_usermeta ON (wp_users.ID = wp_usermeta.user_id)
 			WHERE
+				$connected_students_clause
 				wp_usermeta.meta_key = 'wpan_academic_role'
 					AND CAST(wp_usermeta.meta_value AS CHAR) = %s
 					AND 1 = LOCATE( %s, display_name )
@@ -238,5 +263,40 @@ class TabbedStudentList extends BaseGadget
 		}
 
 		return $students;
+	}
+
+
+	/**
+	 * Provides a where clause if needed (may be an empty string if it is not needed)
+	 * for use in SQL queries, to narrow the result set to connected students.
+	 *
+	 * @return string
+	 */
+	protected function get_connected_students_clause() {
+		global $wpdb;
+
+		// Do we want to limit the result set to connected students?
+		if ( ! $this->connected_students ) return '';
+
+		$connected_students = $this->get_connected_student_ids();
+
+		return ! empty( $connected_students )
+			? " $wpdb->users.ID IN ( " . join( ', ', $connected_students ) . " ) "
+			: '';
+	}
+
+	/**
+	 * Returns a list of students connected with the teacher.
+	 *
+	 * @return array
+	 */
+	protected function get_connected_student_ids() {
+		$result = array();
+
+		foreach( $this->network->get_supervised_blogs( get_current_user_id() ) as $student ) {
+			$result[] = (int) $student['student_id'];
+		}
+
+		return $result;
 	}
 }
