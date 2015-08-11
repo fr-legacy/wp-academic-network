@@ -110,7 +110,7 @@ class TabbedStudentList extends BaseGadget
 	public function widget( $args, $instance ) {
 		$params = array_merge( (array) $args, (array) $instance );
 
-		if ( Utilities::is_true( $params['connected_students' ] ) )
+		if ( Utilities::is_true( @$params['connected_students' ] ) )
 			$this->connected_students = true;
 
 		$tabs = $this->get_tabs();
