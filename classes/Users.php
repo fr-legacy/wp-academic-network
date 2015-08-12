@@ -702,4 +702,63 @@ class Users
 		if ( ! isset( $meta['wpan_observer_request'] ) ) return;
 		$this->set_academic_role( $user_id, self::OBSERVER );
 	}
+
+	/**
+	 * Returns all tags for the specified user. May be empty if the user has not been tagged.
+	 * If no user is specified, it returns *all* existing tags applied to any user.
+	 *
+	 * @param  $user_id
+	 * @return array
+	 */
+	public function tags_get( $user_id = null ) {
+		if ( $user_id ) return get_user_meta( $user_id, 'wpan_user_tags' );
+		return $this->tags_existing();
+	}
+
+	/**
+	 * Returns all user tags currently applied to any user whatsoever.
+	 *
+	 * @return array
+	 */
+	public function tags_existing() {
+		global $wpdb;
+
+		$tags = $wpdb->get_column( "
+			SELECT meta_value
+			FROM   wp_usermeta
+			WHERE  meta_key = 'wpan_user_tags'
+			  AND  LENGTH( meta_value  ) > 0
+		" );
+
+		return array_filter( array_map( 'trim', $tags ) );
+	}
+
+	public function tags_add( $user_id, $tag ) {
+		// Sanitize and "slugify"
+		$tag = preg_replace( '#[^a-z0-9-_]+#', '',
+			str_replace( ' ', '-', strtolower( trim( $tag ) ) ));
+
+		// If the user is already tagged with the same tag, bail
+		if ( $this->tags_has_tag( $user_id, $tag ) )
+			return;
+
+		// Tag 'em!
+		add_user_meta( $user_id, 'wpan_user_tags', $tag );
+	}
+
+	public function tags_remove( $user_id, $tag ) {
+		// Sanitize and "slugify"
+		$tag = preg_replace( '#[^a-z0-9-_]+#', '',
+			str_replace( ' ', '-', strtolower( trim( $tag ) ) ) );
+
+		// If the user is *not* already tagged with the same tag, bail
+		if ( $this->tags_has_tag( $user_id, $tag ) )
+			return;
+
+		delete_user_meta( $user_id, 'wpan_user_tags', $tag );
+	}
+
+	public function tags_has_tag( $user_id, $tag ) {
+		return in_array( $tag, $this->tags_get( $user_id ) );
+	}
 }

@@ -282,6 +282,7 @@ class StudentConnections
 			->set_bulk_actions( $this->bulk_actions )
 			->add_column( 'user', __( 'Student', 'wpan' ) )
 			->add_column( 'blog', __( 'Blog', 'wpan' ) )
+			->add_column( 'tags', __( 'Tags', 'wpan' ) )
 			->has_search( true )
 			->set_search_terms( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ? $_REQUEST['s'] : '' );
 
@@ -303,7 +304,11 @@ class StudentConnections
 			$this->table->add_row( array(
 				'row_id' => $connection['blog_id'],
 				'user' => View::admin( 'hub/student-connections/user-details', array( 'data' => $connection, 'users' => $this->users ) ),
-				'blog' => View::admin( 'hub/student-connections/blog-details', array( 'data' => $connection ) )
+				'blog' => View::admin( 'hub/student-connections/blog-details', array( 'data' => $connection ) ),
+				'tags' => View::admin( 'hub/student-connections/tagging', array(
+					'data' => $connection,
+					'tags' => Core::object()->users()->tags_get( $connection['student_id'] )
+				) )
 			) );
 	}
 

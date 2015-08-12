@@ -178,3 +178,35 @@ table.controls th[scope=row] {
 #worker_log li .source:hover {
 	opacity: 1;
 }
+
+.wpan .student-tag {
+	background: #4ba4fa;
+	transition: background 0.3s;
+	border-radius: 7px;
+	color: white;
+	font-weight: bold;
+	margin: 2px;
+	padding: 3px 5px;
+
+}
+
+.wpan .student-tag:hover {
+	background: #128afa;
+	transition: background 0.3s;
+}
+
+.wpan .student-tag .remove {
+	cursor: pointer;
+	display: inline-block;
+	font-family: monospace;
+	font-size: 0.9rem;
+	margin-bottom: 0.2rem;
+	padding-left: 0.18rem;
+	opacity: 0;
+	transition: opacity 0.3s;
+}
+
+.wpan .student-tag:hover .remove {
+	opacity: 1;
+	transition: opacity 0.3s;
+}
