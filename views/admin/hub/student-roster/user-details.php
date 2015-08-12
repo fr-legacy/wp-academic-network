@@ -10,7 +10,7 @@ use WPAN\Users;
 	<span class="user-display-name inline-editable"
 	      title="<?php echo esc_attr( sprintf( __( 'Actual login: %s', 'wpan' ), $student->user_login ) ) ?>"
 	      data-user-id="<?php echo esc_attr( $student->ID ) ?>"
-	      data-check="<?php echo esc_attr( wp_create_nonce( 'edit-name-' . $student->ID ) ) ?> ">
+	      data-check="<?php echo esc_attr( wp_create_nonce( 'edit-name-' . $student->ID ) ) ?>">
 	          <?php echo esc_html( esc_html_e( $student->display_name ) ) ?>
 	</span>
 
