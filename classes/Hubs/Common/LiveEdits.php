@@ -14,10 +14,10 @@ class LiveEdits {
 
 		$fields = array_intersect_key( $_POST, $expected );
 
-		if ( count( $fields ) !== 3 || wp_verify_nonce( $fields['check'], 'edit-name-' . $_POST['user_id'] ) ) {
+		if ( count( $fields ) !== 3 || ! wp_verify_nonce( $fields['check'], 'edit-name-' . $fields['user_id'] ) ) {
 			wp_send_json( array(
 				'result'  => 'fail',
-				'user_id' => absint( $fields['user_id'] )
+				'user_id' => absint( @$fields['user_id'] )
 			) );
 		}
 

@@ -3,6 +3,7 @@ namespace WPAN\Hubs;
 
 use WPAN\Core,
     WPAN\Hubs\Common\LiveEdits,
+    WPAN\Hubs\Common\Tagging,
 	WPAN\Hubs\Network\Manager as NetworkHub,
     WPAN\Hubs\Student\Manager as StudentHub,
     WPAN\Hubs\Teacher\Manager as TeacherHub,
@@ -27,6 +28,11 @@ class Loader {
 	protected $live_edits;
 
 	/**
+	 * @var Tagging
+	 */
+	protected $tagging;
+
+	/**
 	 * Container for the hub manager object.
 	 */
 	public $hub_object;
@@ -37,6 +43,7 @@ class Loader {
 	 */
 	public function __construct() {
 		$this->live_edits = new LiveEdits;
+		$this->tagging    = new Tagging;
 		add_action( 'init', array( $this, 'setup' ) );
 	}
 

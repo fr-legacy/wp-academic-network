@@ -740,10 +740,11 @@ class Users
 
 		// If the user is already tagged with the same tag, bail
 		if ( $this->tags_has_tag( $user_id, $tag ) )
-			return;
+			return false;
 
 		// Tag 'em!
 		add_user_meta( $user_id, 'wpan_user_tags', $tag );
+		return $tag;
 	}
 
 	public function tags_remove( $user_id, $tag ) {
@@ -752,7 +753,7 @@ class Users
 			str_replace( ' ', '-', strtolower( trim( $tag ) ) ) );
 
 		// If the user is *not* already tagged with the same tag, bail
-		if ( $this->tags_has_tag( $user_id, $tag ) )
+		if ( ! $this->tags_has_tag( $user_id, $tag ) )
 			return;
 
 		delete_user_meta( $user_id, 'wpan_user_tags', $tag );

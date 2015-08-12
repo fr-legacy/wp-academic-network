@@ -1,6 +1,8 @@
 if ( "function" === typeof jQuery ) jQuery( document ).ready( function( $ ) {
+	var wpan = $( ".wpan" );
+
 	function search_pagination_fix() {
-		var search_area  = $( ".wpan" ).find( ".search" );
+		var search_area  = wpan.find( ".search" );
 		var search_field = search_area.find( "input[type='search']" );
 		var search_btn   = search_area.find( "input[type='submit']" );
 
@@ -14,7 +16,7 @@ if ( "function" === typeof jQuery ) jQuery( document ).ready( function( $ ) {
 	}
 
 	function inline_displayname_editing() {
-		var editable_fields = $( ".wpan" ).find( ".inline-editable.user-display-name" );
+		var editable_fields = wpan.find( ".inline-editable.user-display-name" );
 
 		function restore( user_id ) {
 			var field = editable_fields.filter( "[data-user-id='" + user_id + "']" );
@@ -105,6 +107,81 @@ if ( "function" === typeof jQuery ) jQuery( document ).ready( function( $ ) {
 		editable_fields.click( click_handler );
 	}
 
+	function tagging_support() {
+		function remove_tag() {
+			var field   = $( this ).parent( ".user-tag" );
+			var request = {
+				action:  "wpan_remove_user_tag",
+				check:   field.data( "check" ),
+				tag:     field.data( "tag" ),
+				user_id: field.data( "user_id" )
+			};
+
+			$.post( ajaxurl, request, remove_tag_response, "json" );
+		}
+
+		function remove_tag_response( data ) {
+			if ( data.result !== "success" ) return;
+			wpan.find( ".user-tag[data-tag='" + data.tag + "'][data-user_id='" + data.user_id + "']").remove();
+		}
+
+		function show_tagging_dialog() {
+			var add_link = $( this )
+			var controls = add_link.parent( ".user-tagging-controls" );
+			var input    = controls.find( "input" );
+
+			add_link.hide()
+			input.show().focus().keydown( function( event ) {
+				// Cancel?
+				if ( 27 === event.keyCode ) {
+					add_link.show();
+					input.hide();
+
+					event.stopPropagation();
+					return false;
+				}
+
+				// Submit?
+				if ( 13 === event.keyCode ) {
+					var tags    = $( this ).val();
+					var check   = controls.data( "check" );
+					var user_id = controls.data( "user_id" );
+
+					event.stopPropagation();
+					submit_tags( user_id, tags, check );
+					return false;
+				}
+			} );
+		}
+
+		function submit_tags( user_id, tags, check ) {
+			var request = {
+				action:  "wpan_add_user_tags",
+				user_id: user_id,
+				tags:    tags,
+				check:   check
+			};
+
+			$.post( ajaxurl, request, submit_tags_response, "json" );
+		}
+
+		function submit_tags_response( data ) {
+			if ( data.result !== "success" ) return;
+
+			var controls = wpan.find( ".user-tagging-controls[data-user_id='" + data.user_id + "']" );
+			var link     = controls.find( "a" );
+			var input    = controls.find( "input" );
+
+			controls.before( data.html );
+			input.val( "" ).hide();
+			link.show();
+		}
+
+		wpan.find( ".user-tag" ).find( ".remove" ).click( remove_tag );
+		wpan.find( ".user-tagging-controls a" ).click( show_tagging_dialog ) ;
+	}
+
 	search_pagination_fix();
 	inline_displayname_editing();
+	tagging_support();
 } );

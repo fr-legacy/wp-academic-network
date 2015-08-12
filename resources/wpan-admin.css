@@ -179,34 +179,48 @@ table.controls th[scope=row] {
 	opacity: 1;
 }
 
-.wpan .student-tag {
-	background: #4ba4fa;
+.wpan .user-tag {
+	background: #ededed;
+	border: 1px solid #aaa;
+	box-shadow: 0 0 2px transparent;
+	display: inline-block;
 	transition: background 0.3s;
 	border-radius: 7px;
-	color: white;
+	color: #666;
 	font-weight: bold;
-	margin: 2px;
-	padding: 3px 5px;
+	margin: 2px 4px 5px;
+	padding: 2px 6px 0px 8px;
 
 }
 
-.wpan .student-tag:hover {
-	background: #128afa;
+.wpan .user-tag:hover {
+	background: #0091d6;
+	border-color: #007bb5;
+	box-shadow: 0 0 2px #4f86ea;
+	color: white;
 	transition: background 0.3s;
+	transition: color 0.3s;
 }
 
-.wpan .student-tag .remove {
+.wpan .user-tag .remove {
 	cursor: pointer;
 	display: inline-block;
 	font-family: monospace;
 	font-size: 0.9rem;
 	margin-bottom: 0.2rem;
 	padding-left: 0.18rem;
-	opacity: 0;
+	opacity: 0.2;
 	transition: opacity 0.3s;
 }
 
-.wpan .student-tag:hover .remove {
+.wpan .user-tag:hover .remove {
 	opacity: 1;
 	transition: opacity 0.3s;
+}
+.wpan .user-tagging-controls {
+	display: block;
+}
+
+.wpan .user-tagging-controls input {
+	font-size: 0.9rem;
 }
