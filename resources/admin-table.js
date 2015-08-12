@@ -137,7 +137,7 @@ if ( "function" === typeof jQuery ) jQuery( document ).ready( function( $ ) {
 					add_link.show();
 					input.hide();
 
-					event.stopPropagation();
+					event.stopImmediatePropagation();
 					return false;
 				}
 
@@ -147,7 +147,7 @@ if ( "function" === typeof jQuery ) jQuery( document ).ready( function( $ ) {
 					var check   = controls.data( "check" );
 					var user_id = controls.data( "user_id" );
 
-					event.stopPropagation();
+					event.stopImmediatePropagation();
 					submit_tags( user_id, tags, check );
 					return false;
 				}
@@ -175,10 +175,20 @@ if ( "function" === typeof jQuery ) jQuery( document ).ready( function( $ ) {
 			controls.before( data.html );
 			input.val( "" ).hide();
 			link.show();
+			tagging_init();
 		}
 
-		wpan.find( ".user-tag" ).find( ".remove" ).click( remove_tag );
-		wpan.find( ".user-tagging-controls a" ).click( show_tagging_dialog ) ;
+		function tagging_init() {
+			wpan.find( ".user-tag" ).find( ".remove" )
+				.unbind( "click", remove_tag )
+				.bind( "click", remove_tag );
+
+			wpan.find( ".user-tagging-controls a" )
+				.unbind( "click", show_tagging_dialog )
+				.bind( "click", show_tagging_dialog )
+		}
+
+		tagging_init();
 	}
 
 	search_pagination_fix();
