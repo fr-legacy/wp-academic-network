@@ -263,7 +263,7 @@ class Privacy
 
 	/**
 	 * Intended to run if the wpan_disallow_request event is fired: this allows other plugins an opportunity
-	 * to take some other action prior to this running, or to shortc circuit it and implement some other
+	 * to take some other action prior to this running, or to short circuit it and implement some other
 	 * course of action instead.
 	 */
 	public function disallow() {

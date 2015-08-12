@@ -179,9 +179,9 @@ class WordPress {
 	public static function already_at_url( $url ) {
 		if ( false === ( $url = parse_url($url) ) ) return false;
 
-		$url['path'] = trim( $url['path'], '/' );
-		$domain = $_SERVER['SERVER_NAME'];
-		$path = trim( $_SERVER['REQUEST_URI'], '/' );
+		$url['path'] = trim( @$url['path'], '/' );
+		$domain = @$_SERVER['SERVER_NAME'];
+		$path = trim( @$_SERVER['REQUEST_URI'], '/' );
 
 		return ( $domain === $url['host'] && $path === $url['path'] );
 	}
