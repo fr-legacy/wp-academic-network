@@ -2,11 +2,12 @@
 namespace WPAN\Hubs;
 
 use WPAN\Core,
+    WPAN\Hubs\Common\LiveEdits,
 	WPAN\Hubs\Network\Manager as NetworkHub,
-	WPAN\Hubs\Student\Manager as StudentHub,
-	WPAN\Hubs\Teacher\Manager as TeacherHub,
-	WPAN\Network,
-	WPAN\Users;
+    WPAN\Hubs\Student\Manager as StudentHub,
+    WPAN\Hubs\Teacher\Manager as TeacherHub,
+    WPAN\Network,
+    WPAN\Users;
 
 
 class Loader {
@@ -21,6 +22,11 @@ class Loader {
 	protected $users;
 
 	/**
+	 * @var LiveEdits
+	 */
+	protected $live_edits;
+
+	/**
 	 * Container for the hub manager object.
 	 */
 	public $hub_object;
@@ -30,6 +36,7 @@ class Loader {
 	 * Sets up any hub-level facilities, admin screens and functionality that is required.
 	 */
 	public function __construct() {
+		$this->live_edits = new LiveEdits;
 		add_action( 'init', array( $this, 'setup' ) );
 	}
 

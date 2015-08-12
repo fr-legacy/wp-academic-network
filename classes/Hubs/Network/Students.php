@@ -2,14 +2,14 @@
 namespace WPAN\Hubs\Network;
 
 use WP_User,
-	WPAN\Core,
-	WPAN\Helpers\AdminTable,
-	WPAN\Helpers\Log,
-	WPAN\Helpers\View,
-	WPAN\Helpers\WordPress,
-	WPAN\Network,
-	WPAN\Roster,
-	WPAN\Users;
+    WPAN\Core,
+    WPAN\Helpers\AdminTable,
+    WPAN\Helpers\Log,
+    WPAN\Helpers\View,
+    WPAN\Helpers\WordPress,
+    WPAN\Network,
+    WPAN\Roster,
+    WPAN\Users;
 
 
 class Students
