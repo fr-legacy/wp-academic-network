@@ -213,7 +213,7 @@ class StudentConnections
 	 * Provide a view of all established connections to students/student blogs.
 	 */
 	protected function connections_view() {
-		$connections = $this->network->get_supervised_blogs( get_current_user_id() );
+		$connections = $this->connections_load();
 		$connections = $this->connections_search_filter( $connections );
 
 		$this->bulk_actions = ( array(
@@ -228,12 +228,31 @@ class StudentConnections
 	}
 
 	/**
+	 * Get a list of student blogs connected with the current user (teacher).
+	 *
+	 * By default these are sorted by student display_name.
+	 *
+	 * @return array
+	 */
+	protected function connections_load() {
+		$connections = $this->network->get_supervised_blogs( get_current_user_id() );
+
+		usort( $connections, function( $lefthand, $righthand ) {
+			if ( $lefthand['student_name'] < $righthand['student_name'] ) return -1;
+			if ( $lefthand['student_name'] > $righthand['student_name'] ) return 1;
+			return 0;
+		} );
+
+		return $connections;
+	}
+	/**
 	 * Filters connections according to any search keywords that have been set.
 	 *
 	 * Since the connection list isn't obtained via a WP_Query/WP_User_Query-like
 	 * mechanism we do some filtering of our own to achieve this.
 	 *
-	 * @param $connections
+	 * @param  array $connections
+	 * @return array
 	 */
 	protected function connections_search_filter( $connections ) {
 		$search = isset( $_REQUEST['s'] ) ? trim( (string) $_REQUEST['s'] ) : '';
