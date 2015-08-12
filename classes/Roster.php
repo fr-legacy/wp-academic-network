@@ -366,12 +366,12 @@ class Roster
 
 		// Ordering
 		$order    = apply_filters( 'wpan_roster_order', 'ASC' );
-		$order_by = apply_filters( 'wpan_roster_order_by', 'login' );
+		$order_by = apply_filters( 'wpan_roster_order_by', 'display_name' );
 
 		// User search
 		$search   = apply_filters( 'wpan_roster_search', '' );
 
-		$results = $this->users->get_where( $this->type, $limit, $offset, $order, $order_by, 0, $search );
+		$results = $this->users->get_where( $this->type, $limit, $offset, $order_by, $order, 0, $search );
 		$this->total_users = $this->users->get_total_count();
 		return $results;
 	}
