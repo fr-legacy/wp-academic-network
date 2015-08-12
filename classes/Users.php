@@ -711,7 +711,11 @@ class Users
 	 * @return array
 	 */
 	public function tags_get( $user_id = null ) {
-		if ( $user_id ) return get_user_meta( $user_id, 'wpan_user_tags' );
+		if ( $user_id ) {
+			$tags = get_user_meta( $user_id, 'wpan_user_tags' );
+			sort( $tags );
+			return $tags;
+		}
 		return $this->tags_existing();
 	}
 

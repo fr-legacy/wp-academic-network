@@ -144,6 +144,7 @@ class Students
 			->add_column( 'user', __( 'User', 'wpan' ) )
 			->add_column( 'validated', __( 'Validated', 'wpan' ) )
 			->add_column( 'blog', __( 'Primary blog', 'wpan' ) )
+			->add_column( 'tags', __( 'Tags', 'wpan' ) )
 			->has_search( true )
 			->set_search_terms( isset( $_REQUEST['s'] ) && ! empty( $_REQUEST['s'] ) ? $_REQUEST['s'] : '' );
 	}
@@ -201,7 +202,11 @@ class Students
 			'row_id' => $student->ID,
 			'user' => View::admin( 'hub/student-roster/user-details', array( 'student' => $student, 'users' => $this->users ) ),
 			'validated' => View::admin( 'hub/student-roster/last-validated', array( 'days' => $this->users->num_days_since_validated( $student->ID ) ) ),
-			'primary_blog' => View::admin( 'hub/student-roster/blog-details', array( 'blog_id' => $this->network->get_primary_blog( $student->ID ) ) )
+			'primary_blog' => View::admin( 'hub/student-roster/blog-details', array( 'blog_id' => $this->network->get_primary_blog( $student->ID ) ) ),
+			'tags' => View::admin( 'hub/student-roster/tagging', array(
+				'data' => $student,
+				'tags' => Core::object()->users()->tags_get( $student->ID )
+			) )
 		);
 	}
 
