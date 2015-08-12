@@ -245,6 +245,7 @@ class StudentConnections
 
 		return $connections;
 	}
+
 	/**
 	 * Filters connections according to any search keywords that have been set.
 	 *
