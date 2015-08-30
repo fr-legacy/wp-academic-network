@@ -439,6 +439,9 @@ class Users
 	 * @return array
 	 */
 	public function get_where( $academic_role, $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0, $search = '' ) {
+		$search = trim( $search );
+		if ( ! empty( $search ) ) return $this->get_where_search( $academic_role, $limit, $offset, $order_by, $order, $blog, $search );
+
 		$args = array(
 			'meta_key' => 'wpan_academic_role',
 			'meta_value' => $academic_role,
@@ -458,6 +461,23 @@ class Users
 		$users = new WP_User_Query( $args );
 		$this->query_count = $users->get_total();
 		return (array) $users->get_results();
+	}
+
+	/**
+	 * Retrieves users matching the search term by academic role.
+	 *
+	 * @param  string  $academic_role
+	 * @param  int     $limit
+	 * @param  int     $offset
+	 * @param  string  $order_by
+	 * @param  string  $order
+	 * @param  int     $blog
+	 * @param  string  $search
+	 * @return array
+	 */
+	public function get_where_search( $academic_role, $limit = -1, $offset = 0, $order_by = 'login', $order = 'ASC', $blog = 0, $search = '' ) {
+		$search = new UserSearch( $academic_role, $limit, $offset, $order_by, $order, $blog, $search );
+		return $search->get_results();
 	}
 
 	/**
