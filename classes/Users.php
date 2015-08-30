@@ -2,9 +2,10 @@
 namespace WPAN;
 
 use DateTime,
-	Exception,
-	WPAN\Helpers\Log,
-	WP_User_Query;
+    Exception,
+    WPAN\Helpers\Log,
+    WP_User,
+    WP_User_Query;
 
 
 class Users
@@ -737,6 +738,35 @@ class Users
 			return $tags;
 		}
 		return $this->tags_existing();
+	}
+
+	/**
+	 * Given one or more user tags, returns an array of user IDs for all users who
+	 * have those tags.
+	 *
+	 * @param  string|array $tags
+	 * @return array
+	 */
+	public function tags_users_with( $tags ) {
+		if ( ! is_array( $tags ) ) $tags = array( $tags );
+
+		$query = new WP_User_Query( array(
+			'blog_id'     => 0,
+			'meta_query'  => array( array(
+				'key'     => 'wpan_user_tags',
+				'compare' => 'IN',
+				'value'   => $tags
+			) )
+		) );
+
+		if ( 0 === $query->get_total() ) return array();
+
+		$filter = function( WP_User $user ) {
+			return (int) $user->ID;
+		};
+
+		$results = array_map( $filter, $query->get_results() );
+		return array_unique( $results );
 	}
 
 	/**

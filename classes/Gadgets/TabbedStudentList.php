@@ -24,9 +24,17 @@ class TabbedStudentList extends BaseGadget
 	 * Useful on a teacher's site: limits the result set to those students connected with the
 	 * site owner (ie, the teacher).
 	 *
-	 * @var boolean
+	 * @var bool
 	 */
 	protected $connected_students = false;
+
+	/**
+	 * Limits the result set to those students who have been tagged with one or more tags,
+	 * represented by a comma-separated string.
+	 *
+	 * @var bool
+	 */
+	protected $student_tags = false;
 
 
 	/**
@@ -113,6 +121,9 @@ class TabbedStudentList extends BaseGadget
 		if ( Utilities::is_true( @$params['connected_students' ] ) )
 			$this->connected_students = true;
 
+		if ( isset( $params['tags'] ) )
+			$this->student_tags = Utilities::array_from_csv_string( $params['tags'] );
+
 		$tabs = $this->get_tabs();
 		$first = ! empty( $tabs ) ? $tabs[0]->header : '';
 
@@ -147,8 +158,8 @@ class TabbedStudentList extends BaseGadget
 		global $wpdb;
 
 		// Generate possible connected students clause
-		$connected_students_clause = $this->get_connected_students_clause();
-		if ( ! empty( $connected_students_clause ) ) $connected_students_clause .= ' AND ';
+		$subset_clause = $this->get_subset_clause();
+		if ( ! empty( $subset_clause ) ) $subset_clause .= ' AND ';
 
 		$query = "
 			SELECT
@@ -159,7 +170,7 @@ class TabbedStudentList extends BaseGadget
 					INNER JOIN
 				$wpdb->usermeta ON ( $wpdb->users.ID = $wpdb->usermeta.user_id )
 			WHERE
-				$connected_students_clause
+				$subset_clause
 				$wpdb->usermeta.meta_key = 'wpan_academic_role'
 				AND CAST( $wpdb->usermeta.meta_value AS CHAR ) = %s
 			GROUP BY SUBSTR( display_name, 1, 1 )
@@ -199,8 +210,8 @@ class TabbedStudentList extends BaseGadget
 		global $wpdb;
 
 		// Generate possible connected students clause
-		$connected_students_clause = $this->get_connected_students_clause();
-		if ( ! empty( $connected_students_clause ) ) $connected_students_clause .= ' AND ';
+		$subset_clause = $this->get_subset_clause();
+		if ( ! empty( $subset_clause ) ) $subset_clause .= ' AND ';
 
 		$query = "
 			SELECT
@@ -210,7 +221,7 @@ class TabbedStudentList extends BaseGadget
 					INNER JOIN
 				wp_usermeta ON (wp_users.ID = wp_usermeta.user_id)
 			WHERE
-				$connected_students_clause
+				$subset_clause
 				wp_usermeta.meta_key = 'wpan_academic_role'
 					AND CAST(wp_usermeta.meta_value AS CHAR) = %s
 					AND 1 = LOCATE( %s, display_name )
@@ -265,23 +276,40 @@ class TabbedStudentList extends BaseGadget
 		return $students;
 	}
 
-
 	/**
 	 * Provides a where clause if needed (may be an empty string if it is not needed)
 	 * for use in SQL queries, to narrow the result set to connected students.
 	 *
 	 * @return string
 	 */
-	protected function get_connected_students_clause() {
+	protected function get_subset_clause() {
 		global $wpdb;
+		$user_ids = array();
 
 		// Do we want to limit the result set to connected students?
-		if ( ! $this->connected_students ) return '';
+		if ( $this->connected_students )
+			$connected_ids = array_merge( $user_ids, $this->get_connected_student_ids() );
 
-		$connected_students = $this->get_connected_student_ids();
+		// Do we want to limit the result set to users with specific tags?
+		if ( $this->student_tags ) {
+			$tagged_ids = Core::object()->users()->tags_users_with( $this->student_tags );
+		}
 
-		return ! empty( $connected_students )
-			? " $wpdb->users.ID IN ( " . join( ', ', $connected_students ) . " ) "
+		// Maybe limit the results to those users who are tagged *and* are connected
+		if ( ! empty( $connected_ids ) && ! empty( $tagged_ids ) )
+			$user_ids = array_intersect( $connected_ids, $tagged_ids );
+		// Else just limit to those users who are connected
+		elseif ( ! empty( $connected_ids ) )
+			$user_ids = $connected_ids;
+		// Else just limit to those users with the specified tag(s)
+		elseif ( ! empty( $tagged_ids ) )
+			$user_ids = $tagged_ids;
+
+		// Filter out duplicates
+		$user_ids = array_unique( $user_ids );
+
+		return ! empty( $user_ids )
+			? " {$wpdb->users}.ID IN ( " . join( ', ', $user_ids ) . " ) "
 			: '';
 	}
 

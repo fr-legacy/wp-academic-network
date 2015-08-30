@@ -4,7 +4,7 @@
 	Description: Provides a framework and set of utilities to help teachers and students interact, blog and learn together.
 	Network: true
 	Author: Forthrobot Software
-	Version: 0.8.0dev1
+	Version: 0.8.0dev2
 	Author URI: http://forthrobot.com
 	License: GPL3
 

@@ -27,4 +27,22 @@ class Utilities
 
 		return (bool) $value;
 	}
+
+	/**
+	 * Given a string containing comma separated values, returns the individual
+	 * items in an array.
+	 *
+	 * @param  string $csv_string
+	 * @return array
+	 */
+	public static function array_from_csv_string( $csv_string ) {
+		$items = array();
+
+		foreach ( explode( ',', $csv_string ) as $item ) {
+			$item = trim( $item );
+			if ( ! empty( $item ) ) $items[] = $item;
+		}
+
+		return $items;
+	}
 }
